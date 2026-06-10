@@ -17,6 +17,7 @@ abstract class Routes {
   static const WHATSAPP = _Paths.WHATSAPP;
   static const ADD_ORDER = _Paths.ADD_ORDER;
   static const WALLET = _Paths.WALLET;
+  static const LOGIN_ONBORADING = _Paths.LOGIN_ONBORADING;
 }
 
 abstract class _Paths {
@@ -35,4 +36,5 @@ abstract class _Paths {
   static const WHATSAPP = '/whatsapp';
   static const ADD_ORDER = '/add-order';
   static const WALLET = '/wallet';
+  static const LOGIN_ONBORADING = '/login-onborading';
 }

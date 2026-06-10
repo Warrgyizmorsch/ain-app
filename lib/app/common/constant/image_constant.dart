@@ -24,6 +24,8 @@ class ImageConstant {
 
   static const String onboarding3 =
       '${onboardingPath}onboarding3.png';
+  static const String loginOnboarding3 =
+      '${onboardingPath}login_onboarding.webp';
   static const String loginBackground = '${imagesPath}login_background.png';
   static const String signupBackground = '${imagesPath}signup_background.png';
   static const String facebookIcon = '${iconPath}facebook_icon.png';
@@ -43,6 +45,7 @@ class ImageConstant {
   static const String wallet = '${imagesPath}wallet.gif';
   static const String lock = '${imagesPath}lock.png';
   static  const String splashBackground = '${imagesPath}splash_background.png';
+  static  const String splash = '${imagesPath}splash.webp';
 
   // Common Images
   static const String noData = '${imagesPath}no_data.png';

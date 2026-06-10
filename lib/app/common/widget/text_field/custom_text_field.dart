@@ -9,40 +9,40 @@ import '../../constant/app_colors.dart';
 import '../../constant/font_family.dart';
 
 class TextFieldCustom extends StatelessWidget {
-  Widget? suffixIcon;
-  Widget? prefixIcon;
-  Function()? onEditingComplete;
-  Function()? onTap;
-  int? maxLine;
-  String? hintText;
-  String? labelText;
-  String? errorText;
-  bool? obscureText;
-  bool? readOnly;
-  double? width;
-  double? height;
-  int? maxLines;
-  int? maxLength;
-  List<TextInputFormatter>? inputFormatters;
-  String? fieldName;
-  String? Function(String?)? validator;
-  String? Function(String?)? onChanged;
-  TextEditingController? controller;
-  TextInputType? textInputType;
-  TextInputAction? textInputAction;
-  AutovalidateMode? autoValidateMode;
-  Color? hintTextColor;
-  String? hintTextStyle;
-  double? hintTextSize;
-  Color? borderColor;
-  double? borderWidth;
-  Color? backgroundColor;
-  EdgeInsetsGeometry? contentPadding;
-  bool? enabled;
-  FocusNode? focusNode;
-  Function(String)? onSubmitted;
+  final Widget? suffixIcon;
+  final Widget? prefixIcon;
+  final Function()? onEditingComplete;
+  final Function()? onTap;
+  final int? maxLine;
+  final String? hintText;
+  final String? labelText;
+  final String? errorText;
+  final bool? obscureText;
+  final bool? readOnly;
+  final double? width;
+  final double? height;
+  final int? maxLines;
+  final int? maxLength;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? fieldName;
+  final String? Function(String?)? validator;
+  final String? Function(String?)? onChanged;
+  final TextEditingController? controller;
+  final TextInputType? textInputType;
+  final TextInputAction? textInputAction;
+  final AutovalidateMode? autoValidateMode;
+  final Color? hintTextColor;
+  final String? hintTextStyle;
+  final double? hintTextSize;
+  final Color? borderColor;
+  final double? borderWidth;
+  final Color? backgroundColor;
+  final EdgeInsetsGeometry? contentPadding;
+  final bool? enabled;
+  final FocusNode? focusNode;
+  final Function(String)? onSubmitted;
 
-  TextFieldCustom({
+  const TextFieldCustom({
     super.key,
     this.suffixIcon,
     this.prefixIcon,
@@ -80,6 +80,10 @@ class TextFieldCustom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine the baseline border color to use
+    final currentBorderColor = borderColor ?? AppColors.textSecondary;
+    final fallbackFocusColor = borderColor ?? AppColors.primary;
+
     return SizedBox(
       width: width,
       height: height,
@@ -98,7 +102,6 @@ class TextFieldCustom extends StatelessWidget {
         maxLength: maxLength,
         enabled: enabled ?? true,
         focusNode: focusNode,
-
         onFieldSubmitted: onSubmitted,
         style: TextStyle(
           fontSize: hintTextSize ?? 15,
@@ -128,38 +131,24 @@ class TextFieldCustom extends StatelessWidget {
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(
-              color: borderColor ?? AppColors.textSecondary,
-              width: borderWidth ?? 1.0,
-            ),
+            borderSide: BorderSide(color: currentBorderColor, width: borderWidth ?? 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(
-              color: borderColor ?? AppColors.textSecondary,
-              width: borderWidth ?? 1.0,
-            ),
+            borderSide: BorderSide(color: currentBorderColor, width: borderWidth ?? 1.0),
           ),
+          // If a custom error/border color is forced, use it for focus state to suppress the primary focus color
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(
-              color:  borderColor ?? AppColors.primary,
-              width: borderWidth ?? 1.0,
-            ),
+            borderSide: BorderSide(color: fallbackFocusColor, width: borderWidth ?? 1.5),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(
-              color: AppColors.error,
-              width: borderWidth ?? 1.0,
-            ),
+            borderSide: BorderSide(color: AppColors.error, width: borderWidth ?? 1.0),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(
-              color: AppColors.error,
-              width: borderWidth ?? 1.0,
-            ),
+            borderSide: BorderSide(color: AppColors.error, width: borderWidth ?? 1.5),
           ),
           filled: true,
           fillColor: backgroundColor ?? Colors.white,

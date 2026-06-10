@@ -1,67 +1,156 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../common/constant/app_imports.dart';
+import '../../../common/widget/file_picker/app_file_picker.dart'; // Ensure path points to your Custom File Helper
+import '../../../core/models/order_now_model/countries_master_model.dart';
+import '../../../core/models/order_now_model/services_master_model.dart';
+import '../../../core/models/order_now_model/subjects_master_model.dart';
+import '../../../core/models/order_now_model/urgencies_master_model.dart';
+import '../../../core/models/order_now_model/word_count_master_model.dart';
+import '../../../core/utils/api/order_now_api/order_now_dropdown_api.dart';
 
 class AddOrderController extends GetxController {
-  /// STEP 1 -> Assignment Details
-  /// STEP 3 -> Requirements & Payment
+  final isLoading = false.obs;
   final currentStep = 1.obs;
-
   final isAccepted = false.obs;
+  final RxList<File> pickedFiles = <File>[].obs;
 
-  // Text controllers
+  // Text Form Controllers
   final topicController = TextEditingController();
   final deadlineController = TextEditingController();
   final pagesController = TextEditingController();
   final requirementsController = TextEditingController();
+  final mobileController = TextEditingController();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
 
-  // Dropdown notifiers
-  final subjectNotifier = ValueNotifier<String?>(null);
-  final serviceNotifier = ValueNotifier<String?>(null);
-  final workTypeNotifier = ValueNotifier<String?>(null);
+  // Reactive Input Fields Validation Error Hooks
+  final fullNameError = RxString('');
+  final mobileError = RxString('');
+  final emailError = RxString('');
+  final topicError = RxString('');
 
-  // Dropdown data
-  final subjects = [
-    'Mathematics',
-    'English',
-    'Science',
-    'History',
-    'Computer Science',
+  // Reactive Dropdowns Validation Error Hooks
+  final countryError = RxString('');
+  final subjectError = RxString('');
+  final serviceError = RxString('');
+  final workTypeError = RxString('');
+  final urgencyError = RxString('');
+  final wordCountError = RxString('');
+
+  // Mobile Verification Hooks
+  final selectedDialCode = '+1'.obs;
+  final isMobileValid = true.obs;
+
+  // Form Dropdown Selections (Using ValueNotifier to map natively with CustomDropdown)
+  final selectedSubject = ValueNotifier<SubjectData?>(null);
+  final selectedService = ValueNotifier<GetServiceModel?>(null);
+  final selectedUrgency = ValueNotifier<UrgencyData?>(null);
+  final selectedPageConfig = ValueNotifier<WordCountData?>(null);
+  final selectedCountry = ValueNotifier<CountryData?>(null);
+  final selectedWorkType = ValueNotifier<String?>(null);
+
+  // Global Calculation Constants (Populated dynamically via Word Count master API)
+  final basePricePerWord = 0.0.obs;
+  final globalDiscountPercentage = 0.obs;
+
+  // Master Lists
+  final RxList<GetServiceModel> services = <GetServiceModel>[].obs;
+  final RxList<WordCountData> wordCount = <WordCountData>[].obs;
+  final RxList<CountryData> countries = <CountryData>[].obs;
+  final RxList<UrgencyData> urgencies = <UrgencyData>[].obs;
+  final RxList<SubjectData> subjects = <SubjectData>[].obs;
+
+  // Static Local Dropdown Configurations
+  final List<String> workTypes = [
+    'Standard',
+    'First Class Work',
   ];
 
-  final services = [
-    'Essay Writing',
-    'Research Paper',
-    'Dissertation',
-    'Case Study',
-  ];
-
-  final workTypes = [
-    'Original',
-    'Editing',
-    'Proofreading',
-    'Formatting',
-  ];
-  final pageNotifier = ValueNotifier<String?>(null);
-
-  final pages = [
-    '1 Page (250 Words)',
-    '2 Pages (500 Words)',
-    '3 Pages (750 Words)',
-    '4 Pages (1000 Words)',
-    '5 Pages (1250 Words)',
-    '6 Pages (1500 Words)',
-    '7 Pages (1750 Words)',
-    '8 Pages (2000 Words)',
-    '9 Pages (2250 Words)',
-    '10 Pages (2500 Words)',
-  ];
-  /// STEP 1 -> STEP 2 (Requirements Screen)
-  void onContinue() {
-    currentStep.value = 3;
+  @override
+  void onInit() {
+    super.onInit();
+    // Connect custom listeners to capture underlying ValueNotifier state adjustments
+    _attachCalculationListeners();
+    // Concurrently download app configuration layers
+    fetchAllMasterData();
   }
 
-  /// STEP 2 -> STEP 1
+  // ─── CORE FORM VALIDATIONS ─────────────────────────────────────────────────
+
+  void validateFullName(String value) {
+    fullNameError.value = value.trim().isEmpty ? "Full name is required" : "";
+  }
+
+  void validateMobileNumber(String value) {
+    mobileError.value = value.trim().isEmpty ? "Mobile number is required" : "";
+  }
+
+  void validateTopic(String value) {
+    topicError.value = value.trim().isEmpty ? "Assignment topic is required" : "";
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  }
+
+  void validateEmail(String value) {
+    if (value.isEmpty) {
+      emailError.value = 'Email is required';
+    } else if (!_isValidEmail(value)) {
+      emailError.value = 'Please enter a valid email address';
+    } else {
+      emailError.value = '';
+    }
+  }
+
+  /// Verifies every mandatory checkout node before allowing user step advancement
+  bool validateStep1() {
+    // 1. Fire absolute evaluations across inline text inputs
+    validateFullName(nameController.text);
+    validateEmail(emailController.text);
+    validateMobileNumber(mobileController.text);
+    validateTopic(topicController.text);
+
+    // 2. Fire evaluations on dropdown items
+    countryError.value = selectedCountry.value == null ? "Please select your country" : "";
+    subjectError.value = selectedSubject.value == null ? "Please select a subject area" : "";
+    serviceError.value = selectedService.value == null ? "Please select a service type" : "";
+    workTypeError.value = selectedWorkType.value == null ? "Please select a work type status tier" : "";
+    urgencyError.value = selectedUrgency.value == null ? "Please select an urgency timeline" : "";
+    wordCountError.value = selectedPageConfig.value == null ? "Please select a word count configuration level" : "";
+
+    // 3. Complete verification if all error paths run clean
+    return fullNameError.value.isEmpty &&
+        emailError.value.isEmpty &&
+        mobileError.value.isEmpty &&
+        topicError.value.isEmpty &&
+        countryError.value.isEmpty &&
+        subjectError.value.isEmpty &&
+        serviceError.value.isEmpty &&
+        workTypeError.value.isEmpty &&
+        urgencyError.value.isEmpty &&
+        wordCountError.value.isEmpty;
+  }
+
+  // ─── STEP NAVIGATION CONTROLS ──────────────────────────────────────────────
+
+  void onContinue() {
+    if (validateStep1()) {
+      currentStep.value = 3;
+    } else {
+      Get.snackbar(
+        'Validation Failed',
+        'Please complete all highlighted input fields and dropdown selections.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    }
+  }
+
   void onBack() {
     currentStep.value = 1;
   }
@@ -70,124 +159,240 @@ class AddOrderController extends GetxController {
     isAccepted.value = !isAccepted.value;
   }
 
-  void pickFile() {
-    // TODO: Implement File Picker
+  /// Pipes external model selections to the GetX update lifecycle loop
+  void _attachCalculationListeners() {
+    selectedPageConfig.addListener(() => update());
+    selectedService.addListener(() => update());
+    selectedUrgency.addListener(() => update());
+    selectedWorkType.addListener(() => update());
+  }
+
+  // ─── DYNAMIC PRICING SYSTEM ENGINE ────────────────────────────────────────
+
+  /// 1. Computes running cost based on raw words count multiplied by its page tier configuration factor
+  double get baseCost {
+    if (selectedPageConfig.value == null) {
+      _logCalculationDebug("Base Cost calculation skipped: No Word Count configuration selected yet.");
+      return 0.0;
+    }
+
+    final int totalWords = selectedPageConfig.value!.value;
+    final double pageTierMultiplier = selectedPageConfig.value!.multiplier;
+    final double currentBasePrice = basePricePerWord.value;
+
+    final double computedBase = (currentBasePrice * totalWords) * pageTierMultiplier;
+
+    _logCalculationDebug(
+        "📐 STEP 1: [Base Cost Calculation]\n"
+            "   • Words: $totalWords\n"
+            "   • Base Price Per Word: $currentBasePrice\n"
+            "   • Page Tier Multiplier: $pageTierMultiplier\n"
+            "   • Resulting Base Cost: £${computedBase.toStringAsFixed(2)}"
+    );
+
+    return computedBase;
+  }
+
+  /// 2. Accumulates combined multiplier parameters from your active data selections
+  double get estimatedPrice {
+    if (selectedPageConfig.value == null) return 0.0;
+
+    final double currentBaseCost = baseCost;
+    final double serviceMultiplier = selectedService.value?.multiplier ?? 1.0;
+    final double urgencyMultiplier = selectedUrgency.value?.multiplier ?? 1.0;
+
+    // Fixed: Matches 'First Class Work' dropdown item perfectly
+    final double typeMultiplier = (selectedWorkType.value == 'First Class Work') ? 1.3 : 1.0;
+
+    final double computedEstimated = currentBaseCost * serviceMultiplier * typeMultiplier * urgencyMultiplier;
+
+    _logCalculationDebug(
+        "⚙️ STEP 2: [Estimated Price Multipliers]\n"
+            "   • Running Base Cost Context: £${currentBaseCost.toStringAsFixed(2)}\n"
+            "   • Service Multiplier: $serviceMultiplier (${selectedService.value?.name ?? 'None'})\n"
+            "   • Work Type Multiplier: $typeMultiplier (${selectedWorkType.value ?? 'None'})\n"
+            "   • Urgency Multiplier: $urgencyMultiplier (${selectedUrgency.value?.name ?? 'None'})\n"
+            "   • Total Estimated Sum: £${computedEstimated.toStringAsFixed(2)}"
+    );
+
+    return computedEstimated;
+  }
+
+  /// 3. Computes the clean final payable balance following system markdowns
+  double get finalPrice {
+    final double currentEstimated = estimatedPrice;
+    if (currentEstimated == 0.0) return 0.0;
+
+    final int currentDiscountPercent = globalDiscountPercentage.value;
+    final double discountFactor = (100 - currentDiscountPercent) / 100;
+    final double computedFinal = currentEstimated * discountFactor;
+
+    _logCalculationDebug(
+        "💰 STEP 3: [Final Discount Application]\n"
+            "   • Subtotal Estimated: £${currentEstimated.toStringAsFixed(2)}\n"
+            "   • System Markdown: $currentDiscountPercent%\n"
+            "   • Total Final Balance: £${computedFinal.toStringAsFixed(2)}\n"
+            "===================================================="
+    );
+
+    return computedFinal;
+  }
+
+  /// 4. Evaluates total user financial markdown discount amounts
+  double get savingsAmount {
+    final double discountFraction = globalDiscountPercentage.value / 100;
+    return estimatedPrice * discountFraction;
+  }
+
+  // ─── STRING FINESSE UI FORMATTERS ──────────────────────────────────────────
+  String get formattedEstimatedPrice => '£${estimatedPrice.toStringAsFixed(2)}';
+  String get formattedDiscount       => '${globalDiscountPercentage.value}% OFF (£${savingsAmount.toStringAsFixed(2)})';
+  String get formattedFinalPrice     => '£${finalPrice.toStringAsFixed(2)}';
+
+  void _logCalculationDebug(String message) {
+    if (Get.isLogEnable) {
+      debugPrint('================ [ENGINE CALCULATION] ================');
+      debugPrint(message);
+    }
+  }
+
+  // ─── CONCURRENT LOOKUP INIT API LAYER ──────────────────────────────────────
+
+  Future<void> fetchAllMasterData() async {
+    try {
+      isLoading.value = true;
+      await Future.wait([
+        getServices(),
+        getWordCount(),
+        getCountries(),
+        getUrgencies(),
+        getSubjects(),
+      ]);
+    } catch (e) {
+      Get.snackbar('Error', 'Error pairing network drop configurations: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> getServices() async {
+    try {
+      final response = await OrderNowDropdownApi.getServices();
+      if (response.success) {
+        services.assignAll(response.data);
+      }
+    } catch (e) {
+      debugPrint('Services downstream loading failed: $e');
+    }
+  }
+
+  Future<void> getWordCount() async {
+    try {
+      final response = await OrderNowDropdownApi.getWordCount();
+      if (response.success) {
+        basePricePerWord.value = (response.basePricePerWord as num?)?.toDouble() ?? 0.03;
+        globalDiscountPercentage.value = (response.discountPercentage as num?)?.toInt() ?? 40;
+
+        wordCount.assignAll(response.data);
+
+        // Pre-selects first dictionary node layout item to solve initial empty 0 computations
+        if (wordCount.isNotEmpty) {
+          selectedPageConfig.value = wordCount.first;
+        }
+      }
+    } catch (e) {
+      debugPrint('Word Count tiers lookup crash fallback: $e');
+    }
+  }
+
+  Future<void> getCountries() async {
+    try {
+      final response = await OrderNowDropdownApi.getCountries();
+      if (response.success) {
+        countries.assignAll(response.data);
+      }
+    } catch (e) {
+      debugPrint('Countries metadata retrieval error: $e');
+    }
+  }
+
+  Future<void> getUrgencies() async {
+    try {
+      final response = await OrderNowDropdownApi.getUrgencies();
+      if (response.success) {
+        urgencies.assignAll(response.data);
+      }
+    } catch (e) {
+      debugPrint('Urgencies parameters collection failed: $e');
+    }
+  }
+
+  Future<void> getSubjects() async {
+    try {
+      final response = await OrderNowDropdownApi.getSubjects();
+      if (response.success) {
+        subjects.assignAll(response.data);
+      }
+    } catch (e) {
+      debugPrint('Academic subjects configuration exception: $e');
+    }
+  }
+
+  // ─── NATIVE ENCAPSULATED ATTACHMENT DRIVERS ───────────────────────────────
+
+  Future<void> pickFile() async {
+    try {
+      isLoading.value = true;
+      // Triggers multi-format extraction via decoupled Helper module class safely
+      final List<File> selectedFiles = await AppFilePickerHelper.pickMultipleFiles();
+
+      if (selectedFiles.isNotEmpty) {
+        pickedFiles.addAll(selectedFiles);
+      }
+    } catch (e) {
+      Get.snackbar('File Error', 'Failed to resolve chosen documents: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void removeFile(int index) {
+    if (index >= 0 && index < pickedFiles.length) {
+      pickedFiles.removeAt(index);
+    }
   }
 
   void addToCart() {
     if (!isAccepted.value) {
       Get.snackbar(
-        'Terms Required',
-        'Please accept the terms to continue.',
+          'Terms Required',
+          'Please check the terms and conditions policy checkbox before routing order details.',
+          snackPosition: SnackPosition.BOTTOM
       );
       return;
     }
-
-    // TODO: Submit Order
+    // TODO: Establish structural API payload post requests map here
   }
 
   @override
   void onClose() {
+    // Release Text Form memory footprints
     topicController.dispose();
     deadlineController.dispose();
     pagesController.dispose();
     requirementsController.dispose();
+    mobileController.dispose();
+    nameController.dispose();
+    emailController.dispose();
 
-    subjectNotifier.dispose();
-    serviceNotifier.dispose();
-    workTypeNotifier.dispose();
-    pageNotifier.dispose();
+    // Release tracking hooks structures cleanly
+    selectedSubject.dispose();
+    selectedService.dispose();
+    selectedUrgency.dispose();
+    selectedPageConfig.dispose();
+    selectedCountry.dispose();
+    selectedWorkType.dispose();
+
     super.onClose();
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import 'package:get/get.dart';
-//
-// import '../../../common/constant/app_imports.dart';
-//
-// // ─── CONTROLLER ──────────────────────────────────────────────────────────────
-//
-// class AddOrderController extends GetxController {
-//   final currentStep = 1.obs;
-//   final isAccepted  = false.obs;
-//
-//   // Text controllers
-//   final topicController        = TextEditingController();
-//   final deadlineController     = TextEditingController();
-//   final pagesController        = TextEditingController();
-//   final requirementsController = TextEditingController();
-//
-//   // Dropdown notifiers
-//   final subjectNotifier  = ValueNotifier<String?>(null);
-//   final serviceNotifier  = ValueNotifier<String?>(null);
-//   final workTypeNotifier = ValueNotifier<String?>(null);
-//
-//   // Dropdown data
-//   final subjects  = ['Mathematics', 'English', 'Science', 'History', 'Computer Science'];
-//   final services  = ['Essay Writing', 'Research Paper', 'Dissertation', 'Case Study'];
-//   final workTypes = ['Original', 'Editing', 'Proofreading', 'Formatting'];
-//
-//   void onContinue() {
-//     if (currentStep.value < 3) currentStep.value++;
-//   }
-//
-//   void toggleAccepted() => isAccepted.value = !isAccepted.value;
-//
-//   void pickFile() {
-//     // Integrate file_picker here
-//   }
-//
-//   void addToCart() {
-//     if (!isAccepted.value) {
-//       Get.snackbar('Terms Required', 'Please accept the terms to continue.');
-//       return;
-//     }
-//     // Submit order
-//   }
-//
-//   @override
-//   void onClose() {
-//     topicController.dispose();
-//     deadlineController.dispose();
-//     pagesController.dispose();
-//     requirementsController.dispose();
-//     subjectNotifier.dispose();
-//     serviceNotifier.dispose();
-//     workTypeNotifier.dispose();
-//     super.onClose();
-//   }
-// }

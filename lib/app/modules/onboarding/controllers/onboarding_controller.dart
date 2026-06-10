@@ -40,7 +40,7 @@ class OnboardingController extends GetxController {
       );
     } else {
       // Navigate to home or login
-      Get.offAllNamed(Routes.LOGIN);
+      Get.offAllNamed(Routes.LOGIN_ONBORADING);
     }
   }
 
