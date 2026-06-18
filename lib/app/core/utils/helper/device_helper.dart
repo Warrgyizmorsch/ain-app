@@ -1,8 +1,41 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import 'dart:developer';
+
+import 'package:fluttertoast/fluttertoast.dart';
+
+import '../../../common/constant/app_imports.dart';
 
 class UDeviceHelper {
   // uDeviceHelper._();
+
+  //----------TOAST------------//
+  static showToast(BuildContext context, String msg,
+      {ToastGravity gravity = ToastGravity.BOTTOM}) {
+    return Fluttertoast.showToast(
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: gravity,
+      backgroundColor: AppColors.primary,
+      textColor: AppColors.white,
+      fontSize: 15,
+    );
+  }
+  static showErrorToast(BuildContext context, String msg,
+      {ToastGravity gravity = ToastGravity.BOTTOM}) {
+    return Fluttertoast.showToast(
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: gravity,
+      backgroundColor: AppColors.error,
+      textColor: AppColors.white,
+      fontSize: 15,
+    );
+  }
+
+  static printLog(String tag, String str) {
+    log("$tag -->> $str");
+  }
+
   static void hideKeyboard(BuildContext context) {
     FocusScope.of(context).requestFocus(FocusNode());
   }

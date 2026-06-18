@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../common/constant/app_imports.dart';
+import '../../../services/storage_services.dart';
 import '../controllers/splash_controller.dart';
 
 class SplashView extends GetView<SplashController> {
@@ -139,7 +140,13 @@ class SplashView extends GetView<SplashController> {
                               height: isTablet ? 54 : 46, // Slightly taller button for better tap targets
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Get.offNamed(Routes.ONBOARDING);
+                                  final token = StorageService.to.getToken();
+
+                                  if (token != null && token.isNotEmpty) {
+                                    Get.offAllNamed(Routes.BOTTOM_NAV_BAR);
+                                  } else {
+                                    Get.offAllNamed(Routes.ONBOARDING);
+                                  }
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFF47946),
@@ -196,18 +203,5 @@ class SplashView extends GetView<SplashController> {
     );
   }
 
-  // Helper widget to build the slide indicators (Kept for your onboarding or usage elsewhere)
-  Widget _buildDot({required bool isActive}) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      height: 8,
-      width: 8,
-      decoration: BoxDecoration(
-        color: isActive
-            ? const Color(0xFFF47946)
-            : const Color(0xFFF47946).withOpacity(0.3),
-        shape: BoxShape.circle,
-      ),
-    );
-  }
+
 }

@@ -2,6 +2,10 @@ import 'package:get/get.dart';
 
 import '../modules/add_order/bindings/add_order_binding.dart';
 import '../modules/add_order/views/add_order_view.dart';
+import '../modules/add_to_cart/bindings/add_to_cart_binding.dart';
+import '../modules/add_to_cart/views/add_to_cart_view.dart';
+import '../modules/assignments/bindings/assignments_binding.dart';
+import '../modules/assignments/views/assignments_view.dart';
 import '../modules/bottom_nav_bar/bindings/bottom_nav_bar_binding.dart';
 import '../modules/bottom_nav_bar/views/bottom_nav_bar_view.dart';
 import '../modules/contact_us/bindings/contact_us_binding.dart';
@@ -14,6 +18,8 @@ import '../modules/login_onborading/bindings/login_onborading_binding.dart';
 import '../modules/login_onborading/views/login_onborading_view.dart';
 import '../modules/onboarding/bindings/onboarding_binding.dart';
 import '../modules/onboarding/views/onboarding_view.dart';
+import '../modules/payment/bindings/payment_binding.dart';
+import '../modules/payment/views/payment_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/profile/widget/change_password_widget.dart';
@@ -24,8 +30,7 @@ import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
 import '../modules/wallet/bindings/wallet_binding.dart';
 import '../modules/wallet/views/wallet_view.dart';
-import '../modules/whatsapp/bindings/whatsapp_binding.dart';
-import '../modules/whatsapp/views/whatsapp_view.dart';
+
 
 part 'app_routes.dart';
 
@@ -91,9 +96,9 @@ class AppPages {
     ),
 
     GetPage(
-      name: _Paths.WHATSAPP,
-      page: () => const WhatsappView(),
-      binding: WhatsappBinding(),
+      name: _Paths.ASSIGNMENTS,
+      page: () => const AssignmentsView(),
+      binding: AssignmentsBinding(),
     ),
     GetPage(
       name: _Paths.ADD_ORDER,
@@ -109,6 +114,16 @@ class AppPages {
       name: _Paths.LOGIN_ONBORADING,
       page: () => const LoginOnboradingView(),
       binding: LoginOnboradingBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADD_TO_CART,
+      page: () => const AddToCartView(),
+      binding: AddToCartBinding(),
+    ),
+    GetPage(
+      name: _Paths.PAYMENT,
+      page: () => const PaymentView(),
+      binding: PaymentBinding(),
     ),
   ];
 }

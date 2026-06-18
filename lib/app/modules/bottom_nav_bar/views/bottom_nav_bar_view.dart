@@ -13,7 +13,7 @@ class BottomNavView extends GetView<BottomNavController> {
     return Obx(
           () => Scaffold(
         // Set your background color here (e.g., the slate/grey color from 55646.jpg)
-        backgroundColor: const Color(0xFF8B9BB4),
+        backgroundColor:AppColors.white,
         body: IndexedStack(
           index: controller.selectedIndex.value,
           children: controller.pages,
@@ -51,7 +51,7 @@ class _BottomNavBar extends GetView<BottomNavController> {
                 child: Container(
                   height: 56,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD6E8F8), // Matches the exact light blue background
+                    color: const Color(0xFFE7F0FC), // Matches the exact light blue background
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
@@ -96,7 +96,7 @@ class _BottomNavBar extends GetView<BottomNavController> {
                               index: 2,
                               selectedIndex: controller.selectedIndex.value,
                               onTap: controller.changeTab,
-                              assetPath: ImageConstant.whatsAppIcon,
+                              assetPath: ImageConstant.assignments,
                             ),
                             _NavItem(
                               index: 3,
@@ -183,7 +183,7 @@ class _NavItem extends StatelessWidget {
           child: Center(
             child: ColorFiltered(
               colorFilter: ColorFilter.mode(
-                isActive ? AppColors.white : const Color(0xFF2B92CE),
+                isActive ? AppColors.white : AppColors.primary,
                 BlendMode.srcIn,
               ),
               child: Image.asset(

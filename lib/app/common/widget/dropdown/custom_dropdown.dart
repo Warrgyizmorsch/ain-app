@@ -75,6 +75,7 @@ class CustomDropdown<T> extends StatelessWidget {
 
         hint: Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             if (prefixIcon != null) ...[
               prefixIcon!,

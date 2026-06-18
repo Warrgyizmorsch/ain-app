@@ -14,10 +14,12 @@ abstract class Routes {
   static const PROFILE = _Paths.PROFILE;
   static const EDIT_PROFILE = _Paths.EDIT_PROFILE;
   static const CHANGE_PASSWORD = _Paths.CHANGE_PASSWORD;
-  static const WHATSAPP = _Paths.WHATSAPP;
+  static const ASSIGNMENTS = _Paths.ASSIGNMENTS;
   static const ADD_ORDER = _Paths.ADD_ORDER;
   static const WALLET = _Paths.WALLET;
   static const LOGIN_ONBORADING = _Paths.LOGIN_ONBORADING;
+  static const ADD_TO_CART = _Paths.ADD_TO_CART;
+  static const PAYMENT = _Paths.PAYMENT;
 }
 
 abstract class _Paths {
@@ -33,8 +35,10 @@ abstract class _Paths {
   static const PROFILE = '/profile';
   static const EDIT_PROFILE = '/edit-profile';
   static const CHANGE_PASSWORD = '/change-password';
-  static const WHATSAPP = '/whatsapp';
+  static const ASSIGNMENTS = '/assignments';
   static const ADD_ORDER = '/add-order';
   static const WALLET = '/wallet';
   static const LOGIN_ONBORADING = '/login-onborading';
+  static const ADD_TO_CART = '/add-to-cart';
+  static const PAYMENT = '/payment';
 }

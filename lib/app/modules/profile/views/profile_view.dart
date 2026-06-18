@@ -2,6 +2,7 @@
 
 
 import '../../../common/constant/app_imports.dart';
+import '../../../services/storage_services.dart';
 import '../controllers/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
@@ -123,33 +124,17 @@ class ProfileView extends GetView<ProfileController> {
                 Get.toNamed(Routes.CHANGE_PASSWORD);
               },
             ),
-
-            const Spacer(),
-
-            InkWell(
-              onTap: () {
-                // Logout
+            const SizedBox(height: 10),
+            _ProfileMenuTile(
+              icon: Icons.login_outlined,
+              title: 'LogOut',
+              onTap: () async {
+                await StorageService.to.clearAuthData();
+                Get.offAllNamed(Routes.LOGIN);
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.logout,
-                    size: 18,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Logout',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
             ),
 
-            const SizedBox(height: 20),
+
           ],
         ),
       ),

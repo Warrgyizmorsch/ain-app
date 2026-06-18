@@ -41,10 +41,12 @@ class ApiConstant {
   static const String URGENCIES = "urgencies";
   static const String SUBJECTS = "subjects";
   static const String WORK_TYPES = "work-types";
-  static const String ADD_ORDER = "add-order";
-  static const String CART_LIST = "cart-list";
-  static const String DELETE_CART_ITEM = "delete-cart-item";
-  static const String UPDATE_CART_ITEM = "update-cart-item";
+  static const String PLACE_ORDER = "place-order";
+  static const String ORDER_LIST = "order-list";
+  static const String RESET_PASSWORD = "reset-password";
+  static const String RAISE_TICKET = "raise-ticket";
+  static const String SUBMIT_FEEDBACK = "submit-feedback";
+
 
 
 

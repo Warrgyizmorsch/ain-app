@@ -1,26 +1,34 @@
 import 'package:get/get.dart';
-
 import '../../../routes/app_pages.dart';
+import '../../../services/storage_services.dart';
 
 class SplashController extends GetxController {
-  // Observable boolean to trigger the animation
-  var isAnimated = false.obs;
 
   @override
-  void onInit() {
-    super.onInit();
-    startAnimation();
+  void onReady() {
+    super.onReady();
+    // onReady runs safely after the splash view is rendered on screen
+    checkLoginStatus();
   }
 
-  Future<void> startAnimation() async {
-    // Wait a moment before starting the animation
-    await Future.delayed(const Duration(milliseconds: 500));
-    isAnimated.value = true;
+  Future<void> checkLoginStatus() async {
+    print('Splash Started');
 
-    // Wait for animation to finish, then navigate to Home/Auth screen
-    await Future.delayed(const Duration(milliseconds: 2500));
+    // Reduced for testing, change or remove as needed for production
+    await Future.delayed(const Duration(seconds: 3));
 
-    // Replace with your actual route (e.g., Routes.HOME)
-    Get.offNamed(Routes.ONBOARDING);
+    print('Delay Completed');
+
+    // Ensure StorageService is available
+    final token = StorageService.to.getToken();
+    print('Token: $token');
+
+    if (token != null && token.isNotEmpty) {
+      print('Navigate Home');
+      Get.offAllNamed(Routes.BOTTOM_NAV_BAR);
+    } else {
+      print('Navigate Onboarding');
+      Get.offAllNamed(Routes.ONBOARDING);
+    }
   }
 }

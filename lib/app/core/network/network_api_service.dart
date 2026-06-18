@@ -6,7 +6,9 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:intl/intl.dart';
 
+import '../../services/storage_services.dart';
 import '../constant_api/api_constant.dart';
+
 
 class ApiClient {
   static final http.Client _client = http.Client();
@@ -15,14 +17,25 @@ class ApiClient {
   RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?([+-]\d{2}:\d{2}|Z)$');
 
   // ==========================================
-  // HEADERS
+  // HEADERS (Updated to auto-inject Bearer Token)
   // ==========================================
 
   static Map<String, String> get _defaultHeaders {
-    return {
+    final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
+
+    try {
+      final token = StorageService.to.getToken();
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+    } catch (e) {
+      debugPrint('⚠️ ApiClient Headers: StorageService is not ready yet. $e');
+    }
+
+    return headers;
   }
 
   // ==========================================
@@ -79,7 +92,6 @@ class ApiClient {
     debugPrint('╚══════════════════════════════════════════════════════════════');
   }
 
-  // NEW: Custom Error Logger
   static void _logError(dynamic error, [StackTrace? stackTrace]) {
     if (!kDebugMode) return;
 
@@ -101,12 +113,6 @@ class ApiClient {
       debugPrint('║ [Error]       ${error.toString()}');
     }
 
-    // Optional: Print StackTrace if you want deep debugging (uncomment if needed)
-    // if (stackTrace != null) {
-    //   debugPrint('╟ [StackTrace]');
-    //   debugPrint('║ $stackTrace');
-    // }
-
     debugPrint('╚══════════════════════════════════════════════════════════════');
   }
 
@@ -124,7 +130,6 @@ class ApiClient {
   // CORE API METHODS (CRUD)
   // ==========================================
 
-  // --- GET ---
   static Future<dynamic> get(Uri url, {Map<String, String>? headers}) async {
     final mergedHeaders = {..._defaultHeaders, ...?headers};
     _logRequest('GET', url, headers: mergedHeaders);
@@ -134,7 +139,6 @@ class ApiClient {
     return _convertIsoDatesToLocal(jsonDecode(response.body));
   }
 
-  // --- POST ---
   static Future<dynamic> post(Uri url, {Map<String, String>? headers, dynamic body}) async {
     final mergedHeaders = {..._defaultHeaders, ...?headers};
     final encodedBody = body != null ? jsonEncode(body) : null;
@@ -147,7 +151,6 @@ class ApiClient {
     return _convertIsoDatesToLocal(jsonDecode(response.body));
   }
 
-  // --- PUT ---
   static Future<dynamic> put(Uri url, {Map<String, String>? headers, dynamic body}) async {
     final mergedHeaders = {..._defaultHeaders, ...?headers};
     final encodedBody = body != null ? jsonEncode(body) : null;
@@ -160,7 +163,6 @@ class ApiClient {
     return _convertIsoDatesToLocal(jsonDecode(response.body));
   }
 
-  // --- PATCH ---
   static Future<dynamic> patch(Uri url, {Map<String, String>? headers, dynamic body}) async {
     final mergedHeaders = {..._defaultHeaders, ...?headers};
     final encodedBody = body != null ? jsonEncode(body) : null;
@@ -173,7 +175,6 @@ class ApiClient {
     return _convertIsoDatesToLocal(jsonDecode(response.body));
   }
 
-  // --- DELETE ---
   static Future<dynamic> delete(Uri url, {Map<String, String>? headers, dynamic body}) async {
     final mergedHeaders = {..._defaultHeaders, ...?headers};
     final encodedBody = body != null ? jsonEncode(body) : null;
@@ -254,11 +255,14 @@ class ApiClient {
       'svg': 'image/svg+xml',
       'bmp': 'image/bmp',
       'tiff': 'image/tiff',
+      'pdf': 'application/pdf',                      // 💡 Added for assignments
+      'doc': 'application/msword',                    // 💡 Added for assignments
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // 💡 Added
     };
 
     if (!allowedExtensions.containsKey(extension)) {
       throw ApiException(
-          'Only image formats are allowed (JPEG, JPG, PNG, WEBP, AVIF, GIF, SVG, BMP, TIFF). Received: $extension');
+          'Allowed formats: JPEG, PNG, WEBP, PDF, DOC, DOCX. Received: $extension');
     }
 
     final mimeType = allowedExtensions[extension]!;
@@ -316,7 +320,7 @@ class ApiClient {
       final response = await http.Response.fromStream(streamedResponse);
       return _handleResponse(response);
     } catch (error, stackTrace) {
-      _logError(error, stackTrace); // Trigger error print here
+      _logError(error, stackTrace);
       if (error is ApiException) rethrow;
       throw _mapToException(error);
     }
@@ -334,7 +338,7 @@ class ApiClient {
       );
       return _handleResponse(response);
     } catch (error, stackTrace) {
-      _logError(error, stackTrace); // Trigger error print here
+      _logError(error, stackTrace);
       if (error is ApiException) rethrow;
       throw _mapToException(error);
     }

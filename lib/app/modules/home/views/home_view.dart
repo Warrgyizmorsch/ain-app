@@ -355,13 +355,13 @@ class _DrawerItem extends StatelessWidget {
           children: [
             // Colored circular icon badge
             Container(
-              width: 38,
-              height: 38,
+              width: 25,
+              height: 25,
               decoration: BoxDecoration(
                 // color: iconBgColor,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Image.asset(icon, color: AppColors.secondary, height: 20,width: 20,),
+              child: Image.asset(icon, color: AppColors.secondary, height: 12,width: 12,),
             ),
             const SizedBox(width: 14),
             Text(

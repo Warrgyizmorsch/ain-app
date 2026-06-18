@@ -46,6 +46,7 @@ class ImageConstant {
   static const String lock = '${imagesPath}lock.png';
   static  const String splashBackground = '${imagesPath}splash_background.png';
   static  const String splash = '${imagesPath}splash.webp';
+  static  const String assignments = '${imagesPath}assignments_icon.png';
 
   // Common Images
   static const String noData = '${imagesPath}no_data.png';

@@ -52,70 +52,70 @@ class AssignmentDetailsStep extends GetView<AddOrderController> {
           ),
           const SizedBox(height: 16),
 
-          // 1. Name Input
-          Obx(() {
-            final hasError = controller.fullNameError.isNotEmpty;
-            return TextFormFieldCustom(
-              title: 'NAME',
-              isRequired: true,
-              method: TextFieldCustom(
-                controller: controller.nameController,
-                hintText: 'Enter your full name',
-                textInputType: TextInputType.name,
-                textInputAction: TextInputAction.next,
-                borderColor: hasError ? AppColors.error : AppColors.lightDivider,
-                borderWidth: 1.5,
-                backgroundColor: Colors.white,
-                onChanged: (value) {
-                  controller.validateFullName(value ?? "");
-                  return null;
-                },
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              ),
-            );
-          }),
-          Obx(() => controller.fullNameError.isNotEmpty
-              ? Padding(
-            padding: const EdgeInsets.only(top: 4, left: 5),
-            child: Text(
-              controller.fullNameError.value,
-              style: const TextStyle(fontSize: 12, color: AppColors.error),
-            ),
-          )
-              : const SizedBox.shrink()),
-          const SizedBox(height: 12),
-
-          // 2. Email Address Input
-          Obx(() {
-            final hasError = controller.emailError.isNotEmpty;
-            return TextFormFieldCustom(
-              title: 'EMAIL ADDRESS',
-              isRequired: true,
-              method: TextFieldCustom(
-                controller: controller.emailController,
-                hintText: 'Enter email address',
-                textInputType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                borderColor: hasError ? AppColors.error : AppColors.lightDivider,
-                borderWidth: 1.5,
-                backgroundColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                onChanged: (value) {
-                  controller.validateEmail(value ?? "");
-                  return null;
-                },
-              ),
-            );
-          }),
-          Obx(() => controller.emailError.isNotEmpty
-              ? Padding(
-            padding: const EdgeInsets.only(top: 4, left: 5),
-            child: Text(
-              controller.emailError.value,
-              style: const TextStyle(fontSize: 12, color: AppColors.error),
-            ),
-          )
-              : const SizedBox.shrink()),
+          // // 1. Name Input
+          // Obx(() {
+          //   final hasError = controller.fullNameError.isNotEmpty;
+          //   return TextFormFieldCustom(
+          //     title: 'NAME',
+          //     isRequired: true,
+          //     method: TextFieldCustom(
+          //       controller: controller.nameController,
+          //       hintText: 'Enter your full name',
+          //       textInputType: TextInputType.name,
+          //       textInputAction: TextInputAction.next,
+          //       borderColor: hasError ? AppColors.error : AppColors.lightDivider,
+          //       borderWidth: 1.5,
+          //       backgroundColor: Colors.white,
+          //       onChanged: (value) {
+          //         controller.validateFullName(value ?? "");
+          //         return null;
+          //       },
+          //       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          //     ),
+          //   );
+          // }),
+          // Obx(() => controller.fullNameError.isNotEmpty
+          //     ? Padding(
+          //   padding: const EdgeInsets.only(top: 4, left: 5),
+          //   child: Text(
+          //     controller.fullNameError.value,
+          //     style: const TextStyle(fontSize: 12, color: AppColors.error),
+          //   ),
+          // )
+          //     : const SizedBox.shrink()),
+          // const SizedBox(height: 12),
+          //
+          // // 2. Email Address Input
+          // Obx(() {
+          //   final hasError = controller.emailError.isNotEmpty;
+          //   return TextFormFieldCustom(
+          //     title: 'EMAIL ADDRESS',
+          //     isRequired: true,
+          //     method: TextFieldCustom(
+          //       controller: controller.emailController,
+          //       hintText: 'Enter email address',
+          //       textInputType: TextInputType.emailAddress,
+          //       textInputAction: TextInputAction.next,
+          //       borderColor: hasError ? AppColors.error : AppColors.lightDivider,
+          //       borderWidth: 1.5,
+          //       backgroundColor: Colors.white,
+          //       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          //       onChanged: (value) {
+          //         controller.validateEmail(value ?? "");
+          //         return null;
+          //       },
+          //     ),
+          //   );
+          // }),
+          // Obx(() => controller.emailError.isNotEmpty
+          //     ? Padding(
+          //   padding: const EdgeInsets.only(top: 4, left: 5),
+          //   child: Text(
+          //     controller.emailError.value,
+          //     style: const TextStyle(fontSize: 12, color: AppColors.error),
+          //   ),
+          // )
+          //     : const SizedBox.shrink()),
           const SizedBox(height: 12),
 
           // 3. Country Dropdown
@@ -149,55 +149,55 @@ class AssignmentDetailsStep extends GetView<AddOrderController> {
           const SizedBox(height: 12),
 
           // 4. Contact Details Input
-          Obx(() {
-            final hasError = controller.mobileError.isNotEmpty;
-            return TextFormFieldCustom(
-              title: "CONTACT DETAILS",
-              isRequired: true,
-              method: TextFieldCustom(
-                controller: controller.mobileController,
-                hintText: "Enter Mobile Number",
-                textInputType: TextInputType.number,
-                textInputAction: TextInputAction.next,
-                borderColor: hasError ? AppColors.error : AppColors.lightDivider,
-                borderWidth: 1.5,
-                backgroundColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  UsNumberTextInputFormatter(),
-                ],
-                onChanged: (value) {
-                  controller.validateMobileNumber(value ?? "");
-                  return null;
-                },
-                prefixIcon: CountryCodePicker(
-                  onChanged: (country) {
-                    if (country.dialCode != null) {
-                      controller.selectedDialCode.value = country.dialCode!;
-                    }
-                  },
-                  initialSelection: 'US',
-                  favorite: const ['+1', 'US'],
-                  showDropDownButton: true,
-                  showCountryOnly: false,
-                  padding: EdgeInsets.zero,
-                  alignLeft: false,
-                  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                  flagWidth: 24,
-                ),
-              ),
-            );
-          }),
-          Obx(() => controller.mobileError.isNotEmpty
-              ? Padding(
-            padding: const EdgeInsets.only(top: 4, left: 5),
-            child: Text(
-              controller.mobileError.value,
-              style: const TextStyle(fontSize: 12, color: AppColors.error),
-            ),
-          )
-              : const SizedBox.shrink()),
+          // Obx(() {
+          //   final hasError = controller.mobileError.isNotEmpty;
+          //   return TextFormFieldCustom(
+          //     title: "CONTACT DETAILS",
+          //     isRequired: true,
+          //     method: TextFieldCustom(
+          //       controller: controller.mobileController,
+          //       hintText: "Enter Mobile Number",
+          //       textInputType: TextInputType.number,
+          //       textInputAction: TextInputAction.next,
+          //       borderColor: hasError ? AppColors.error : AppColors.lightDivider,
+          //       borderWidth: 1.5,
+          //       backgroundColor: Colors.white,
+          //       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          //       inputFormatters: [
+          //         FilteringTextInputFormatter.digitsOnly,
+          //         UsNumberTextInputFormatter(),
+          //       ],
+          //       onChanged: (value) {
+          //         controller.validateMobileNumber(value ?? "");
+          //         return null;
+          //       },
+          //       prefixIcon: CountryCodePicker(
+          //         onChanged: (country) {
+          //           if (country.dialCode != null) {
+          //             controller.selectedDialCode.value = country.dialCode!;
+          //           }
+          //         },
+          //         initialSelection: 'US',
+          //         favorite: const ['+1', 'US'],
+          //         showDropDownButton: true,
+          //         showCountryOnly: false,
+          //         padding: EdgeInsets.zero,
+          //         alignLeft: false,
+          //         textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          //         flagWidth: 24,
+          //       ),
+          //     ),
+          //   );
+          // }),
+          // Obx(() => controller.mobileError.isNotEmpty
+          //     ? Padding(
+          //   padding: const EdgeInsets.only(top: 4, left: 5),
+          //   child: Text(
+          //     controller.mobileError.value,
+          //     style: const TextStyle(fontSize: 12, color: AppColors.error),
+          //   ),
+          // )
+          //     : const SizedBox.shrink()),
           const SizedBox(height: 12),
 
           // 5. Enter Topic Input

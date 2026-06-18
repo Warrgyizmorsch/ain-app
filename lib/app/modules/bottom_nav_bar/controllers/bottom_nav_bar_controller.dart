@@ -1,9 +1,9 @@
 
 import '../../../common/constant/app_imports.dart';
 
+import '../../assignments/views/assignments_view.dart';
 import '../../contact_us/views/contact_us_view.dart';
 import '../../home/views/home_view.dart';
-import '../../whatsapp/views/whatsapp_view.dart';
 import '../../profile/views/profile_view.dart';
 
 class BottomNavController extends GetxController {
@@ -12,7 +12,7 @@ class BottomNavController extends GetxController {
   final List<Widget> pages = [
     const HomeView(),
     const ContactUsView(),
-    const WhatsappView(),
+    const AssignmentsView(),
     const ProfileView(),
   ];
 

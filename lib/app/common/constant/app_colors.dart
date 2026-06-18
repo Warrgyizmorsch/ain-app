@@ -5,7 +5,7 @@ class AppColors {
 
   // ── Brand ────────────────────────────────────────────────────────────────────
   static const Color secondary   = Color(0xFF6C4EF6); // purple
-  static const Color primary = Color(0xFF4E9AF6); // blue
+  static const Color primary = Color(0xFF3B22B7); // blue
 
   // ── Neutrals ─────────────────────────────────────────────────────────────────
   static const Color transparent = Colors.transparent;

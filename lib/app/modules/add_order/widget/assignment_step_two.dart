@@ -14,19 +14,15 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Obx(() => _StepBadge(label: 'Step ${controller.currentStep.value}/2')),
+         _StepBadge(label: 'Step 2/2'),
           const SizedBox(height: 12),
 
-          const Text(
-            'SPECIFY YOUR REQUIREMENTS HERE',
-            style: AppTextStyles.fieldLabel,
-          ),
-          const SizedBox(height: 8),
 
           // Requirements Textarea
           TextFormFieldCustom(
-            title: '',
-            showTitle: false,
+            title: 'Requirements',
+
+            isRequired: true,
             method: TextFormField(
               controller: controller.requirementsController,
               maxLines: 5,
@@ -46,33 +42,37 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
           const SizedBox(height: 8),
 
           // Upload File Interaction Zone
-          GestureDetector(
-            onTap: controller.pickFile,
-            child: Container(
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: AppColors.lightDivider,
-                  width: 1.5,
+          TextFormFieldCustom(
+            title: 'Upload file',
+            isRequired: true,
+            method: GestureDetector(
+              onTap: controller.pickFile,
+              child: Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: AppColors.lightDivider,
+                    width: 1.5,
+                  ),
                 ),
-              ),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.upload_outlined,
-                    size: 18,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    AppStrings.dropFilesHint,
-                    style: AppTextStyles.uploadHint,
-                  ),
-                ],
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.upload_outlined,
+                      size: 18,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      AppStrings.dropFilesHint,
+                      style: AppTextStyles.uploadHint,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -293,7 +293,7 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
           ),
           const SizedBox(height: 16),
 
-          AppButton(title: 'Add to Cart', onTap: controller.addToCart),
+          AppButton(title: 'Pay', onTap: controller.addToCart),
           const SizedBox(height: 16),
         ],
       ),

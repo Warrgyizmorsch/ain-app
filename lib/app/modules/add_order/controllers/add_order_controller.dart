@@ -1,6 +1,8 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:ain/app/core/models/order_now_model/place_order_request_model.dart';
+import 'package:ain/app/core/utils/api/order_now_api/place_order_api.dart';
+import 'package:ain/app/services/storage_services.dart';
+
 
 import '../../../common/constant/app_imports.dart';
 import '../../../common/widget/file_picker/app_file_picker.dart'; // Ensure path points to your Custom File Helper
@@ -109,9 +111,9 @@ class AddOrderController extends GetxController {
   /// Verifies every mandatory checkout node before allowing user step advancement
   bool validateStep1() {
     // 1. Fire absolute evaluations across inline text inputs
-    validateFullName(nameController.text);
-    validateEmail(emailController.text);
-    validateMobileNumber(mobileController.text);
+    // validateFullName(nameController.text);
+    // validateEmail(emailController.text);
+    // validateMobileNumber(mobileController.text);
     validateTopic(topicController.text);
 
     // 2. Fire evaluations on dropdown items
@@ -123,9 +125,10 @@ class AddOrderController extends GetxController {
     wordCountError.value = selectedPageConfig.value == null ? "Please select a word count configuration level" : "";
 
     // 3. Complete verification if all error paths run clean
-    return fullNameError.value.isEmpty &&
-        emailError.value.isEmpty &&
-        mobileError.value.isEmpty &&
+    return
+      // fullNameError.value.isEmpty &&
+      //   emailError.value.isEmpty &&
+      //   mobileError.value.isEmpty &&
         topicError.value.isEmpty &&
         countryError.value.isEmpty &&
         subjectError.value.isEmpty &&
@@ -268,6 +271,7 @@ class AddOrderController extends GetxController {
         getUrgencies(),
         getSubjects(),
       ]);
+
     } catch (e) {
       Get.snackbar('Error', 'Error pairing network drop configurations: $e');
     } finally {
@@ -362,16 +366,135 @@ class AddOrderController extends GetxController {
     }
   }
 
-  void addToCart() {
+  Future<void> addToCart() async {
+    // 1. Terms and Conditions validation check
     if (!isAccepted.value) {
       Get.snackbar(
-          'Terms Required',
-          'Please check the terms and conditions policy checkbox before routing order details.',
-          snackPosition: SnackPosition.BOTTOM
+        'Terms Required',
+        'Please check the terms and conditions policy checkbox before routing order details.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.amberAccent.withOpacity(0.1),
+        colorText: Colors.black87,
       );
       return;
     }
-    // TODO: Establish structural API payload post requests map here
+
+    // 2. Final security check to ensure no empty or invalid data slips through
+    if (!validateStep1()) {
+      Get.snackbar(
+        'Validation Failed',
+        'Please complete all highlighted input fields and dropdown selections.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+
+      String cleanMobile = mobileController.text.trim().replaceAll(RegExp(r'[^\d]'), '');
+      String cleanDialCode = selectedDialCode.value.replaceAll('+', '').trim();
+
+      if (cleanMobile.startsWith(cleanDialCode) && cleanMobile.length > 10) {
+        cleanMobile = cleanMobile.substring(cleanDialCode.length);
+      }
+
+      if (cleanMobile.startsWith('0') && cleanMobile.length > 10) {
+        cleanMobile = cleanMobile.substring(1);
+      }
+
+      PlaceOrderRequest request = PlaceOrderRequest(
+        // name: nameController.text.trim(),
+        // email: emailController.text.trim(),
+        country: selectedCountry.value?.name ?? "",
+        // countryCode: cleanDialCode,
+        // mobile: cleanMobile,
+        service: selectedService.value?.name ?? "",
+        workType: selectedWorkType.value ?? "Standard",
+        subject: selectedSubject.value?.name ?? "",
+        urgency: selectedUrgency.value?.id?.toString() ?? "5",
+        wordCount: selectedPageConfig.value?.value ?? 0,
+        topic: topicController.text.trim(),
+        requirements: requirementsController.text.trim(),
+        finalPrice: finalPrice.toStringAsFixed(2),
+        sourcePage: "Mobile App",
+      );
+
+      // 5. Network boundary execute karna
+      final response = await PlaceOrderApi.placeOrder(
+        request: request,
+        files: pickedFiles,
+      );
+
+      // 6. Response standard verification logic
+      if (response != null && response.success == true) {
+        Get.snackbar(
+          'Order Placed',
+          response.message ?? 'Your assignment order has been submitted successfully!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.withOpacity(0.1),
+          colorText: Colors.green,
+        );
+
+        // Optional: Reset fields after successful submission
+
+
+        // Target navigation stack cleanup routing
+        Get.offNamed(
+          Routes.PAYMENT,
+          arguments: {
+            'orderId': response.orderId,
+            'topic': topicController.text.trim(),
+            'pages': selectedPageConfig.value?.name ?? '',
+            'deadline': selectedUrgency.value?.name ?? '',
+            'amount': finalPrice.toStringAsFixed(2),
+            'service': selectedService.value?.name ?? '',
+            'discount':savingsAmount.toStringAsFixed(2),
+            'basePrice':formattedEstimatedPrice
+          },
+        );
+        clearAllFields();
+      } else {
+        Get.snackbar(
+          'Submission Error',
+          response.message ?? 'Failed to complete order submission. Try again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.redAccent.withOpacity(0.1),
+          colorText: Colors.red,
+        );
+      }
+    } catch (e) {
+      debugPrint('CRITICAL DISPATCH ERROR: $e');
+      Get.snackbar(
+        'Network Error',
+        'Something went wrong while transmitting data layer: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    } finally {
+      // 7. Reset loader configuration footprint
+      isLoading.value = false;
+    }
+  }
+
+  /// Helper utility to scrub memory maps clean post successful execution checkout
+  void clearAllFields() {
+    nameController.clear();
+    emailController.clear();
+    mobileController.clear();
+    topicController.clear();
+    requirementsController.clear();
+    pickedFiles.clear();
+
+    selectedSubject.value = null;
+    selectedService.value = null;
+    selectedUrgency.value = null;
+    selectedCountry.value = null;
+    selectedWorkType.value = null;
+    isAccepted.value = false;
   }
 
   @override

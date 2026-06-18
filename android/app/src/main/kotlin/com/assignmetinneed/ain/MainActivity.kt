@@ -1,4 +1,4 @@
-package com.example.ain
+package com.assignmetinneed.ain
 
 import io.flutter.embedding.android.FlutterActivity
 
