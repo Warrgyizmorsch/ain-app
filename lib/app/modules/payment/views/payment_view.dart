@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:ain/app/common/constant/app_imports.dart';
 import '../controllers/payment_controller.dart';
 
 class PaymentView extends GetView<PaymentController> {
@@ -8,14 +7,10 @@ class PaymentView extends GetView<PaymentController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF7F8FC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-            onPressed: Get.back, icon: const Icon(Icons.arrow_back_ios, color: Colors.black)),
-        title: const Text("Payment", style: TextStyle(color: Colors.black)),
-        centerTitle: true,
+      backgroundColor: AppColors.appBackground,
+      appBar: CustomAppBar(
+        title: 'Payment',
+        showBackButton: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -102,11 +97,15 @@ class PaymentView extends GetView<PaymentController> {
               const SizedBox(width: 10),
               Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const Spacer(),
-              Radio<String>(
-                value: title,
+              RadioGroup<String>(
                 groupValue: controller.selectedPaymentMethod.value,
-                onChanged: (val) => controller.selectPaymentMethod(val!),
-              ),
+                onChanged: (value) {
+                  controller.selectPaymentMethod(value!);
+                },
+                child: Radio<String>(
+                  value: title,
+                ),
+              )
             ],
           ),
           if (child != null) ...[const SizedBox(height: 10), child],
@@ -118,7 +117,7 @@ class PaymentView extends GetView<PaymentController> {
   Widget _customTextField(String hint) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(color: Colors.grey.withOpacity(0.05), borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(color: Colors.grey.withValues(alpha:0.05), borderRadius: BorderRadius.circular(8)),
       child: TextField(decoration: InputDecoration(hintText: hint, border: InputBorder.none)),
     );
   }

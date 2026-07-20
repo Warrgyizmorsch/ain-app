@@ -202,7 +202,7 @@ class CustomDropdown<T> extends StatelessWidget {
           ),
         ),
 
-        iconStyleData: const IconStyleData(
+        iconStyleData:  IconStyleData(
           icon: Icon(
             Icons.keyboard_arrow_down,
             size: 20,

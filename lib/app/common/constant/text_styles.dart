@@ -7,43 +7,43 @@ class AppTextStyles {
   AppTextStyles._();
 
   // ── Display ──────────────────────────────────────────────────────────────────
-  static const TextStyle displayLarge = TextStyle(
+  static TextStyle get displayLarge => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s32,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle displayMedium = TextStyle(
+  static TextStyle get displayMedium => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s28,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
   // ── Headings ─────────────────────────────────────────────────────────────────
-  static final TextStyle h1 = TextStyle(
+  static TextStyle get h1 => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s20,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle h2 = TextStyle(
+  static TextStyle get h2 => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s28,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle headline = TextStyle(
+  static TextStyle get headline => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s24,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle subhead = TextStyle(
+  static TextStyle get subhead => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s18,
     fontWeight: FontWeight.w600,
@@ -51,15 +51,15 @@ class AppTextStyles {
   );
 
   // ── Title ────────────────────────────────────────────────────────────────────
-  static const TextStyle titleLarge = TextStyle(
+  static TextStyle get titleLarge => TextStyle(
     fontFamily: FontFamily.regular,
-    fontSize: AppFontSize.s20,
+    fontSize: AppFontSize.s16,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
   /// AppBar title — "Order Assignment" / "Order Now"
-  static const TextStyle appBarTitle = TextStyle(
+  static TextStyle get appBarTitle => TextStyle(
     fontFamily: FontFamily.semiBold,
     fontSize: AppFontSize.s15,
     fontWeight: FontWeight.w600,
@@ -68,16 +68,16 @@ class AppTextStyles {
 
   // ── Section ──────────────────────────────────────────────────────────────────
   /// Bold gradient heading — "Assignment Details"
-  static const TextStyle sectionHeading = TextStyle(
+  static TextStyle get sectionHeading => TextStyle(
     fontFamily: FontFamily.bold,
     fontSize: AppFontSize.s18,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
     height: 1.2,
   );
 
   /// Subtext below section heading
-  static const TextStyle sectionSub = TextStyle(
+  static TextStyle get sectionSub => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s12,
     fontWeight: FontWeight.w400,
@@ -86,8 +86,8 @@ class AppTextStyles {
 
   // ── Field ────────────────────────────────────────────────────────────────────
   /// Uppercase field label — "ASSIGNMENT TOPIC", "SUBJECT" etc.
-  static const TextStyle fieldLabel = TextStyle(
-    fontFamily: FontFamily.semiBold,
+  static TextStyle get fieldLabel => TextStyle(
+    fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s11,
     fontWeight: FontWeight.w600,
     color: AppColors.textSecondary,
@@ -95,7 +95,7 @@ class AppTextStyles {
   );
 
   /// Input typed text
-  static const TextStyle inputText = TextStyle(
+  static TextStyle get inputText => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s13,
     fontWeight: FontWeight.w400,
@@ -103,7 +103,7 @@ class AppTextStyles {
   );
 
   /// Input / dropdown hint
-  static const TextStyle hintText = TextStyle(
+  static TextStyle get hintText => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s13,
     fontWeight: FontWeight.w400,
@@ -111,7 +111,7 @@ class AppTextStyles {
   );
 
   /// Dropdown item text
-  static const TextStyle dropdownItem = TextStyle(
+  static TextStyle get dropdownItem => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s13,
     fontWeight: FontWeight.w400,
@@ -119,21 +119,21 @@ class AppTextStyles {
   );
 
   // ── Body ─────────────────────────────────────────────────────────────────────
-  static const TextStyle bodyLarge = TextStyle(
+  static TextStyle get bodyLarge => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s16,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle bodyMedium = TextStyle(
+  static TextStyle get bodyMedium => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s14,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle subtitle = TextStyle(
+  static TextStyle get subtitle => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s14,
     fontWeight: FontWeight.w500,
@@ -142,26 +142,26 @@ class AppTextStyles {
 
   // ── Step Badge ───────────────────────────────────────────────────────────────
   /// Text inside the step pill — "Step 1/2"
-  static const TextStyle stepBadge = TextStyle(
+  static TextStyle get stepBadge => TextStyle(
     fontFamily: FontFamily.semiBold,
     fontSize: AppFontSize.s11,
     fontWeight: FontWeight.w600,
-    color: Color(0xFF5B3FD4),
+    color: const Color(0xFF5B3FD4),
     letterSpacing: 0.3,
   );
 
   // ── Price Box ────────────────────────────────────────────────────────────────
   /// "Price Details" title
-  static const TextStyle priceTitle = TextStyle(
+  static TextStyle get priceTitle => TextStyle(
     fontFamily: FontFamily.bold,
     fontSize: AppFontSize.s11,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: AppColors.primary,
     letterSpacing: 0.5,
   );
 
   /// Row label — "Basic Price (USD)", "Discount"
-  static const TextStyle priceLabel = TextStyle(
+  static TextStyle get priceLabel => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s12,
     fontWeight: FontWeight.w400,
@@ -169,7 +169,7 @@ class AppTextStyles {
   );
 
   /// Row value — "USD 224.52"
-  static const TextStyle priceValue = TextStyle(
+  static TextStyle get priceValue => TextStyle(
     fontFamily: FontFamily.semiBold,
     fontSize: AppFontSize.s13,
     fontWeight: FontWeight.w600,
@@ -177,7 +177,7 @@ class AppTextStyles {
   );
 
   /// Discount value — "USD 67.36" in red
-  static const TextStyle discountValue = TextStyle(
+  static TextStyle get discountValue => TextStyle(
     fontFamily: FontFamily.semiBold,
     fontSize: AppFontSize.s13,
     fontWeight: FontWeight.w600,
@@ -185,24 +185,24 @@ class AppTextStyles {
   );
 
   /// Total label
-  static const TextStyle totalLabel = TextStyle(
+  static TextStyle get totalLabel => TextStyle(
     fontFamily: FontFamily.bold,
     fontSize: AppFontSize.s13,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
   /// Total value — "USD 157.16" in primary
-  static const TextStyle totalValue = TextStyle(
+  static TextStyle get totalValue => TextStyle(
     fontFamily: FontFamily.bold,
     fontSize: AppFontSize.s15,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: AppColors.primary,
   );
 
   // ── Upload zone ──────────────────────────────────────────────────────────────
   /// "Drop files here or click to upload"
-  static const TextStyle uploadHint = TextStyle(
+  static TextStyle get uploadHint => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s12,
     fontWeight: FontWeight.w400,
@@ -211,7 +211,7 @@ class AppTextStyles {
 
   // ── Terms ────────────────────────────────────────────────────────────────────
   /// Terms & conditions body text
-  static const TextStyle termsText = TextStyle(
+  static TextStyle get termsText => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s10,
     fontWeight: FontWeight.w400,
@@ -220,7 +220,7 @@ class AppTextStyles {
   );
 
   /// Terms links — "Terms of Use", "Privacy Policy", "Money Back Guarantee"
-  static const TextStyle termsLink = TextStyle(
+  static TextStyle get termsLink => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s10,
     fontWeight: FontWeight.w400,
@@ -229,88 +229,88 @@ class AppTextStyles {
   );
 
   // ── Button ───────────────────────────────────────────────────────────────────
-  static const TextStyle button = TextStyle(
+  static TextStyle get button => TextStyle(
     fontFamily: FontFamily.regular,
-    fontSize: AppFontSize.s16,
+    fontSize: AppFontSize.s15,
     fontWeight: FontWeight.w600,
-    color: Colors.white,
+    color: AppColors.white, // Made this dynamic too if needed
   );
 
   // ── Misc ─────────────────────────────────────────────────────────────────────
-  static const TextStyle caption = TextStyle(
+  static TextStyle get caption => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s12,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
   );
 
-  static const TextStyle overline = TextStyle(
+  static TextStyle get overline => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s10,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
   );
 
-  static const TextStyle error = TextStyle(
+  static TextStyle get error => TextStyle(
     fontSize: AppFontSize.s12,
     fontFamily: FontFamily.regular,
     color: AppColors.error,
   );
-  // ── Wallet ─────────────────────────────────────────────────────────────────
 
-  static const TextStyle walletTitle = TextStyle(
+  // ── Wallet ─────────────────────────────────────────────────────────────────
+  static TextStyle get walletTitle => TextStyle(
     fontFamily: FontFamily.semiBold,
     fontSize: AppFontSize.s18,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle walletAmountLabel = TextStyle(
+  static TextStyle get walletAmountLabel => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s11,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
   );
 
-  static const TextStyle walletAmount = TextStyle(
+  static TextStyle get walletAmount => TextStyle(
     fontFamily: FontFamily.bold,
     fontSize: AppFontSize.s28,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: AppColors.primary,
   );
 
-  static const TextStyle transactionTitle = TextStyle(
+  static TextStyle get transactionTitle => TextStyle(
     fontFamily: FontFamily.semiBold,
     fontSize: AppFontSize.s14,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle transactionAmount = TextStyle(
+  static TextStyle get transactionAmount => TextStyle(
     fontFamily: FontFamily.bold,
     fontSize: AppFontSize.s14,
-    fontWeight: FontWeight.w700,
-    color: Colors.green,
+    fontWeight: FontWeight.w600,
+    color: Colors.green, // You can also move this to AppColors.success
   );
 
-  static const TextStyle transactionHistory = TextStyle(
+  static TextStyle get transactionHistory => TextStyle(
     fontFamily: FontFamily.semiBold,
     fontSize: AppFontSize.s13,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle noTransaction = TextStyle(
+  static TextStyle get noTransaction => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s13,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
   );
-  static const TextStyle bodySmall = TextStyle(
+
+  static TextStyle get bodySmall => TextStyle(
     fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s12,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
   );
-  
 }

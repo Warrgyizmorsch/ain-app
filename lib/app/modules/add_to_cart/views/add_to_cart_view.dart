@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../../common/constant/app_imports.dart';
 import '../controllers/add_to_cart_controller.dart';
 
@@ -33,7 +31,7 @@ class AddToCartView extends GetView<AddToCartController> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(.05), blurRadius: 10)],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:.05), blurRadius: 10)],
                   ),
                   child: Column(
                     children: [
@@ -48,7 +46,7 @@ class AddToCartView extends GetView<AddToCartController> {
                   ),
                 ),
                 // The blue blob effect seen in the screenshot
-                Positioned(right: 0, top: 0, child: Container(height: 120, width: 120, decoration: BoxDecoration(color: Colors.blue.withOpacity(0.05), shape: BoxShape.circle))),
+                Positioned(right: 0, top: 0, child: Container(height: 120, width: 120, decoration: BoxDecoration(color: Colors.blue.withValues(alpha:0.05), shape: BoxShape.circle))),
               ],
             ),
 
@@ -77,7 +75,7 @@ class AddToCartView extends GetView<AddToCartController> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(14),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(.05), blurRadius: 10)],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:.05), blurRadius: 10)],
               ),
               child: Row(
                 children: [
@@ -89,7 +87,6 @@ class AddToCartView extends GetView<AddToCartController> {
                       // Pill shaped price highlight
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(color: const Color(0xff6C4CF1).withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
                         child: Text('USD ${controller.amount.value}', style: const TextStyle(color: Color(0xff6C4CF1), fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                     ],

@@ -1,142 +1,208 @@
-
-
-
 import '../../../common/constant/app_imports.dart';
 import '../../../services/storage_services.dart';
 import '../controllers/profile_controller.dart';
+import '../widget/change_password_widget.dart';
+import '../widget/edit_profile_widget.dart';
+import '../widget/my_order_widget.dart';
+import '../widget/payment_history_view.dart';
+import '../widget/refer_and_earn_screen.dart';
+import '../widget/saved_sample_widget.dart';
+
 
 class ProfileView extends GetView<ProfileController> {
-  const ProfileView({super.key});
+    ProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: CustomAppBar(
-
-
-        title:
-          'Profile',showBackButton: false,
+      backgroundColor: AppColors.appBackground,
+      appBar:   CustomAppBar(
+        title: 'Profile',
+        showBackButton: false,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding:   EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
+            // --- Header Gradient Card ---
+            Container(
+              padding:   EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                    CircleAvatar(
+                    radius: 32,
+                    backgroundColor: AppColors.white,
+                    // TODO: Replace with network image if required
+                    // backgroundImage: NetworkImage('url'),
+                    child: Icon(Icons.person, size: 32, color: AppColors.textGrey),
                   ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    "P",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
+                    SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          controller.nameController.text,
+                          style: AppTextStyles.titleLarge.copyWith(
+                            color: AppColors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                          SizedBox(height: 4),
+                        Text(
+                          controller.emailController.text,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                          SizedBox(height: 10),
+                        Container(
+                          padding:   EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.white.withValues(alpha:0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'Premium Member',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Priyanka Joshi',
-                        style: AppTextStyles.subtitle.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'oludeed@gmail.com',
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
+                ],
+              ),
+            ),
+
+              SizedBox(height: 24),
+
+            // --- Menu Section ---
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.lightShadow, // Replaced grey withOpacity(0.08)
+                    spreadRadius: 2,
+                    blurRadius: 15,
+                    offset:   Offset(0, 4),
                   ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            Row(
-              children: [
-                Text(
-                  'Profile Status',
-                  style: AppTextStyles.caption,
-                ),
-                const Spacer(),
-                Text(
-                  '85%',
-                  style: AppTextStyles.caption,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8),
-
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: LinearProgressIndicator(
-                value: .85,
-                minHeight: 6,
-                backgroundColor: const Color(0xFFE5E5E5),
-                valueColor: const AlwaysStoppedAnimation(
-                  AppColors.primary,
-                ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _ProfileMenuTile(
+                    icon: Icons.receipt_long_outlined,
+                    title: 'My Orders',
+                    onTap: () {
+                      Get.to(() => MyOrdersWidget());
+                    },
+                  ),
+                  _Divider(),
+                  _ProfileMenuTile(
+                    icon: Icons.payment_outlined,
+                    title: 'Payments',
+                    onTap: () {
+                      // Note: adjust route if this should be const
+                      Get.to(PaymentHistoryView());
+                    },
+                  ),
+                  _Divider(),
+                  _ProfileMenuTile(
+                    icon: Icons.bookmark_border_outlined,
+                    title: 'Saved Samples',
+                    onTap: () {
+                      // Note: adjust route if this should be const
+                      Get.to(SavedSamplesView());
+                    },
+                  ),
+                  _Divider(),
+                  _ProfileMenuTile(
+                    icon: Icons.card_giftcard_outlined,
+                    title: 'Refer & Earn',
+                    subtitle: 'Invite & earn rewards',
+                    onTap: () {
+                      Get.to(  ReferAndEarnScreen());
+                    },
+                  ),
+                  _Divider(),
+                  _ProfileMenuTile(
+                    icon: Icons.help_outline,
+                    title: 'Support Center',
+                    onTap: () {
+                      controller.openLiveChat();
+                    },
+                  ),
+                  _Divider(),
+                  _ProfileMenuTile(
+                    icon: Icons.manage_accounts_outlined,
+                    title: 'Edit Profile',
+                    onTap: () {
+                      Get.to(  EditProfileWidget());
+                    },
+                  ),
+                  _Divider(),
+                  _ProfileMenuTile(
+                    icon: Icons.lock_outline,
+                    title: 'Change Password',
+                    onTap: () {
+                      Get.to(  ChangePasswordWidget());
+                    },
+                  ),
+                ],
               ),
             ),
 
-            const SizedBox(height: 28),
+              SizedBox(height: 10),
 
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Account Settings',
-                style: AppTextStyles.caption,
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            _ProfileMenuTile(
-              icon: Icons.manage_accounts_outlined,
-              title: 'Edit Profile',
-              onTap: () {
-                Get.toNamed(Routes.EDIT_PROFILE);
-              },
-            ),
-
-            const SizedBox(height: 10),
-
-            _ProfileMenuTile(
-              icon: Icons.lock_outline,
-              title: 'Change Password',
-              onTap: () {
-                Get.toNamed(Routes.CHANGE_PASSWORD);
-              },
-            ),
-            const SizedBox(height: 10),
-            _ProfileMenuTile(
-              icon: Icons.login_outlined,
-              title: 'LogOut',
-              onTap: () async {
+            // --- Log Out Button ---
+            TextButton.icon(
+              onPressed: () async {
                 await StorageService.to.clearAuthData();
-                Get.offAllNamed(Routes.LOGIN);
+                Get.offAllNamed(Routes.LOGIN); // Assuming Routes is imported properly
               },
+              icon:   Icon(Icons.logout, color: AppColors.error),
+              label: Text(
+                'Log Out',
+                style: AppTextStyles.button.copyWith(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                padding:   EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
             ),
 
-
+              SizedBox(height: 100),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// Custom divider to match the inset seen in typical lists
+class _Divider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return   Padding(
+      padding: EdgeInsets.only(left: 56, right: 16),
+      child: Divider(
+        height: 1,
+        thickness: 1,
+        color: AppColors.lightDivider,
       ),
     );
   }
@@ -145,54 +211,54 @@ class ProfileView extends GetView<ProfileController> {
 class _ProfileMenuTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String? subtitle;
   final VoidCallback onTap;
 
-  const _ProfileMenuTile({
+    _ProfileMenuTile({
     required this.icon,
     required this.title,
+    this.subtitle,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.white,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 2,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Container(
-          height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F5F7),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  size: 18,
-                  color: AppColors.textPrimary,
-                ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20), // Matches container bounds if it's the first/last item
+      child: Padding(
+        padding:   EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.textSecondary, size: 24),
+              SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      fontWeight: FontWeight.w500,
+                      fontSize: AppFontSize.s14,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                      SizedBox(height: 4),
+                    Text(
+                      subtitle!,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontSize: 12,
+                        color: AppColors.lightTextDisabled,
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: AppTextStyles.bodyMedium,
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.textPrimary,
-              ),
-            ],
-          ),
+            ),
+              Icon(Icons.chevron_right, color: AppColors.lightTextHint, size: 22),
+          ],
         ),
       ),
     );

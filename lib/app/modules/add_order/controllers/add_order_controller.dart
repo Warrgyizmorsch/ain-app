@@ -1,9 +1,8 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'dart:io';
 import 'package:ain/app/core/models/order_now_model/place_order_request_model.dart';
 import 'package:ain/app/core/utils/api/order_now_api/place_order_api.dart';
-import 'package:ain/app/services/storage_services.dart';
-
-
 import '../../../common/constant/app_imports.dart';
 import '../../../common/widget/file_picker/app_file_picker.dart'; // Ensure path points to your Custom File Helper
 import '../../../core/models/order_now_model/countries_master_model.dart';
@@ -11,14 +10,17 @@ import '../../../core/models/order_now_model/services_master_model.dart';
 import '../../../core/models/order_now_model/subjects_master_model.dart';
 import '../../../core/models/order_now_model/urgencies_master_model.dart';
 import '../../../core/models/order_now_model/word_count_master_model.dart';
+import '../../../core/models/payment_model/bank_list_model.dart';
 import '../../../core/utils/api/order_now_api/order_now_dropdown_api.dart';
+import '../../../core/utils/api/payment_api/bank_list_api.dart';
 
 class AddOrderController extends GetxController {
   final isLoading = false.obs;
   final currentStep = 1.obs;
   final isAccepted = false.obs;
   final RxList<File> pickedFiles = <File>[].obs;
-
+  final RxList<BankDetail> banksList = <BankDetail>[].obs;
+  final isBankLoading = false.obs;
   // Text Form Controllers
   final topicController = TextEditingController();
   final deadlineController = TextEditingController();
@@ -117,7 +119,7 @@ class AddOrderController extends GetxController {
     validateTopic(topicController.text);
 
     // 2. Fire evaluations on dropdown items
-    countryError.value = selectedCountry.value == null ? "Please select your country" : "";
+    // countryError.value = selectedCountry.value == null ? "Please select your country" : "";
     subjectError.value = selectedSubject.value == null ? "Please select a subject area" : "";
     serviceError.value = selectedService.value == null ? "Please select a service type" : "";
     workTypeError.value = selectedWorkType.value == null ? "Please select a work type status tier" : "";
@@ -130,7 +132,7 @@ class AddOrderController extends GetxController {
       //   emailError.value.isEmpty &&
       //   mobileError.value.isEmpty &&
         topicError.value.isEmpty &&
-        countryError.value.isEmpty &&
+        // countryError.value.isEmpty &&
         subjectError.value.isEmpty &&
         serviceError.value.isEmpty &&
         workTypeError.value.isEmpty &&
@@ -148,7 +150,7 @@ class AddOrderController extends GetxController {
         'Validation Failed',
         'Please complete all highlighted input fields and dropdown selections.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withOpacity(0.1),
+        backgroundColor: Colors.redAccent.withValues(alpha:0.1),
         colorText: Colors.red,
       );
     }
@@ -172,7 +174,6 @@ class AddOrderController extends GetxController {
 
   // ─── DYNAMIC PRICING SYSTEM ENGINE ────────────────────────────────────────
 
-  /// 1. Computes running cost based on raw words count multiplied by its page tier configuration factor
   double get baseCost {
     if (selectedPageConfig.value == null) {
       _logCalculationDebug("Base Cost calculation skipped: No Word Count configuration selected yet.");
@@ -196,7 +197,6 @@ class AddOrderController extends GetxController {
     return computedBase;
   }
 
-  /// 2. Accumulates combined multiplier parameters from your active data selections
   double get estimatedPrice {
     if (selectedPageConfig.value == null) return 0.0;
 
@@ -221,7 +221,6 @@ class AddOrderController extends GetxController {
     return computedEstimated;
   }
 
-  /// 3. Computes the clean final payable balance following system markdowns
   double get finalPrice {
     final double currentEstimated = estimatedPrice;
     if (currentEstimated == 0.0) return 0.0;
@@ -270,6 +269,7 @@ class AddOrderController extends GetxController {
         getCountries(),
         getUrgencies(),
         getSubjects(),
+        bankList(),
       ]);
 
     } catch (e) {
@@ -365,7 +365,34 @@ class AddOrderController extends GetxController {
       pickedFiles.removeAt(index);
     }
   }
+  Future<void> bankList() async {
+    try {
+      isBankLoading.value = true;
 
+      final response = await BankListApi.getBankList();
+
+      if (response.success == true && response.data != null) {
+        banksList.assignAll(response.data!);
+      } else {
+        Get.snackbar(
+          'Error',
+          'Failed to load bank details',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      debugPrint('Bank List Error: $e');
+      Get.snackbar(
+        'Error',
+        'Something went wrong while fetching banks.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isBankLoading.value = false;
+    }
+  }
   Future<void> addToCart() async {
     // 1. Terms and Conditions validation check
     if (!isAccepted.value) {
@@ -373,7 +400,7 @@ class AddOrderController extends GetxController {
         'Terms Required',
         'Please check the terms and conditions policy checkbox before routing order details.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amberAccent.withOpacity(0.1),
+        backgroundColor: Colors.amberAccent.withValues(alpha:0.1),
         colorText: Colors.black87,
       );
       return;
@@ -385,7 +412,7 @@ class AddOrderController extends GetxController {
         'Validation Failed',
         'Please complete all highlighted input fields and dropdown selections.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withOpacity(0.1),
+        backgroundColor: Colors.redAccent.withValues(alpha:0.1),
         colorText: Colors.red,
       );
       return;
@@ -408,13 +435,13 @@ class AddOrderController extends GetxController {
       PlaceOrderRequest request = PlaceOrderRequest(
         // name: nameController.text.trim(),
         // email: emailController.text.trim(),
-        country: selectedCountry.value?.name ?? "",
+        // country: selectedCountry.value?.name ?? "",
         // countryCode: cleanDialCode,
         // mobile: cleanMobile,
         service: selectedService.value?.name ?? "",
         workType: selectedWorkType.value ?? "Standard",
         subject: selectedSubject.value?.name ?? "",
-        urgency: selectedUrgency.value?.id?.toString() ?? "5",
+        urgency: selectedUrgency.value?.id.toString() ?? "5",
         wordCount: selectedPageConfig.value?.value ?? 0,
         topic: topicController.text.trim(),
         requirements: requirementsController.text.trim(),
@@ -434,7 +461,7 @@ class AddOrderController extends GetxController {
           'Order Placed',
           response.message ?? 'Your assignment order has been submitted successfully!',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withOpacity(0.1),
+          backgroundColor: Colors.green.withValues(alpha:0.1),
           colorText: Colors.green,
         );
 
@@ -461,7 +488,7 @@ class AddOrderController extends GetxController {
           'Submission Error',
           response.message ?? 'Failed to complete order submission. Try again.',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent.withOpacity(0.1),
+          backgroundColor: Colors.redAccent.withValues(alpha:0.1),
           colorText: Colors.red,
         );
       }
@@ -471,7 +498,7 @@ class AddOrderController extends GetxController {
         'Network Error',
         'Something went wrong while transmitting data layer: $e',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withOpacity(0.1),
+        backgroundColor: Colors.redAccent.withValues(alpha:0.1),
         colorText: Colors.red,
       );
     } finally {

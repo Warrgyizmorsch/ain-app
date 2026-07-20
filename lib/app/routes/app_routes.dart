@@ -1,5 +1,6 @@
+// ignore_for_file: constant_identifier_names
+
 part of 'app_pages.dart';
-// DO NOT EDIT. This is code generated via package:get_cli/get_cli.dart
 
 abstract class Routes {
   Routes._();
@@ -10,16 +11,19 @@ abstract class Routes {
   static const SIGNUP = _Paths.SIGNUP;
   static const HOME = _Paths.HOME;
   static const BOTTOM_NAV_BAR = _Paths.BOTTOM_NAV_BAR;
-  static const CHAT = _Paths.CONTACTUS;
+  static const CONTACTUS = _Paths.CONTACTUS;
   static const PROFILE = _Paths.PROFILE;
   static const EDIT_PROFILE = _Paths.EDIT_PROFILE;
   static const CHANGE_PASSWORD = _Paths.CHANGE_PASSWORD;
   static const ASSIGNMENTS = _Paths.ASSIGNMENTS;
   static const ADD_ORDER = _Paths.ADD_ORDER;
   static const WALLET = _Paths.WALLET;
-  static const LOGIN_ONBORADING = _Paths.LOGIN_ONBORADING;
+  static const LOGIN_ONBOARDING = _Paths.LOGIN_ONBOARDING;
   static const ADD_TO_CART = _Paths.ADD_TO_CART;
   static const PAYMENT = _Paths.PAYMENT;
+  static const EXPERTS = _Paths.EXPERTS;
+  static const RESOURCES = _Paths.RESOURCES;
+  static const CHAT = _Paths.CHAT;
 }
 
 abstract class _Paths {
@@ -38,7 +42,10 @@ abstract class _Paths {
   static const ASSIGNMENTS = '/assignments';
   static const ADD_ORDER = '/add-order';
   static const WALLET = '/wallet';
-  static const LOGIN_ONBORADING = '/login-onborading';
+  static const LOGIN_ONBOARDING = '/login-onboarding';
   static const ADD_TO_CART = '/add-to-cart';
   static const PAYMENT = '/payment';
+  static const EXPERTS = '/experts';
+  static const RESOURCES = '/resources';
+  static const CHAT = '/chat';
 }

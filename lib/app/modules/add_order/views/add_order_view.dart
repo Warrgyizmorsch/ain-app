@@ -21,7 +21,7 @@ class AddOrderView extends GetView<AddOrderController> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.appBackground,
         appBar: CustomAppBar(
           title: controller.currentStep.value == 1
               ? 'Order Assignment'

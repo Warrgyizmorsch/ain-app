@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../../common/constant/app_imports.dart';
 import '../../../services/storage_services.dart';
 import '../controllers/splash_controller.dart';
@@ -9,7 +7,6 @@ class SplashView extends GetView<SplashController> {
 
   @override
   Widget build(BuildContext context) {
-    // Fetching screen dimensions for responsive scaling
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isTablet = screenWidth > 600;
@@ -20,7 +17,7 @@ class SplashView extends GetView<SplashController> {
         height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/splash_background.png'),
+            image: AssetImage(ImageConstant.splashBackground),
             fit: BoxFit.cover,
           ),
         ),
@@ -34,23 +31,21 @@ class SplashView extends GetView<SplashController> {
                   ),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.06, // 6% of screen width dynamic padding
+                      horizontal: screenWidth * 0.06,
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Top Section: Logo & Headings
                         Column(
                           children: [
-                            SizedBox(height: screenHeight * 0.03),
+                            SizedBox(height: screenHeight * 0.02),
 
-                            // 1. App Icon / Logo (Scales dynamically)
                             ClipRRect(
                               borderRadius: BorderRadius.circular(isTablet ? 32 : 24),
                               child: Image.asset(
-                                ImageConstant.splashLogo,
-                                height: isTablet ? 180 : 140,
-                                width: isTablet ? 180 : 140,
+                                ImageConstant.appLogo,
+                                height: isTablet ? 180 : 250,
+                                width: isTablet ? 180 : 300,
                                 fit: BoxFit.contain,
                                 errorBuilder: (context, error, stackTrace) => Column(
                                   mainAxisSize: MainAxisSize.min,
@@ -78,9 +73,7 @@ class SplashView extends GetView<SplashController> {
                               ),
                             ),
 
-                            SizedBox(height: screenHeight * 0.02),
 
-                            // 2. Main Header Typography
                             Text(
                               'Expert Academic Support',
                               textAlign: TextAlign.center,
@@ -104,7 +97,6 @@ class SplashView extends GetView<SplashController> {
 
                             SizedBox(height: screenHeight * 0.02),
 
-                            // 3. Subtitle Description Text
                             Padding(
                               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.02),
                               child: Text(
@@ -121,7 +113,6 @@ class SplashView extends GetView<SplashController> {
                           ],
                         ),
 
-                        // Middle Section: Central 3D Illustration
                         Padding(
                           padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
                           child: Image.asset(
@@ -131,13 +122,11 @@ class SplashView extends GetView<SplashController> {
                           ),
                         ),
 
-                        // Bottom Section: Action Button & Trust Footer
                         Column(
                           children: [
-                            // 5. Action Button ("Get Started ->")
                             SizedBox(
                               width: double.infinity,
-                              height: isTablet ? 54 : 46, // Slightly taller button for better tap targets
+                              height: isTablet ? 54 : 46,
                               child: ElevatedButton(
                                 onPressed: () {
                                   final token = StorageService.to.getToken();
@@ -179,7 +168,6 @@ class SplashView extends GetView<SplashController> {
 
                             SizedBox(height: screenHeight * 0.02),
 
-                            // 7. Bottom Trust Text Footer
                             Text(
                               'Trusted by 25,000+ Students',
                               style: TextStyle(

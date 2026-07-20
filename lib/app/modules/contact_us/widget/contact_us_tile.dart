@@ -35,11 +35,11 @@ class ContactTile extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: const Color(0xFFEAF4FB),
+              backgroundColor: AppColors.background,
               child: Icon(
                 icon,
                 size: 18,
-                color: AppColors.textPrimary,
+                color: AppColors.secondary,
               ),
             ),
 

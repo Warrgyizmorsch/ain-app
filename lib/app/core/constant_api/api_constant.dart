@@ -1,12 +1,11 @@
 // ignore_for_file: constant_identifier_names
 
-import 'dart:developer';
 
 class ApiConstant {
-  static const BASE_URL = "https://admin.assignnmentinneed.com/api/app/";
+  static const BASE_URL = "https://ain.warrgyizmorsch.com/api/";
   static const Webview_URL = "https://www.assignnmentinneed.com/PrivacyPolicy";
 
-  static const String? FALLBACK_BEARER_TOKEN =
+  static const String FALLBACK_BEARER_TOKEN =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiU3VwZXIgQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsIlJvbGVJZCI6IjEiLCJDb21wYW55SWQiOiIxIiwiZXhwIjoxNzYzNDY5ODA5LCJpc3MiOiJZYWNodEJvb2tpbmciLCJhdWQiOiJZYWNodEJvb2tpbmctVXNlcnMifQ.-KP5dh4wHR_MdL_gYRjOi3rqqhGKX6wVjTn_Vq08990";
 
 
@@ -32,25 +31,36 @@ class ApiConstant {
   }
 
   // Auth Endpoints
-  static const String LOGIN = "login";
-  static const String REGISTER = "register";
-  static const String FORGOT_PASSWORD = "forgot-password";
-  static const String SERVICES = "services";
-  static const String COUNTRIES = "countries";
-  static const String WORD_COUNT = "word-count";
-  static const String URGENCIES = "urgencies";
-  static const String SUBJECTS = "subjects";
-  static const String WORK_TYPES = "work-types";
-  static const String PLACE_ORDER = "place-order";
-  static const String ORDER_LIST = "order-list";
-  static const String RESET_PASSWORD = "reset-password";
-  static const String RAISE_TICKET = "raise-ticket";
+  static const String LOGIN = "app/login";
+  static const String REGISTER = "app/register";
+  static const String SERVICES = "app/services";
+  static const String COUNTRIES = "app/countries";
+  static const String WORD_COUNT = "app/word-count";
+  static const String URGENCIES = "app/urgencies";
+  static const String SUBJECTS = "app/subjects";
+  static const String WORK_TYPES = "app/work-types";
+  static const String PLACE_ORDER = "app/place-order";
+  static const String ORDER_LIST = "app/order-list";
+  static const String RESET_PASSWORD = "app/reset-password";
+  static const String RAISE_TICKET = "app/raise-ticket";
   static const String SUBMIT_FEEDBACK = "submit-feedback";
+  static const String samplesList = "samples";
+  static const String samplesCategory = "sample-categories";
+  static const String writerList = "writer-list";
+  static const String experts = "experts";
+  static const String googleLogin = "app/google-login";
+  static const String forgotPassword = "app/forgot-password";
+  static const String forgotPasswordOtp = "app/verify-forgot-password-otp";
+  static const String resetPassword = "app/reset-password";
+  static const String wallet = "app/wallet-amount";
+  static const String walletList = "app/wallet-history";
+  static const String bankList = "app/banks";
+  static const String addPayment = "app/add-payment";
 
 
 
 
 
-// More endpoints will be added as we build the app
+
 }
 

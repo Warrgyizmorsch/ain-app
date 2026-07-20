@@ -1,4 +1,5 @@
-
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import '../../../common/constant/app_imports.dart';
 import '../../../core/models/order_now_model/feedback_request_model.dart';
 import '../../../core/models/order_now_model/order_list_model.dart';
@@ -47,31 +48,36 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       price = orderData.price ?? "0.00";
 
     } else if (orderData is ConfirmedOrder) {
-      title = orderData.service ?? AppStrings.assignmentDetails;
+      title = orderData.title ?? AppStrings.assignmentDetails;
       orderId = orderData.orderId?.toString() ?? "#0000";
-      deadline = orderData.deadline ?? "N/A";
+      deadline = orderData.deliveryDate ?? "N/A";
       status = orderData.status ?? "Completed";
       statusColor = status == "In Progress" ? AppColors.secondary : AppColors.success;
       progress = 1.0;
       progressText = "100%";
 
-      customerName = orderData.name ?? "N/A";
-      workType = orderData.workType ?? "N/A";
-      price = orderData.price ?? "0.00";
+      customerName = orderData.moduleCode ?? "N/A";
+      workType = orderData.type ?? "N/A";
+      price = orderData.amount ?? "0.00";
     }
-
     bool isPaymentPending = (status == "Pending");
 
+    // --- AUTO-OPEN PAYMENT DETAILS IF PENDING ---
+    if (isPaymentPending) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showPaymentDetailsSheet(context, price, orderId);
+      });
+    }
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.appBackground,
       appBar: const CustomAppBar(
         title: 'Order Details',
         showBackButton: true,
       ),
-      // 1. STICKY BOTTOM BAR: Now holds urgent communication actions
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-        decoration: const BoxDecoration(
+        decoration:  BoxDecoration(
           color: AppColors.white,
           boxShadow: [
             BoxShadow(
@@ -93,7 +99,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                     label: Text("Live Chat", style: AppTextStyles.button.copyWith(color: AppColors.primary, fontSize: AppFontSize.s14)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary, width: 1.2),
+                      side:  BorderSide(color: AppColors.primary, width: 1.2),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
@@ -121,59 +127,48 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(12.0), // Compact body padding
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Details Card
             _buildTopCard(title, orderId, deadline, status, statusColor, progress, progressText),
-            const SizedBox(height: 12), // Reduced spacing between sections
+            const SizedBox(height: 12),
 
-            // Customer Information
             _buildSectionTitle("Customer Details"),
             _buildPremiumBox([
               _buildIconDetailRow(Icons.person_outline, "Name", customerName),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
+               Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
               _buildIconDetailRow(Icons.email_outlined, "Email", customerEmail),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
+               Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
               _buildIconDetailRow(Icons.phone_outlined, "Mobile", customerMobile),
             ]),
             const SizedBox(height: 12),
 
-            // Order Specifications
             _buildSectionTitle("Order Specifications"),
             _buildPremiumBox([
               _buildIconDetailRow(Icons.work_outline, AppStrings.workType, workType),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
+               Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
               _buildIconDetailRow(Icons.format_list_numbered, AppStrings.pages, wordCount),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
-              _buildIconDetailRow(Icons.monetization_on_outlined, AppStrings.total, "\$$price",
-                  valueColor: AppColors.primary, isValueBold: true),
+               Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
+              _buildIconDetailRow(Icons.monetization_on_outlined, AppStrings.total, "\$$price", valueColor: AppColors.primary, isValueBold: true),
             ]),
             const SizedBox(height: 12),
 
-            // Instructions
             _buildSectionTitle("Instructions"),
             _buildPremiumBox([
-              Text(
-                instructions,
-                style: AppTextStyles.bodySmall.copyWith(height: 1.4), // Tighter text
-              ),
+              Text(instructions, style: AppTextStyles.bodySmall.copyWith(height: 1.4)),
             ]),
             const SizedBox(height: 12),
 
-            // Uploaded Files
             _buildSectionTitle("Uploaded Files"),
             _buildFileRow("Assignment_Brief.pdf", "1.2 MB"),
             const SizedBox(height: 6),
             _buildFileRow("Reference_Notes.docx", "845 KB"),
             const SizedBox(height: 12),
 
-            // Payment Status
-            _buildPaymentStatusBox(isPaymentPending),
+            _buildPaymentStatusBox(context, isPaymentPending, price, orderId),
             const SizedBox(height: 12),
 
-            // 2. HELP & FEEDBACK SECTION: Moved here logically
             _buildSectionTitle("Help & Feedback"),
             Row(
               children: [
@@ -184,7 +179,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                     title: "Rate Order",
                     subtitle: "Give Feedback",
                     iconColor: AppColors.warning,
-                    onTap: () => _showFeedbackDialog(context,orderId),
+                    onTap: () => _showFeedbackDialog(context, orderId),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -195,21 +190,420 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                     title: "Issue?",
                     subtitle: "Raise Ticket",
                     iconColor: AppColors.error,
-                    onTap: () => _showRaiseTicketDialog(context,orderId),
+                    onTap: () => _showRaiseTicketDialog(context, orderId),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20), // Bottom padding for scroll clearance
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  // --- UI Builder Widgets ---
+  // ==========================================
+  // PAYMENT BOTTOM SHEETS (Country-wise Tab Bar)
+  // ==========================================
 
-  // New Action Card for Feedback & Tickets
+  void _showPaymentDetailsSheet(BuildContext context, String amountDue, String orderId) {
+    if (controller.banksList.isEmpty) {
+      controller.bankList();
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 20, right: 20, top: 24,
+          ),
+          child: Obx(() {
+            if (controller.isLoading.value) {
+              return  SizedBox(
+                height: 200,
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
+              );
+            }
+
+            if (controller.banksList.isEmpty) {
+              return const SizedBox(
+                height: 200,
+                child: Center(child: Text("No bank details found.")),
+              );
+            }
+
+            // --- Dynamic Country Tabs Extraction ---
+            final uniqueCountries = controller.banksList
+                .map((bank) => bank.name ?? 'Global')
+                .toSet()
+                .toList();
+
+            return DefaultTabController(
+              length: uniqueCountries.length,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 50, height: 5,
+                        margin: const EdgeInsets.only(bottom: 20),
+                        decoration: BoxDecoration(color: AppColors.lightDivider, borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(color: AppColors.warning.withValues(alpha: 0.1), shape: BoxShape.circle),
+                          child: const Icon(Icons.account_balance_wallet, color: AppColors.warning),
+                        ),
+                        const SizedBox(width: 12),
+                        Text("Payment Pending", style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s18)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Please complete your payment to confirm order $orderId and begin the work process.",
+                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Total Amount Due:", style: AppTextStyles.subtitle.copyWith(fontSize: AppFontSize.s14)),
+                          Text("\$$amountDue", style: AppTextStyles.h1.copyWith(color: AppColors.warning, fontSize: AppFontSize.s20)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    Text("Bank Transfer Details", style: AppTextStyles.sectionHeading.copyWith(fontSize: AppFontSize.s14)),
+                    const SizedBox(height: 12),
+
+                    // --- Dynamic Tab Bar for Countries ---
+                    TabBar(
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
+                      indicatorColor: AppColors.primary,
+                      labelColor: AppColors.primary,
+                      unselectedLabelColor: AppColors.textSecondary,
+                      labelStyle: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w600),
+                      tabs: uniqueCountries.map((country) => Tab(text: country),).toList(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // --- Dynamic Tab Bar View (Content Filtered by Country) ---
+                    SizedBox(
+                      height: 240,
+                      child: TabBarView(
+                        children: uniqueCountries.map((country) {
+                          final countryBanks = controller.banksList
+                              .where((bank) => (bank.name ?? 'Global') == country)
+                              .toList();
+
+                          return ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: countryBanks.length,
+                            separatorBuilder: (context, index) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final bank = countryBanks[index];
+                              return _buildPremiumBox([
+                                _buildCopyableRow("Account Name", bank.accountHolder ?? "N/A"),
+                                 Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1, color: AppColors.lightDivider)),
+                                _buildCopyableRow("Account Number", bank.accountNumber ?? "N/A"),
+                                 Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1, color: AppColors.lightDivider)),
+                                _buildCopyableRow("Sort Code / Routing", bank.sortCode ?? "N/A"),
+                              ]);
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: AppButton(
+                        title: "I Have Paid",
+                        onTap: () {
+                          Get.back();
+                          _showUploadScreenshotSheet(context, orderId);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        onPressed: () => Get.back(),
+                        child: Text("Pay Later", style: AppTextStyles.subtitle.copyWith(color: AppColors.textSecondary)),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+
+  void _showUploadScreenshotSheet(BuildContext context, String orderId) {
+    final Rx<File?> selectedFile = Rx<File?>(null);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 20, right: 20, top: 24,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 50, height: 5,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(color: AppColors.lightDivider, borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
+                      child:  Icon(Icons.cloud_upload_outlined, color: AppColors.primary),
+                    ),
+                    const SizedBox(width: 12),
+                    Text("Upload Payment Proof", style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s18)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Please upload a screenshot of your successful transaction for order $orderId.",
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 24),
+
+                InkWell(
+                  onTap: () async {
+                    try {
+                      FilePickerResult? result = await FilePicker.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+                      );
+
+
+                      if (result != null && result.files.single.path != null) {
+                        selectedFile.value = File(result.files.single.path!);
+                      }
+                    } catch (e) {
+                      Get.snackbar("Error", "Could not pick file.", backgroundColor: AppColors.error, colorText: AppColors.white);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 1.5, style: BorderStyle.solid),
+                    ),
+                    child: Obx(() => Column(
+                      children: [
+                        Icon(
+                            selectedFile.value == null ? Icons.image_outlined : Icons.check_circle_outline,
+                            color: AppColors.primary,
+                            size: 40
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          selectedFile.value == null
+                              ? "Tap to browse files"
+                              : selectedFile.value!.path.split('/').last,
+                          style: AppTextStyles.subtitle.copyWith(
+                              color: selectedFile.value == null ? AppColors.primary : AppColors.success,
+                              fontWeight: FontWeight.bold
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (selectedFile.value == null) ...[
+                          const SizedBox(height: 8),
+                          Text("Supports JPG, PNG, PDF", style: AppTextStyles.caption),
+                        ]
+                      ],
+                    )),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: AppButton(
+                    title: "Submit Proof",
+                    onTap: () {
+                      if (selectedFile.value == null) {
+                        Get.snackbar("Error", "Please select a file first.", backgroundColor: AppColors.error, colorText: AppColors.white);
+                        return;
+                      }
+
+                      controller.submitPaymentProof(
+                        orderId: orderId,
+                        amount: "0",
+                        payeeName: "",
+                        reference: "",
+                        bankCountry: "",
+                        selectedFile: selectedFile.value!,
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Get.back(),
+                    child: Text("Cancel", style: AppTextStyles.subtitle.copyWith(color: AppColors.textSecondary)),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCopyableRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.subtitle.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: AppFontSize.s14,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Copy Button
+        InkWell(
+          onTap: () {
+            Get.snackbar(
+              "Copied",
+              "$label copied to clipboard",
+              snackPosition: SnackPosition.BOTTOM,
+              margin: const EdgeInsets.all(12),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: AppColors.priceBg,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child:  Icon(Icons.copy, size: 16, color: AppColors.primary),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ==========================================
+  // UI BUILDER WIDGETS
+  // ==========================================
+
+  Widget _buildPaymentStatusBox(BuildContext context, bool isPending, String price, String orderId) {
+    Color bgColor = isPending ? AppColors.error.withValues(alpha:0.05) : AppColors.success.withValues(alpha:0.05);
+    Color borderColor = isPending ? AppColors.error.withValues(alpha:0.2) : AppColors.success.withValues(alpha:0.2);
+    Color textColor = isPending ? AppColors.error : AppColors.success;
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: borderColor, width: 1),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(isPending ? Icons.pending_actions : Icons.verified, color: textColor, size: 18),
+                  const SizedBox(width: 8),
+                  Text("Payment Status", style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.bold, fontSize: AppFontSize.s13)),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: AppColors.white.withValues(alpha:0.8), borderRadius: BorderRadius.circular(6)),
+                child: Text(
+                  isPending ? "PENDING" : "PAID",
+                  style: AppTextStyles.stepBadge.copyWith(color: textColor, letterSpacing: 0.3, fontSize: AppFontSize.s11),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (isPending) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: AppButton(
+              title: "Complete Payment",
+              onTap: () => _showPaymentDetailsSheet(context, price, orderId),
+            ),
+          )
+        ]
+      ],
+    );
+  }
+
   Widget _buildActionCard(BuildContext context, {required IconData icon, required String title, required String subtitle, required Color iconColor, required VoidCallback onTap}) {
     return Material(
       color: AppColors.white,
@@ -222,13 +616,13 @@ class OrderDetailsView extends GetView<AssignmentsController> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.lightDivider, width: 1),
-            boxShadow: const [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))],
+            boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))],
           ),
           child: Column(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: iconColor.withOpacity(0.1), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: iconColor.withValues(alpha:0.1), shape: BoxShape.circle),
                 child: Icon(icon, color: iconColor, size: 22),
               ),
               const SizedBox(height: 8),
@@ -247,9 +641,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(color: AppColors.lightShadow, blurRadius: 8, offset: Offset(0, 2)),
-        ],
+        boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 8, offset: Offset(0, 2))],
       ),
       child: Column(
         children: [
@@ -259,10 +651,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
               children: [
                 Positioned(
                   top: -30, left: -20,
-                  child: Container(
-                    height: 90, width: 90,
-                    decoration: const BoxDecoration(color: AppColors.priceBg, shape: BoxShape.circle),
-                  ),
+                  child: Container(height: 90, width: 90, decoration:  BoxDecoration(color: AppColors.priceBg, shape: BoxShape.circle)),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(12.0),
@@ -280,7 +669,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                             const SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                              decoration: BoxDecoration(color: statusColor.withValues(alpha:0.1), borderRadius: BorderRadius.circular(6)),
                               child: Text(status, style: AppTextStyles.stepBadge.copyWith(color: statusColor, fontSize: AppFontSize.s10)),
                             ),
                           ],
@@ -291,16 +680,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            SizedBox(
-                              height: 54, width: 54,
-                              child: CircularProgressIndicator(
-                                value: progress,
-                                strokeWidth: 5,
-                                backgroundColor: AppColors.lightDivider,
-                                color: AppColors.primary,
-                                strokeCap: StrokeCap.round,
-                              ),
-                            ),
+                            SizedBox(height: 54, width: 54, child: CircularProgressIndicator(value: progress, strokeWidth: 5, backgroundColor: AppColors.lightDivider, color: AppColors.primary, strokeCap: StrokeCap.round)),
                             Text(progressText, style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s12)),
                           ],
                         ),
@@ -311,17 +691,14 @@ class OrderDetailsView extends GetView<AssignmentsController> {
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.lightDivider),
+           Divider(height: 1, color: AppColors.lightDivider),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: const BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
-            ),
+            decoration:  BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.vertical(bottom: Radius.circular(12))),
             child: Row(
               children: [
-                const Icon(Icons.info_outline, size: 14, color: AppColors.textSecondary),
+                 Icon(Icons.info_outline, size: 14, color: AppColors.textSecondary),
                 const SizedBox(width: 6),
                 Text("Estimated completion: Tomorrow", style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: AppFontSize.s11)),
               ],
@@ -351,11 +728,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
   Widget _buildPremiumBox(List<Widget> children) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: const [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))],
-      ),
+      decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(10), boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
     );
   }
@@ -364,23 +737,14 @@ class OrderDetailsView extends GetView<AssignmentsController> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(color: AppColors.priceBg, borderRadius: BorderRadius.circular(6)),
-          child: Icon(icon, size: 14, color: AppColors.primary),
-        ),
+        Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: AppColors.priceBg, borderRadius: BorderRadius.circular(6)), child: Icon(icon, size: 14, color: AppColors.primary)),
         const SizedBox(width: 8),
-        Expanded(
-          flex: 2,
-          child: Text(label, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
-        ),
+        Expanded(flex: 2, child: Text(label, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary))),
         Expanded(
           flex: 3,
           child: Text(
             value,
-            style: isValueBold
-                ? AppTextStyles.subtitle.copyWith(color: valueColor ?? AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: AppFontSize.s13)
-                : AppTextStyles.subtitle.copyWith(color: valueColor ?? AppColors.textPrimary, fontSize: AppFontSize.s13),
+            style: isValueBold ? AppTextStyles.subtitle.copyWith(color: valueColor ?? AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: AppFontSize.s13) : AppTextStyles.subtitle.copyWith(color: valueColor ?? AppColors.textPrimary, fontSize: AppFontSize.s13),
             textAlign: TextAlign.right,
           ),
         ),
@@ -391,18 +755,10 @@ class OrderDetailsView extends GetView<AssignmentsController> {
   Widget _buildFileRow(String fileName, String fileSize) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.lightDivider, width: 1),
-      ),
+      decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.lightDivider, width: 1)),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(color: AppColors.error.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
-            child: const Icon(Icons.picture_as_pdf, color: AppColors.error, size: 16),
-          ),
+          Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: AppColors.error.withValues(alpha:0.1), borderRadius: BorderRadius.circular(6)), child: const Icon(Icons.picture_as_pdf, color: AppColors.error, size: 16)),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -417,69 +773,23 @@ class OrderDetailsView extends GetView<AssignmentsController> {
           InkWell(
             onTap: () {},
             borderRadius: BorderRadius.circular(6),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(color: AppColors.priceBg, borderRadius: BorderRadius.circular(6)),
-              child: Text("Download", style: AppTextStyles.stepBadge.copyWith(color: AppColors.primary, fontSize: AppFontSize.s10)),
-            ),
+            child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: AppColors.priceBg, borderRadius: BorderRadius.circular(6)), child: Text("Download", style: AppTextStyles.stepBadge.copyWith(color: AppColors.primary, fontSize: AppFontSize.s10))),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPaymentStatusBox(bool isPending) {
-    Color bgColor = isPending ? AppColors.error.withOpacity(0.05) : AppColors.success.withOpacity(0.05);
-    Color borderColor = isPending ? AppColors.error.withOpacity(0.2) : AppColors.success.withOpacity(0.2);
-    Color textColor = isPending ? AppColors.error : AppColors.success;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: borderColor, width: 1),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(isPending ? Icons.pending_actions : Icons.verified, color: textColor, size: 18),
-              const SizedBox(width: 8),
-              Text("Payment Status", style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.bold, fontSize: AppFontSize.s13)),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(color: AppColors.white.withOpacity(0.8), borderRadius: BorderRadius.circular(6)),
-            child: Text(
-              isPending ? "PENDING" : "PAID",
-              style: AppTextStyles.stepBadge.copyWith(color: textColor, letterSpacing: 0.3, fontSize: AppFontSize.s11),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // ==========================================
+  // HELP & FEEDBACK DIALOGS
+  // ==========================================
 
   void _showFeedbackDialog(BuildContext context, String orderId) {
-    // --- Local State for the Dialog ---
     int rating = 0;
     List<String> selectedScopes = [];
     final TextEditingController suggestionController = TextEditingController();
+    final List<String> scopeOptions = ['Customer service', 'Work quality', 'Deadline', 'Pricing', 'Originality', 'Revisions'];
 
-    // Options for the feedback scope
-    final List<String> scopeOptions = [
-      'Customer service',
-      'Work quality',
-      'Deadline',
-      'Pricing',
-      'Originality',
-      'Revisions'
-    ];
-
-    // Helper to map star rating to experience string
     String getExperienceText(int r) {
       switch (r) {
         case 1: return "Worst";
@@ -500,131 +810,56 @@ class OrderDetailsView extends GetView<AssignmentsController> {
               backgroundColor: AppColors.white,
               surfaceTintColor: AppColors.transparent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: Text(
-                'Rate your experience',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s16),
-              ),
+              title: Text('Rate your experience', textAlign: TextAlign.center, style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s16)),
               content: SizedBox(
-                width: double.maxFinite, // Ensures dialog expands to fit content
-                child: SingleChildScrollView( // Prevents keyboard overflow
+                width: double.maxFinite,
+                child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
-                      // ==========================================
-                      // 1. PREMIUM STAR RATING
-                      // ==========================================
-                      Center(
-                        child: Text(
-                          "How satisfied are you with this assignment?",
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
-                        ),
-                      ),
+                      Center(child: Text("How satisfied are you with this assignment?", textAlign: TextAlign.center, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary))),
                       const SizedBox(height: 16),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(
-                          5,
-                              (index) {
-                            int starValue = index + 1;
-                            bool isFilled = starValue <= rating;
-
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  rating = starValue;
-                                });
-                              },
-                              child: AnimatedScale(
-                                scale: rating == starValue ? 1.15 : 1.0,
-                                duration: const Duration(milliseconds: 150),
-                                child: Icon(
-                                  isFilled ? Icons.star_rounded : Icons.star_border_rounded,
-                                  color: isFilled ? const Color(0xFFFFB800) : AppColors.lightDivider,
-                                  size: 40,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                        children: List.generate(5, (index) {
+                          int starValue = index + 1;
+                          bool isFilled = starValue <= rating;
+                          return GestureDetector(
+                            onTap: () => setState(() => rating = starValue),
+                            child: AnimatedScale(scale: rating == starValue ? 1.15 : 1.0, duration: const Duration(milliseconds: 150), child: Icon(isFilled ? Icons.star_rounded : Icons.star_border_rounded, color: isFilled ? const Color(0xFFFFB800) : AppColors.lightDivider, size: 40)),
+                          );
+                        }),
                       ),
                       const SizedBox(height: 6),
-
-                      // Dynamic Experience Label
                       Center(
                         child: AnimatedOpacity(
                           opacity: rating > 0 ? 1.0 : 0.0,
                           duration: const Duration(milliseconds: 200),
-                          child: Text(
-                            getExperienceText(rating),
-                            style: AppTextStyles.subtitle.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: AppFontSize.s15,
-                            ),
-                          ),
+                          child: Text(getExperienceText(rating), style: AppTextStyles.subtitle.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: AppFontSize.s15)),
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // ==========================================
-                      // 2. FEEDBACK SCOPE (CHIPS)
-                      // ==========================================
-                      Text(
-                        "What could make it even better?",
-                        style: AppTextStyles.subtitle.copyWith(fontSize: AppFontSize.s13, fontWeight: FontWeight.bold),
-                      ),
+                      Text("What could make it even better?", style: AppTextStyles.subtitle.copyWith(fontSize: AppFontSize.s13, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+                        spacing: 8, runSpacing: 8,
                         children: scopeOptions.map((option) {
                           final isSelected = selectedScopes.contains(option);
                           return InkWell(
-                            onTap: () {
-                              setState(() {
-                                if (isSelected) {
-                                  selectedScopes.remove(option);
-                                } else {
-                                  selectedScopes.add(option);
-                                }
-                              });
-                            },
+                            onTap: () => setState(() { isSelected ? selectedScopes.remove(option) : selectedScopes.add(option); }),
                             borderRadius: BorderRadius.circular(8),
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: isSelected ? AppColors.priceBg : AppColors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: isSelected ? AppColors.primary : AppColors.lightDivider,
-                                ),
-                              ),
-                              child: Text(
-                                option,
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
+                              decoration: BoxDecoration(color: isSelected ? AppColors.priceBg : AppColors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: isSelected ? AppColors.primary : AppColors.lightDivider)),
+                              child: Text(option, style: AppTextStyles.bodySmall.copyWith(color: isSelected ? AppColors.primary : AppColors.textPrimary, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                             ),
                           );
                         }).toList(),
                       ),
                       const SizedBox(height: 24),
-
-                      // ==========================================
-                      // 3. YOUR SUGGESTION (TEXT FIELD)
-                      // ==========================================
-                      Text(
-                        "Your Suggestion",
-                        style: AppTextStyles.subtitle.copyWith(fontSize: AppFontSize.s13, fontWeight: FontWeight.bold),
-                      ),
+                      Text("Your Suggestion", style: AppTextStyles.subtitle.copyWith(fontSize: AppFontSize.s13, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 10),
                       TextField(
                         controller: suggestionController,
@@ -633,12 +868,8 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                         decoration: InputDecoration(
                           hintText: 'Tell us how we can improve...',
                           hintStyle: AppTextStyles.hintText.copyWith(fontSize: AppFontSize.s13),
-                          filled: true,
-                          fillColor: AppColors.background,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
+                          filled: true, fillColor: AppColors.background,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                           contentPadding: const EdgeInsets.all(12),
                         ),
                       ),
@@ -650,57 +881,23 @@ class OrderDetailsView extends GetView<AssignmentsController> {
               actions: [
                 Row(
                   children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Get.back(),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.textSecondary,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: Text(
-                          AppStrings.cancel,
-                          style: AppTextStyles.subtitle.copyWith(color: AppColors.textSecondary, fontSize: AppFontSize.s13),
-                        ),
-                      ),
-                    ),
+                    Expanded(child: TextButton(onPressed: () => Get.back(), style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), child: Text(AppStrings.cancel, style: AppTextStyles.subtitle.copyWith(color: AppColors.textSecondary, fontSize: AppFontSize.s13)))),
                     const SizedBox(width: 8),
                     Expanded(
                       child: SizedBox(
                         height: 42,
-                        child:Obx(
-                              () => AppButton(
-                            title: controller.isLoadingFeedback.value
-                                ? "Submitting..."
-                                : AppStrings.submit,
-                            onTap: () {
-                              if (controller.isLoadingFeedback.value) return;
-
-                              if (rating == 0) {
-                                Get.snackbar(
-                                  'Rating Required',
-                                  'Please provide a star rating before submitting.',
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  backgroundColor: AppColors.error,
-                                  colorText: AppColors.white,
-                                  margin: const EdgeInsets.all(12),
-                                );
-                                return;
-                              }
-
-                              final request = FeedbackRequest(
-                                orderId: orderId,
-                                experience: getExperienceText(rating),
-                                feedbackScope: selectedScopes.join(", "),
-                                yourSuggestion: suggestionController.text.trim(),
-                              );
-
-                              controller.submitFeedback(
-                                request: request,
-                                context: context,
-                              );
-                            },
-                          ),
-                        )
+                        child: Obx(() => AppButton(
+                          title: controller.isLoadingFeedback.value ? "Submitting..." : AppStrings.submit,
+                          onTap: () {
+                            if (controller.isLoadingFeedback.value) return;
+                            if (rating == 0) {
+                              Get.snackbar('Rating Required', 'Please provide a star rating before submitting.', snackPosition: SnackPosition.BOTTOM, backgroundColor: AppColors.error, colorText: AppColors.white, margin: const EdgeInsets.all(12));
+                              return;
+                            }
+                            final request = FeedbackRequest(orderId: orderId, experience: getExperienceText(rating), feedbackScope: selectedScopes.join(", "), yourSuggestion: suggestionController.text.trim());
+                            controller.submitFeedback(request: request, context: context);
+                          },
+                        )),
                       ),
                     ),
                   ],
@@ -725,63 +922,47 @@ class OrderDetailsView extends GetView<AssignmentsController> {
           title: Text('Raise a Ticket', style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s16)),
           content: SizedBox(
             width: MediaQuery.of(context).size.width * 0.9,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Please describe your issue in detail. Our team will get back to you shortly.", style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: ticketController,
-                  maxLines: 4,
-                  style: AppTextStyles.inputText.copyWith(fontSize: AppFontSize.s13),
-                  decoration: InputDecoration(
-                    hintText: 'Type your issue here...',
-                    hintStyle: AppTextStyles.hintText.copyWith(fontSize: AppFontSize.s13),
-                    filled: true,
-                    fillColor: AppColors.background,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-                    contentPadding: const EdgeInsets.all(10),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Please describe your issue in detail. Our team will get back to you shortly.", style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: ticketController,
+                    maxLines: 4,
+                    style: AppTextStyles.inputText.copyWith(fontSize: AppFontSize.s13),
+                    decoration: InputDecoration(
+                      hintText: 'Type your issue here...',
+                      hintStyle: AppTextStyles.hintText.copyWith(fontSize: AppFontSize.s13),
+                      filled: true, fillColor: AppColors.background,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.all(10),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           actionsPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           actions: [
             Row(
               children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () => Get.back(),
-                    style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                    child: Text(AppStrings.cancel, style: AppTextStyles.subtitle.copyWith(color: AppColors.textSecondary, fontSize: AppFontSize.s13)),
-                  ),
-                ),
+                Expanded(child: TextButton(onPressed: () => Get.back(), style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), child: Text(AppStrings.cancel, style: AppTextStyles.subtitle.copyWith(color: AppColors.textSecondary, fontSize: AppFontSize.s13)))),
                 const SizedBox(width: 8),
-                Obx(
-                      () => AppButton(
-                    title: controller.isLoadingTicket.value
-                        ? "Submitting..."
-                        : AppStrings.submit,
+                Expanded(
+                  child: Obx(() => AppButton(
+                    title: controller.isLoadingTicket.value ? "Submitting..." : AppStrings.submit,
                     onTap: () {
                       if (controller.isLoadingTicket.value) return;
-
                       if (ticketController.text.trim().isEmpty) {
-                        Get.snackbar(
-                          'Validation',
-                          'Please enter your issue before submitting.',
-                        );
+                        Get.snackbar('Validation', 'Please enter your issue before submitting.');
                         return;
                       }
-
-                      controller.raiseTicket(
-                        orderId: orderId,
-                        comment: ticketController.text.trim(),
-                        context: context,
-                      );
+                      controller.raiseTicket(orderId: orderId, comment: ticketController.text.trim(), context: context);
                     },
-                  ),
+                  )),
                 )
               ],
             ),

@@ -39,8 +39,7 @@ class OnboardingController extends GetxController {
         curve: Curves.easeInOut,
       );
     } else {
-      // Navigate to home or login
-      Get.offAllNamed(Routes.LOGIN_ONBORADING);
+      Get.offAllNamed(Routes.LOGIN_ONBOARDING);
     }
   }
 
@@ -51,7 +50,10 @@ class OnboardingController extends GetxController {
 
   @override
   void onClose() {
-    pageController.dispose();
+    Future.delayed(const Duration(milliseconds: 400), () {
+      pageController.dispose();
+    });
+
     super.onClose();
   }
 }

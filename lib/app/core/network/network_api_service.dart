@@ -3,11 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 import 'package:intl/intl.dart';
 
 import '../../services/storage_services.dart';
-import '../constant_api/api_constant.dart';
+
 
 
 class ApiClient {
@@ -266,7 +265,7 @@ class ApiClient {
     }
 
     final mimeType = allowedExtensions[extension]!;
-    final contentType = MediaType.parse(mimeType);
+    final contentType = http.MediaType.parse(mimeType);
 
     return http.MultipartFile(
       file.field,

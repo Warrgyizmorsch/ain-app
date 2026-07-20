@@ -11,8 +11,10 @@ class ImageConstant {
   static const String iconPath = 'assets/icons/';
 
   // App Logos
-  static const String appLogo = '${iconPath}app_icon.png';
+  static const String appLogo = '${iconPath}ain-logo.webp';
+  static const String appLogoFull = '${iconPath}ain-logo-full.png';
   static const String splashLogo = '${iconPath}assignment_logo.png';
+
 
 
   // Onboarding Images

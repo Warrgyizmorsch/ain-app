@@ -19,7 +19,6 @@ class LoginView extends GetView<LoginController> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header Section: Top background graphic with centered circular logo
             Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.center,
@@ -40,14 +39,12 @@ class LoginView extends GetView<LoginController> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(.15),
+                          color: Colors.black.withValues(alpha:.15),
                           blurRadius: 10,
                         ),
                       ],
                     ),
-                    child: Image.asset(
-                      ImageConstant.appLogo,
-                    ),
+                    child: Image.asset(ImageConstant.appLogoFull),
                   ),
                 ),
               ],
@@ -57,37 +54,33 @@ class LoginView extends GetView<LoginController> {
 
             const Text(
               "Welcome Back To Your Account",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
 
             const SizedBox(height: 25),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              // Parent Stack to manage Z-index overlay rendering properly
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-
-                  // Main Form Elements Layout Column
                   Column(
                     children: [
-
-                      /// EMAIL INPUT FIELD
                       Obx(() {
                         final hasError = controller.emailError.value.isNotEmpty;
 
                         return Focus(
                           onFocusChange: (hasFocus) {
-                            if (hasFocus && controller.filteredEmails.isNotEmpty) {
+                            if (hasFocus &&
+                                controller.filteredEmails.isNotEmpty) {
                               controller.showDropdown.value = true;
                             } else {
-                              Future.delayed(const Duration(milliseconds: 200), () {
-                                controller.showDropdown.value = false;
-                              });
+                              Future.delayed(
+                                const Duration(milliseconds: 200),
+                                () {
+                                  controller.showDropdown.value = false;
+                                },
+                              );
                             }
                           },
                           child: Column(
@@ -104,7 +97,10 @@ class LoginView extends GetView<LoginController> {
                               ),
                               if (hasError)
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 5, left: 5),
+                                  padding: const EdgeInsets.only(
+                                    top: 5,
+                                    left: 5,
+                                  ),
                                   child: Text(
                                     controller.emailError.value,
                                     style: const TextStyle(
@@ -120,9 +116,9 @@ class LoginView extends GetView<LoginController> {
 
                       const SizedBox(height: 16),
 
-                      /// PASSWORD INPUT FIELD
                       Obx(() {
-                        final hasError = controller.passwordError.value.isNotEmpty;
+                        final hasError =
+                            controller.passwordError.value.isNotEmpty;
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,11 +150,10 @@ class LoginView extends GetView<LoginController> {
 
                       const SizedBox(height: 10),
 
-                      /// REMEMBER ME CHECKBOX ROW
                       Row(
                         children: [
                           Obx(
-                                () => Checkbox(
+                            () => Checkbox(
                               value: controller.rememberMe.value,
                               onChanged: (value) {
                                 controller.rememberMe.value = value ?? false;
@@ -184,13 +179,12 @@ class LoginView extends GetView<LoginController> {
 
                       const SizedBox(height: 10),
 
-                      /// LOGIN ACTION BUTTON
                       Obx(
-                            () => AppButton(
+                        () => AppButton(
                           title: controller.isLoading.value
                               ? "PLEASE WAIT..."
                               : "LOGIN",
-                          onTap:()=> controller.login(context),
+                          onTap: () => controller.login(),
                         ),
                       ),
 
@@ -209,13 +203,14 @@ class LoginView extends GetView<LoginController> {
 
                       const SizedBox(height: 25),
 
-                      /// SOCIAL MEDIA CONNECTIONS
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           SocialButton(
                             imagePath: ImageConstant.googleIcon,
-                            onTap: () {},
+                            onTap: () async {
+                              await controller.loginWithGoogle();
+                            },
                           ),
                           SocialButton(
                             imagePath: ImageConstant.appleIcon,
@@ -233,9 +228,7 @@ class LoginView extends GetView<LoginController> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
-                            "Don't Have An Account ? ",
-                          ),
+                          const Text("Don't Have An Account ? "),
                           GestureDetector(
                             onTap: () {
                               Get.toNamed(Routes.SIGNUP);
@@ -254,15 +247,13 @@ class LoginView extends GetView<LoginController> {
                     ],
                   ),
 
-                  // ─── FLOATING OVERLAY DROPDOWN MENU LIST ───────────────────
-                  // FIXED: Positioned is now a direct child of the Stack.
-                  // Obx is placed inside the child parameter to handle state shifts safely.
                   Positioned(
-                    top: 48, // Floats overlay directly over content fields below it
+                    top: 48,
                     left: 0,
                     right: 0,
                     child: Obx(() {
-                      if (controller.showDropdown.value && controller.filteredEmails.isNotEmpty) {
+                      if (controller.showDropdown.value &&
+                          controller.filteredEmails.isNotEmpty) {
                         return Container(
                           constraints: const BoxConstraints(maxHeight: 160),
                           decoration: BoxDecoration(
@@ -271,7 +262,7 @@ class LoginView extends GetView<LoginController> {
                             border: Border.all(color: Colors.grey.shade300),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
+                                color: Colors.black.withValues(alpha:0.15),
                                 blurRadius: 10,
                                 offset: const Offset(0, 5),
                               ),
@@ -282,7 +273,8 @@ class LoginView extends GetView<LoginController> {
                             padding: EdgeInsets.zero,
                             itemCount: controller.filteredEmails.length,
                             itemBuilder: (context, index) {
-                              final String email = controller.filteredEmails[index];
+                              final String email =
+                                  controller.filteredEmails[index];
                               return ListTile(
                                 dense: true,
                                 leading: const Icon(

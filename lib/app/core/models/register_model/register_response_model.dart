@@ -1,8 +1,10 @@
+import '../login_model/login_response_model.dart';
+
 class RegisterResponseModel {
   final bool success;
   final String message;
   final String token;
-  final RegisterUserData data;
+  final UserData data;
 
   RegisterResponseModel({
     required this.success,
@@ -17,7 +19,7 @@ class RegisterResponseModel {
       success: json["success"] ?? false,
       message: json["message"] ?? "",
       token: json["token"] ?? "",
-      data: RegisterUserData.fromJson(
+      data: UserData.fromJson(
         json["data"] ?? {},
       ),
     );

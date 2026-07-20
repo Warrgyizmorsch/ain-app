@@ -9,18 +9,18 @@ class UDeviceHelper {
   // uDeviceHelper._();
 
   //----------TOAST------------//
-  static showToast(BuildContext context, String msg,
+  static Future<bool?> showToast(String msg,
       {ToastGravity gravity = ToastGravity.BOTTOM}) {
     return Fluttertoast.showToast(
       msg: msg,
       toastLength: Toast.LENGTH_SHORT,
       gravity: gravity,
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.success,
       textColor: AppColors.white,
       fontSize: 15,
     );
   }
-  static showErrorToast(BuildContext context, String msg,
+  static Future<bool?> showErrorToast( String msg,
       {ToastGravity gravity = ToastGravity.BOTTOM}) {
     return Fluttertoast.showToast(
       msg: msg,
@@ -32,7 +32,7 @@ class UDeviceHelper {
     );
   }
 
-  static printLog(String tag, String str) {
+  static void printLog(String tag, String str) {
     log("$tag -->> $str");
   }
 

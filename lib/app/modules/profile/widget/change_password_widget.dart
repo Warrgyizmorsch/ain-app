@@ -2,27 +2,29 @@ import '../../../common/constant/app_imports.dart';
 import '../controllers/profile_controller.dart';
 
 class ChangePasswordWidget extends GetView<ProfileController> {
-  const ChangePasswordWidget({super.key});
+    ChangePasswordWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+    Get.lazyPut(()=>ProfileController());
     return Scaffold(
+      backgroundColor: AppColors.appBackground,
       appBar: CustomAppBar(
         title: "Change Password",
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding:   EdgeInsets.all(16),
         child: Form(
           key: controller.formKey,
           child: Column(
             children: [
-              const SizedBox(height: 10),
+                SizedBox(height: 10),
               Image.asset(
                 ImageConstant.lock,
                 width: 90,
                 height: 90,
               ),
-              const SizedBox(height: 24),
+                SizedBox(height: 24),
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +41,7 @@ class ChangePasswordWidget extends GetView<ProfileController> {
                         controller: controller.oldPasswordController,
                         obscureText: true,
                         style: AppTextStyles.inputText,
-                        decoration: const InputDecoration(
+                        decoration:   InputDecoration(
                           hintText: 'Old Password',
                           hintStyle: AppTextStyles.hintText,
                           border: InputBorder.none,
@@ -51,12 +53,12 @@ class ChangePasswordWidget extends GetView<ProfileController> {
                   }),
                   Obx(() => controller.oldPasswordError.isNotEmpty
                       ? Padding(
-                    padding: const EdgeInsets.only(top: 4, left: 5),
+                    padding:   EdgeInsets.only(top: 4, left: 5),
                     child: Text(controller.oldPasswordError.value,
-                        style: const TextStyle(fontSize: 12, color: AppColors.error)),
+                        style:   TextStyle(fontSize: 12, color: AppColors.error)),
                   )
-                      : const SizedBox.shrink()),
-                  const SizedBox(height: 12),
+                      :   SizedBox.shrink()),
+                    SizedBox(height: 12),
 
                   // --- NEW PASSWORD ---
                   Obx(() {
@@ -70,7 +72,7 @@ class ChangePasswordWidget extends GetView<ProfileController> {
                         controller: controller.newPasswordController,
                         obscureText: true,
                         style: AppTextStyles.inputText,
-                        decoration: const InputDecoration(
+                        decoration:   InputDecoration(
                           hintText: 'New Password',
                           hintStyle: AppTextStyles.hintText,
                           border: InputBorder.none,
@@ -82,12 +84,12 @@ class ChangePasswordWidget extends GetView<ProfileController> {
                   }),
                   Obx(() => controller.newPasswordError.isNotEmpty
                       ? Padding(
-                    padding: const EdgeInsets.only(top: 4, left: 5),
+                    padding:   EdgeInsets.only(top: 4, left: 5),
                     child: Text(controller.newPasswordError.value,
-                        style: const TextStyle(fontSize: 12, color: AppColors.error)),
+                        style:   TextStyle(fontSize: 12, color: AppColors.error)),
                   )
-                      : const SizedBox.shrink()),
-                  const SizedBox(height: 12),
+                      :   SizedBox.shrink()),
+                    SizedBox(height: 12),
 
                   // --- CONFIRM PASSWORD ---
                   Obx(() {
@@ -101,7 +103,7 @@ class ChangePasswordWidget extends GetView<ProfileController> {
                         controller: controller.confirmPasswordController,
                         obscureText: true,
                         style: AppTextStyles.inputText,
-                        decoration: const InputDecoration(
+                        decoration:   InputDecoration(
                           hintText: 'Confirm New Password',
                           hintStyle: AppTextStyles.hintText,
                           border: InputBorder.none,
@@ -113,12 +115,12 @@ class ChangePasswordWidget extends GetView<ProfileController> {
                   }),
                   Obx(() => controller.confirmPasswordError.isNotEmpty
                       ? Padding(
-                    padding: const EdgeInsets.only(top: 4, left: 5),
+                    padding:   EdgeInsets.only(top: 4, left: 5),
                     child: Text(controller.confirmPasswordError.value,
-                        style: const TextStyle(fontSize: 12, color: AppColors.error)),
+                        style:   TextStyle(fontSize: 12, color: AppColors.error)),
                   )
-                      : const SizedBox.shrink()),
-                  const SizedBox(height: 30),
+                      :   SizedBox.shrink()),
+                    SizedBox(height: 30),
 
                   AppButton(
                     title: 'Update Password',

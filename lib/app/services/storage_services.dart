@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/models/login_model/login_response_model.dart';
+
 class StorageService extends GetxService {
   static StorageService get to => Get.find<StorageService>();
 
@@ -12,8 +14,7 @@ class StorageService extends GetxService {
   static const String _refreshTokenKey = 'refresh_token';
   static const String _userKey = 'user_data';
   static const String _keyRememberMe = 'remember_me';
-
-  // New Key for Multiple Accounts Storage
+  static const String _themeKey = 'theme_mode';
   static const String _keyAccountsMap = 'saved_accounts_map';
 
   /// Initializes the SharedPreferences instance
@@ -22,11 +23,13 @@ class StorageService extends GetxService {
     return this;
   }
 
-  // ==========================================
-  // MULTI-ACCOUNT REMEMBER ME METHODS
-  // ==========================================
+  Future<void> saveThemeMode(String mode) async {
+    await _prefs.setString(_themeKey, mode);
+  }
 
-  /// Saves or updates a specific email and password pair inside the local accounts map
+  String? getThemeMode() {
+    return _prefs.getString(_themeKey);
+  }
   Future<void> saveAccount(String email, String password) async {
     final Map<String, dynamic> currentAccounts = getSavedAccounts();
     currentAccounts[email.trim().toLowerCase()] = password;
@@ -109,15 +112,15 @@ class StorageService extends GetxService {
   // USER PROFILE SCHEMAS MANAGEMENT
   // ==========================================
 
-  Map<String, dynamic>? getUser() {
+  UserData? getUser() {
     final userStr = _prefs.getString(_userKey);
     if (userStr != null) {
-      return jsonDecode(userStr);
+      return UserData.fromJson(jsonDecode(userStr));
     }
     return null;
   }
 
-  Future<void> saveUser(dynamic user) async {
+  Future<void> saveUser(UserData user) async {
     await _prefs.setString(_userKey, jsonEncode(user));
   }
 

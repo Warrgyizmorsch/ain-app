@@ -1,9 +1,21 @@
-
 import '../../../common/constant/app_imports.dart';
 import '../controllers/wallet_controller.dart';
 
 class WalletView extends GetView<WalletController> {
-  const WalletView({super.key});
+    WalletView({super.key});
+
+  String getCurrencySymbol(String currencyCode) {
+    switch (currencyCode.toUpperCase()) {
+      case 'GBP':
+        return '£';
+      case 'USD':
+        return '\$';
+      case 'EUR':
+        return '€';
+      default:
+        return currencyCode;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,13 +27,13 @@ class WalletView extends GetView<WalletController> {
         centerTitle: true,
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: const Icon(
+          icon:   Icon(
             Icons.arrow_back_ios_new,
             size: 18,
             color: AppColors.textPrimary,
           ),
         ),
-        title: const Text(
+        title:   Text(
           'Wallet',
           style: TextStyle(
             color: AppColors.textPrimary,
@@ -31,77 +43,84 @@ class WalletView extends GetView<WalletController> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
+        padding:   EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 24,
         ),
         child: Column(
           children: [
-            const SizedBox(height: 20),
+              SizedBox(height: 20),
 
-            // Wallet Image
             Image.asset(
-             ImageConstant.wallet,
+              ImageConstant.wallet,
               width: 90,
               height: 90,
             ),
 
-            const SizedBox(height: 24),
+              SizedBox(height: 24),
 
             // Wallet Amount Card
             Container(
               width: 150,
-              padding: const EdgeInsets.all(12),
+              padding:   EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               decoration: BoxDecoration(
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color(0xFFB6E1FF),
+                  color:   Color(0xFFB6E1FF),
                   width: 1.5,
                 ),
               ),
               child: Column(
                 children: [
-                  const Text(
+                    Text(
                     "Wallet Amount",
                     style: TextStyle(
                       fontSize: 11,
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                    SizedBox(height: 8),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "\$",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
+                  // Reactive Wallet Amount text
+                  Obx(() {
+                    if (controller.isLoadingAmount.value) {
+                      return   SizedBox(
+                        height: 28,
+                        width: 28,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      );
+                    }
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          getCurrencySymbol(controller.currency.value),
+                          style:   TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: TextFieldCustom(
-                          controller: controller.amountController,
-                          textInputType: TextInputType.number,
-                          hintText: '0',
-                          hintTextSize: 28,
-                          borderWidth: 0,
-                          borderColor: Colors.transparent,
-                          backgroundColor: Colors.transparent,
-                          contentPadding: EdgeInsets.zero,
+                          SizedBox(width: 4),
+                        Text(
+                          controller.walletAmount.value.toStringAsFixed(2),
+                          style:   TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    );
+                  }),
                 ],
               ),
             ),
 
-            const SizedBox(height: 24),
+              SizedBox(height: 24),
 
             Align(
               alignment: Alignment.centerLeft,
@@ -113,11 +132,18 @@ class WalletView extends GetView<WalletController> {
               ),
             ),
 
-            const SizedBox(height: 12),
+              SizedBox(height: 12),
 
             Obx(() {
+              if (controller.isLoadingTransactions.value) {
+                return   Padding(
+                  padding: EdgeInsets.only(top: 40),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
               if (controller.transactions.isEmpty) {
-                return const Padding(
+                return   Padding(
                   padding: EdgeInsets.only(top: 20),
                   child: Text(
                     'No Transaction history',
@@ -131,39 +157,55 @@ class WalletView extends GetView<WalletController> {
 
               return ListView.separated(
                 shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+                physics:   NeverScrollableScrollPhysics(),
                 itemCount: controller.transactions.length,
-                separatorBuilder: (_, __) =>
-                const SizedBox(height: 10),
+                separatorBuilder: (_, _) =>   SizedBox(height: 10),
                 itemBuilder: (context, index) {
                   final item = controller.transactions[index];
 
+                  final isCredit = item.type.toLowerCase() == 'credit';
+                  final sign = isCredit ? '+' : '-';
+                  final color = isCredit ? Colors.green : Colors.red;
+
                   return Container(
-                    padding: const EdgeInsets.symmetric(
+                    padding:   EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: const Color(0xFFD6B9FF),
+                        color:   Color(0xFFD6B9FF),
                       ),
                     ),
                     child: Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            item['title']!,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.description,
+                                style:   TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                                SizedBox(height: 4),
+                              Text(
+                                item.createdAt,
+                                style:   TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         Text(
-                          item['amount']!,
-                          style: const TextStyle(
-                            color: Colors.green,
+                          '$sign${getCurrencySymbol(controller.currency.value)}${item.amount}',
+                          style: TextStyle(
+                            color: color,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),

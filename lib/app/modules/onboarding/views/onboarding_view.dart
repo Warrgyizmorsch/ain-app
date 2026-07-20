@@ -1,3 +1,4 @@
+import 'package:ain/app/common/constant/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,7 +10,7 @@ class OnboardingView extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.appBackground,
       body: Stack(
         children: [
           AnimatedBuilder(
@@ -199,7 +200,6 @@ class _OnboardingPageState extends State<_OnboardingPage>
   @override
   void initState() {
     super.initState();
-    // Floating / breathing animation for illustration
     _floatController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2800),
@@ -226,27 +226,18 @@ class _OnboardingPageState extends State<_OnboardingPage>
     return AnimatedBuilder(
       animation: widget.pageController,
       builder: (context, child) {
-        // Per-frame scroll delta for this page (-1..0..1)
         double delta = 0.0;
         if (widget.pageController.hasClients &&
             widget.pageController.page != null) {
           delta = widget.pageController.page! - widget.index;
         }
-        // Clamp to -1..1 for neighbouring pages
         delta = delta.clamp(-1.0, 1.0);
-
-        // Opacity: full at centre, fade out as user swipes away
         final opacity = (1.0 - delta.abs()).clamp(0.0, 1.0);
-
-        // Horizontal parallax: image moves slightly slower than page
         final imageParallax = delta * 30.0;
-
-        // Vertical parallax for text: slides up/down subtly
         final textSlide = delta * 20.0;
 
         return Stack(
           children: [
-            // ── Illustration with float + parallax ──
             Positioned(
               top: imageAreaTop,
               left: 0,
@@ -316,7 +307,7 @@ class _PlaceholderIllustration extends StatelessWidget {
 class _DeskPersonPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final white = Paint()..color = Colors.white.withOpacity(0.9);
+    final white = Paint()..color = Colors.white.withValues(alpha:0.9);
     final lb = Paint()..color = const Color(0xFFB3D4F5);
     final skin = Paint()..color = const Color(0xFFFFD6B0);
     final dark = Paint()..color = const Color(0xFF2D2D2D);
@@ -324,7 +315,7 @@ class _DeskPersonPainter extends CustomPainter {
       ..color = Colors.white
       ..style = PaintingStyle.fill;
     final db = Paint()
-      ..color = Colors.white.withOpacity(0.6)
+      ..color = Colors.white.withValues(alpha:0.6)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     final cx = size.width / 2;
@@ -547,7 +538,7 @@ class _AnimatedNextButtonState extends State<_AnimatedNextButton>
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: const Color(0xFF1AABCB),
+            color: AppColors.secondary,
             borderRadius: BorderRadius.circular(10),
           ),
           alignment: Alignment.center,
@@ -582,7 +573,7 @@ class _DotIndicator extends StatelessWidget {
       height: 8,
       decoration: BoxDecoration(
         color: isActive
-            ? const Color(0xFF1AABCB)
+            ?  AppColors.secondary
             : const Color(0xFFD0D0E8),
         borderRadius: BorderRadius.circular(4),
       ),

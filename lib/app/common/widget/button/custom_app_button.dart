@@ -20,13 +20,14 @@ class AppButton extends StatelessWidget {
         height: 48,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),
-          gradient: const LinearGradient(
-            colors: [
-              AppColors.secondary,
-              AppColors.primary,
-
-            ],
-          ),
+          color: AppColors.buttonPrimary
+          // gradient: const LinearGradient(
+          //   colors: [
+          //     AppColors.secondary,
+          //     AppColors.primary,
+          //
+          //   ],
+          // ),
         ),
         alignment: Alignment.center,
         child: Text(

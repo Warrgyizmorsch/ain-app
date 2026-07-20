@@ -40,7 +40,7 @@ class SignupView extends GetView<SignupController> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(.15),
+                          color: Colors.black.withValues(alpha:.15),
                           blurRadius: 10,
                         ),
                       ],
@@ -298,7 +298,7 @@ class SignupView extends GetView<SignupController> {
                           .isLoading.value
                           ? "PLEASE WAIT..."
                           : "SIGN UP",
-                      onTap:()=> controller.signup(context),
+                      onTap:()=> controller.signup(),
                     ),
                   ),
 

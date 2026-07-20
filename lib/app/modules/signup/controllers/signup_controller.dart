@@ -11,21 +11,17 @@ class SignupController extends GetxController {
   final isLoading = false.obs;
   final selectedDialCode = '+91'.obs;
 
-  // Controllers
   final nameController = TextEditingController();
   final mobileController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
-
-  // Error Variables
   final nameError = ''.obs;
   final mobileError = ''.obs;
   final emailError = ''.obs;
   final passwordError = ''.obs;
   final confirmPasswordError = ''.obs;
 
-  // Validation Methods
 
   void validateName(String value) {
     nameError.value =
@@ -91,7 +87,7 @@ class SignupController extends GetxController {
         confirmPasswordError.value.isEmpty;
   }
 
-  Future<void> signup(BuildContext context) async {
+  Future<void> signup() async {
     if (!validateForm()) {
       Get.snackbar(
         'Validation Failed',
@@ -117,23 +113,21 @@ class SignupController extends GetxController {
       );
 
       if (response.success) {
-        // Save Token
         await StorageService.to.saveToken(
           response.token,
         );
 
-        // Save User Data
         await StorageService.to.saveUser(
-          response.data.toJson(),
+          response.data,
         );
 
-        UDeviceHelper.showToast(context, response.message);
+        UDeviceHelper.showToast( response.message);
 
         Get.offAllNamed(
           Routes.BOTTOM_NAV_BAR,
         );
       } else {
-        UDeviceHelper.showErrorToast(context, response.message);
+        UDeviceHelper.showErrorToast( response.message);
       }
     } catch (e) {
       Get.snackbar(

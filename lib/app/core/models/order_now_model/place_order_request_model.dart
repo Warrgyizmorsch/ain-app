@@ -1,9 +1,9 @@
-import 'dart:io';
+
 
 class PlaceOrderRequest {
   // String name;
   // String email;
-  String country;
+  // String country;
   // String countryCode;
   // String mobile;
   String service;
@@ -18,7 +18,7 @@ class PlaceOrderRequest {
   PlaceOrderRequest({
     // required this.name,
     // required this.email,
-    required this.country,
+    // required this.country,
     // required this.countryCode,
     // required this.mobile,
     required this.service,
@@ -36,7 +36,7 @@ class PlaceOrderRequest {
     return {
       // 'name': name,
       // 'email': email,
-      'country': country,
+      // 'country': country,
       // 'countrycode': countryCode,
       // 'mobile': mobile,
       'service': service,
