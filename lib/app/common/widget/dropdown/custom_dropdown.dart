@@ -60,7 +60,7 @@ class CustomDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? AppColors.white;
+    final Color bgColor = backgroundColor ?? AppColors.bgLight;
 
     final Color borderClr = borderColor ??
         (showBorder
@@ -159,7 +159,7 @@ class CustomDropdown<T> extends StatelessWidget {
                   Icon(
                     leadingIcon,
                     size: 16,
-                    color: AppColors.primary,
+                    color: AppColors.primaryPurple,
                   ),
                   const SizedBox(width: 8),
                 ],

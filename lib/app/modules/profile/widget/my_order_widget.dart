@@ -1,7 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-// Note: Adjust these imports based on your actual project structure
 import 'package:ain/app/common/constant/app_imports.dart';
 import '../../../core/models/order_now_model/order_list_model.dart';
 import '../../assignments/controllers/assignments_controller.dart';
@@ -14,28 +10,14 @@ class MyOrdersWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA), // Very light grey background matching UI
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Get.back(),
-        ),
-        title: const Text(
-          'My Orders',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
+    return Obx(() => Scaffold(
+      backgroundColor: AppColors.appBackground,
+      appBar: CustomAppBar(
+        title: AppStrings.myOrders,
+        showBackButton: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.black87),
+            icon: Icon(Icons.search, color: AppColors.textPrimary),
             onPressed: () {
               // TODO: Implement search functionality
             },
@@ -54,70 +36,25 @@ class MyOrdersWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // --- Filter & Sort Row ---
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //   children: [
-                  //     // Filter Button
-                  //     OutlinedButton.icon(
-                  //       onPressed: () {
-                  //         // TODO: Implement filter sheet or logic
-                  //       },
-                  //       icon: const Icon(Icons.filter_alt_outlined, size: 18, color: Colors.black87),
-                  //       label: const Text(
-                  //         'Filter',
-                  //         style: TextStyle(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.w600),
-                  //       ),
-                  //       style: OutlinedButton.styleFrom(
-                  //         backgroundColor: Colors.white,
-                  //         side: BorderSide(color: Colors.grey.shade300),
-                  //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  //         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  //       ),
-                  //     ),
-                  //
-                  //     // Sort Dropdown
-                  //     Container(
-                  //       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  //       decoration: BoxDecoration(
-                  //         border: Border.all(color: Colors.grey.shade300),
-                  //         borderRadius: BorderRadius.circular(10),
-                  //         color: Colors.white,
-                  //       ),
-                  //       child: Row(
-                  //         children: [
-                  //           const Text(
-                  //             'Most Recent',
-                  //             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
-                  //           ),
-                  //           const SizedBox(width: 6),
-                  //           Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey.shade600),
-                  //         ],
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-                  // const SizedBox(height: 16),
-
                   // --- Orders List ---
                   Obx(() {
                     if (controller.isLoading.value) {
-                      return const Center(
+                      return Center(
                         child: Padding(
-                          padding: EdgeInsets.all(32.0),
-                          child: CircularProgressIndicator(color: Color(0xFF5E35B1)),
+                          padding: const EdgeInsets.all(32.0),
+                          child: CircularProgressIndicator(color: AppColors.primary),
                         ),
                       );
                     }
 
                     final assignments = controller.filteredAssignments;
                     if (assignments.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Padding(
-                          padding: EdgeInsets.all(32.0),
+                          padding: const EdgeInsets.all(32.0),
                           child: Text(
                             'No recent orders found.',
-                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                            style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
                           ),
                         ),
                       );
@@ -146,12 +83,12 @@ class MyOrdersWidget extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildTabs() {
     return Container(
-      color: Colors.white,
+      color: AppColors.bgLight,
       padding: const EdgeInsets.only(top: 4),
       child: Obx(() {
         final currentFilter = controller.selectedFilter.value;
@@ -216,7 +153,7 @@ class MyOrdersWidget extends StatelessWidget {
       orderId: orderId.startsWith('#') ? orderId : '#$orderId',
       serviceName: serviceName,
       date: displayDate,
-      price: price.startsWith('₹') ? price : '₹$price',
+      price: price.startsWith('£') ? price : '£$price',
       status: status,
       onTap: () {
         Get.to(() => const OrderDetailsView(), arguments: item);
@@ -249,7 +186,7 @@ class _TabItem extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: isActive ? const Color(0xFF5E35B1) : Colors.transparent,
+              color: isActive ? AppColors.primaryPurple : Colors.transparent,
               width: 2.0,
             ),
           ),
@@ -259,7 +196,7 @@ class _TabItem extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-            color: isActive ? const Color(0xFF5E35B1) : Colors.grey.shade500,
+            color: isActive ? AppColors.primaryPurple : AppColors.textSecondary,
           ),
         ),
       ),
@@ -297,37 +234,37 @@ class _OrderTile extends StatelessWidget {
 
     switch (status) {
       case OrderStatus.completed:
-        statusColor = const Color(0xFF388E3C); // Green text
-        statusBgColor = const Color(0xFFE8F5E9); // Light green bg
-        iconColor = const Color(0xFF388E3C);
-        iconBgColor = const Color(0xFFE8F5E9);
+        statusColor = AppColors.statusGreen;
+        statusBgColor = AppColors.statusGreen.withValues(alpha: 0.15);
+        iconColor = AppColors.statusGreen;
+        iconBgColor = AppColors.statusGreen.withValues(alpha: 0.15);
         statusText = 'Completed';
         leadingIcon = Icons.assignment_turned_in_outlined;
         break;
       case OrderStatus.inProgress:
-        statusColor = const Color(0xFF5E35B1); // Purple text
-        statusBgColor = const Color(0xFFEDE7F6); // Light purple bg
-        iconColor = const Color(0xFF5E35B1);
-        iconBgColor = const Color(0xFFEDE7F6);
+        statusColor = AppColors.primaryPurple;
+        statusBgColor = AppColors.primaryPurple.withValues(alpha: 0.15);
+        iconColor = AppColors.primaryPurple;
+        iconBgColor = AppColors.primaryPurple.withValues(alpha: 0.15);
         statusText = 'Processing';
         leadingIcon = Icons.assignment_outlined;
         break;
       case OrderStatus.cancelled:
-      case OrderStatus.pending: // Grouping pending with cancelled style based on UI
-        statusColor = const Color(0xFFD32F2F); // Red text
-        statusBgColor = const Color(0xFFFFEBEE); // Light red bg
-        iconColor = const Color(0xFFD32F2F);
-        iconBgColor = const Color(0xFFFFEBEE);
-        statusText = 'Cancelled';
+      case OrderStatus.pending:
+        statusColor = AppColors.error;
+        statusBgColor = AppColors.error.withValues(alpha: 0.15);
+        iconColor = AppColors.error;
+        iconBgColor = AppColors.error.withValues(alpha: 0.15);
+        statusText = status == OrderStatus.pending ? 'Pending' : 'Cancelled';
         leadingIcon = Icons.assignment_late_outlined;
         break;
     }
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.lightDivider),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -360,10 +297,10 @@ class _OrderTile extends StatelessWidget {
                     children: [
                       Text(
                         'Order $orderId',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -371,7 +308,7 @@ class _OrderTile extends StatelessWidget {
                         date,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade500,
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -407,10 +344,10 @@ class _OrderTile extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3E5F5), // Light purple bg for service icon
+                    color: AppColors.tagBg,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.description_outlined, color: Color(0xFF5E35B1), size: 22),
+                  child: Icon(Icons.description_outlined, color: AppColors.primaryPurple, size: 22),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -419,20 +356,20 @@ class _OrderTile extends StatelessWidget {
                     children: [
                       Text(
                         serviceName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '1 Year Subscription', // This matches the subtitle in the design
+                        '1 Year Subscription',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade500,
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -441,10 +378,10 @@ class _OrderTile extends StatelessWidget {
                 ),
                 Text(
                   price,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -466,17 +403,17 @@ class _OrderTile extends StatelessWidget {
                       'Total Amount',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.grey.shade600,
+                        color: AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       price,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF311B92), // Dark deep purple
+                        color: AppColors.primaryPurple,
                       ),
                     ),
                   ],
@@ -484,24 +421,24 @@ class _OrderTile extends StatelessWidget {
                 OutlinedButton(
                   onPressed: onTap,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF5E35B1), width: 1.2),
+                    side: BorderSide(color: AppColors.primaryPurple, width: 1.2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
                       Text(
                         'View Details',
                         style: TextStyle(
-                          color: Color(0xFF5E35B1),
+                          color: AppColors.primaryPurple,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
                       ),
-                      SizedBox(width: 4),
-                      Icon(Icons.chevron_right, color: Color(0xFF5E35B1), size: 16),
+                      const SizedBox(width: 4),
+                      Icon(Icons.chevron_right, color: AppColors.primaryPurple, size: 16),
                     ],
                   ),
                 ),
@@ -522,7 +459,7 @@ class _SupportBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3E5F5), // Light purple background
+        color: AppColors.tagBg,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -530,22 +467,22 @@ class _SupportBanner extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.bgLight,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.headset_mic_outlined, color: Color(0xFF5E35B1), size: 24),
+            child: Icon(Icons.headset_mic_outlined, color: AppColors.primary, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Need help with your order?',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -553,7 +490,7 @@ class _SupportBanner extends StatelessWidget {
                   'Our support team is here to help you.',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade700,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -564,16 +501,16 @@ class _SupportBanner extends StatelessWidget {
               // TODO: Navigate to support
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF311B92), // Dark deep purple button
+              backgroundColor: AppColors.primary,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             ),
-            child: const Text(
+            child: Text(
               'Contact Support',
-              style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+              style: TextStyle(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -602,7 +539,7 @@ class CustomDashedDivider extends StatelessWidget {
               width: dashWidth,
               height: dashHeight,
               child: DecoratedBox(
-                decoration: BoxDecoration(color: Colors.grey.shade300),
+                decoration: BoxDecoration(color: AppColors.lightDivider),
               ),
             );
           }),

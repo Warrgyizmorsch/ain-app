@@ -5,8 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 final priceFormatter = NumberFormat.currency(
-  locale: 'hi_IN',
-  symbol: '₹',
+  locale: 'en_GB',
+  symbol: '£',
   decimalDigits: 0,
 );
 
@@ -70,17 +70,13 @@ class UHelperFunction {
 String formatCurrency(double amount) {
   final absAmount = amount.abs();
 
-  if (absAmount >= 10000000) {
-    // Crore
-    return "₹${(amount / 10000000).toStringAsFixed(2)}Cr";
-  } else if (absAmount >= 100000) {
-    // Lakh
-    return "₹${(amount / 100000).toStringAsFixed(2)}L";
+  if (absAmount >= 1000000) {
+    return "£${(amount / 1000000).toStringAsFixed(2)}M";
   } else if (absAmount >= 1000) {
     // Thousand
-    return "₹${(amount / 1000).toStringAsFixed(1)}K";
+    return "£${(amount / 1000).toStringAsFixed(1)}K";
   } else {
-    return "₹${amount.toStringAsFixed(0)}";
+    return "£${amount.toStringAsFixed(0)}";
   }
 }
 ///////////////// -------------- Extract Fund Manager ----------- //////////////////

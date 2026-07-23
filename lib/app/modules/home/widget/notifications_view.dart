@@ -4,13 +4,13 @@ import '../../../core/models/notifications_model/get_notifications_model.dart';
 import '../controllers/home_controller.dart';
 
 class NotificationsView extends GetView<HomeController> {
-    NotificationsView({super.key});
+  const NotificationsView({super.key});
 
   @override
   Widget build(BuildContext context) {
     Get.put(HomeController());
 
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: CustomAppBar(
         title: 'Notifications',
@@ -18,9 +18,9 @@ class NotificationsView extends GetView<HomeController> {
       ),
       body: Column(
         children: [
-            SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildFilterTabs(),
-            SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           Expanded(
             child: Obx(() {
@@ -30,18 +30,18 @@ class NotificationsView extends GetView<HomeController> {
                 return Center(
                   child: Text(
                     "No notifications found.",
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textGrey),
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
                   ),
                 );
               }
 
               return ListView.separated(
-                physics:   BouncingScrollPhysics(),
-                padding:   EdgeInsets.symmetric(horizontal: 20),
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: list.length,
                 separatorBuilder: (context, index) => Padding(
-                  padding:   EdgeInsets.symmetric(vertical: 8),
-                  child: Divider(color: Colors.grey.shade200, height: 1, thickness: 1),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Divider(color: AppColors.lightDivider, height: 1, thickness: 1),
                 ),
                 itemBuilder: (context, index) {
                   final item = list[index];
@@ -52,34 +52,37 @@ class NotificationsView extends GetView<HomeController> {
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildFilterTabs() {
     return Padding(
-      padding:   EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: List.generate(
           controller.filters.length,
               (index) => Obx(() {
             final isSelected = controller.selectedFilterIndex.value == index;
             return Padding(
-              padding:   EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.only(right: 12),
               child: GestureDetector(
                 onTap: () => controller.setFilter(index),
                 child: AnimatedContainer(
-                  duration:   Duration(milliseconds: 200),
-                  padding:   EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : Colors.grey.shade100,
+                    color: isSelected ? AppColors.primaryPurple : AppColors.bgLight,
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected ? AppColors.primaryPurple : AppColors.lightDivider,
+                    ),
                   ),
                   child: Text(
                     controller.filters[index],
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: isSelected ? Colors.white : Colors.grey.shade700,
+                      color: isSelected ? AppColors.white : AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -93,7 +96,7 @@ class NotificationsView extends GetView<HomeController> {
 
   Widget _buildNotificationTile(NotificationItem item) {
     return Padding(
-      padding:   EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -106,11 +109,11 @@ class NotificationsView extends GetView<HomeController> {
             ),
             child: Icon(
               item.icon,
-              color: Colors.white,
+              color: AppColors.white,
               size: 20,
             ),
           ),
-            SizedBox(width: 16),
+          const SizedBox(width: 16),
 
           Expanded(
             child: Column(
@@ -122,46 +125,44 @@ class NotificationsView extends GetView<HomeController> {
                       item.title,
                       style: TextStyle(
                         fontSize: 15,
-                        // Unread messages ka title thoda bold dikhega
                         fontWeight: item.isRead ? FontWeight.w600 : FontWeight.w800,
-                        color: Colors.black87,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     if (!item.isRead) ...[
-                        SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Container(
                         width: 8,
                         height: 8,
-                        decoration:   BoxDecoration(
-                          color: AppColors.primary,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryPurple,
                           shape: BoxShape.circle,
                         ),
                       ),
                     ]
                   ],
                 ),
-                  SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   item.message,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: item.isRead ? FontWeight.w400 : FontWeight.w500,
-                    color: item.isRead ? Colors.grey.shade600 : Colors.black87,
+                    color: item.isRead ? AppColors.textSecondary : AppColors.textPrimary,
                     height: 1.4,
                   ),
                 ),
               ],
             ),
           ),
-            SizedBox(width: 12),
-
+          const SizedBox(width: 12),
 
           Text(
             item.time,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Colors.grey.shade500,
+              color: AppColors.textSecondary,
             ),
           ),
         ],

@@ -1,39 +1,22 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
 import '../../../common/constant/app_imports.dart';
 import '../controllers/home_controller.dart';
 
 class DissertationPlannerView extends GetView<HomeController> {
-     DissertationPlannerView({super.key});
+  const DissertationPlannerView({super.key});
 
   @override
   Widget build(BuildContext context) {
     // Ensure controller is initialized
     Get.put(HomeController());
 
-    return Scaffold(
-      backgroundColor: AppColors.bgLight,
-      appBar: AppBar(
-        backgroundColor: AppColors.bgLight,
-        elevation: 0,
-        surfaceTintColor: AppColors.transparent,
-        leading: IconButton(
-          icon:    Icon(Icons.arrow_back, color: AppColors.textDark),
-          onPressed: () => Get.back(),
-        ),
-        title:    Text(
-          'Dissertation Planner',
-          style: TextStyle(
-            color: AppColors.textDark,
-            fontSize: 18,
-            fontWeight: FontWeight.w600, // Capped at 600
-          ),
-        ),
-        centerTitle: true,
+    return Obx(() => Scaffold(
+      backgroundColor: AppColors.appBackground,
+      appBar: CustomAppBar(
+        title: 'Dissertation Planner',
+        showBackButton: true,
         actions: [
           IconButton(
-            icon:    Icon(Icons.notifications_none, color: AppColors.textDark),
+            icon: Icon(Icons.notifications_none, color: AppColors.textPrimary),
             onPressed: () {},
           ),
         ],
@@ -79,7 +62,7 @@ class DissertationPlannerView extends GetView<HomeController> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   // ==========================================
@@ -91,7 +74,7 @@ class DissertationPlannerView extends GetView<HomeController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeroBanner(),
-           SizedBox(height: 24),
+        const SizedBox(height: 24),
 
         // Overall Progress
         Row(
@@ -99,11 +82,11 @@ class DissertationPlannerView extends GetView<HomeController> {
           children: [
             Row(
               children: [
-                   Icon(Icons.track_changes, color: AppColors.primaryPurple, size: 20),
-                   SizedBox(width: 8),
-                   Text(
+                Icon(Icons.track_changes, color: AppColors.primaryPurple, size: 20),
+                const SizedBox(width: 8),
+                Text(
                   'Overall Progress',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                 ),
               ],
             ),
@@ -111,35 +94,35 @@ class DissertationPlannerView extends GetView<HomeController> {
               onTap: () {},
               child: Row(
                 children: [
-                     Text('Edit Goal', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
-                     SizedBox(width: 4),
-                     Icon(Icons.edit, color: AppColors.primaryPurple, size: 14),
+                  Text('Edit Goal', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
+                  const SizedBox(width: 4),
+                  Icon(Icons.edit, color: AppColors.primaryPurple, size: 14),
                 ],
               ),
             ),
           ],
         ),
-           SizedBox(height: 12),
+        const SizedBox(height: 12),
         _buildOverallProgressCard(),
-           SizedBox(height: 28),
+        const SizedBox(height: 28),
 
         // Chapter Progress (Horizontal summary)
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-               Text('Chapter Progress', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+            Text('Chapter Progress', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
             InkWell(
               onTap: () => controller.setPlannerTab('Chapters'), // Route to Chapters tab
               child: Row(
                 children: [
-                     Text('View All', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
-                     Icon(Icons.chevron_right, color: AppColors.primaryPurple, size: 16),
+                  Text('View All', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
+                  Icon(Icons.chevron_right, color: AppColors.primaryPurple, size: 16),
                 ],
               ),
             ),
           ],
         ),
-           SizedBox(height: 12),
+        const SizedBox(height: 12),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Obx(() => Row(
@@ -156,7 +139,7 @@ class DissertationPlannerView extends GetView<HomeController> {
             }).toList(),
           )),
         ),
-           SizedBox(height: 28),
+        const SizedBox(height: 28),
 
         // Upcoming Tasks (Summary)
         Row(
@@ -164,38 +147,38 @@ class DissertationPlannerView extends GetView<HomeController> {
           children: [
             Row(
               children: [
-                   Icon(Icons.check_box_outlined, color: AppColors.textDark, size: 20),
-                   SizedBox(width: 8),
-                   Text('Upcoming Tasks', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                Icon(Icons.check_box_outlined, color: AppColors.textPrimary, size: 20),
+                const SizedBox(width: 8),
+                Text('Upcoming Tasks', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
               ],
             ),
             InkWell(
               onTap: () => controller.setPlannerTab('Tasks'), // Route to Tasks tab
               child: Row(
                 children: [
-                     Text('View All Tasks', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
-                     Icon(Icons.chevron_right, color: AppColors.primaryPurple, size: 16),
+                  Text('View All Tasks', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
+                  Icon(Icons.chevron_right, color: AppColors.primaryPurple, size: 16),
                 ],
               ),
             ),
           ],
         ),
-           SizedBox(height: 12),
+        const SizedBox(height: 12),
         _buildUpcomingTasksList(),
-           SizedBox(height: 28),
+        const SizedBox(height: 28),
 
         // Planning Tools
-           Text('Planning Tools', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textDark)),
-           SizedBox(height: 12),
+        Text('Planning Tools', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        const SizedBox(height: 12),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildToolCard('Task Manager', 'Organize tasks', Icons.checklist,    Color(0xFFF3E5F5), AppColors.primaryPurple),
-              _buildToolCard('Timeline', 'View schedule', Icons.calendar_month,    Color(0xFFE8F5E9), AppColors.statusGreen),
-              _buildToolCard('Milestones', 'Track goals', Icons.track_changes,    Color(0xFFE3F2FD),    Color(0xFF0288D1)),
-              _buildToolCard('Notes', 'Add notes', Icons.note_alt_outlined,    Color(0xFFFFEBEE),    Color(0xFFE53935)),
+              _buildToolCard('Task Manager', 'Organize tasks', Icons.checklist, AppColors.primaryPurple.withValues(alpha: 0.15), AppColors.primaryPurple),
+              _buildToolCard('Timeline', 'View schedule', Icons.calendar_month, AppColors.statusGreen.withValues(alpha: 0.15), AppColors.statusGreen),
+              _buildToolCard('Milestones', 'Track goals', Icons.track_changes, AppColors.secondary.withValues(alpha: 0.15), AppColors.secondary),
+              _buildToolCard('Notes', 'Add notes', Icons.note_alt_outlined, AppColors.error.withValues(alpha: 0.15), AppColors.error),
             ],
           ),
         ),
@@ -207,11 +190,11 @@ class DissertationPlannerView extends GetView<HomeController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-           Text(
+        Text(
           'All Chapters',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textDark),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
         ),
-           SizedBox(height: 16),
+        const SizedBox(height: 16),
         // Wrap creates a beautiful grid-like layout for mobile
         Obx(() => Wrap(
           spacing: 12,
@@ -243,27 +226,27 @@ class DissertationPlannerView extends GetView<HomeController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-               Text(
+            Text(
               'All Tasks',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textDark),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
             ),
             Container(
-              padding:    EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                color: AppColors.primaryPurple.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child:    Row(
+              child: Row(
                 children: [
                   Icon(Icons.add, size: 16, color: AppColors.primaryPurple),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   Text('Add Task', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
                 ],
               ),
             ),
           ],
         ),
-           SizedBox(height: 16),
+        const SizedBox(height: 16),
         _buildUpcomingTasksList(), // Reusing the same list component
       ],
     );
@@ -273,18 +256,17 @@ class DissertationPlannerView extends GetView<HomeController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-           Text(
+        Text(
           'Project Timeline',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textDark),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
         ),
-           SizedBox(height: 16),
+        const SizedBox(height: 16),
         Container(
-          padding:    EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.bgLight,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.lightDivider),
-            boxShadow:    [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))],
           ),
           child: Obx(() => Column(
             children: controller.upcomingTasksList.asMap().entries.map((entry) {
@@ -306,7 +288,7 @@ class DissertationPlannerView extends GetView<HomeController> {
   Color _getStatusColor(String status) {
     if (status == 'completed') return AppColors.statusGreen;
     if (status == 'in_progress') return AppColors.primaryPurple;
-    return AppColors.statusOrange;
+    return AppColors.secondary;
   }
 
   IconData _getStatusIcon(String status) {
@@ -319,14 +301,14 @@ class DissertationPlannerView extends GetView<HomeController> {
     return Obx(() {
       final isSelected = controller.selectedPlannerTab.value == title;
       return Padding(
-        padding:    EdgeInsets.only(right: 8.0),
+        padding: const EdgeInsets.only(right: 8.0),
         child: InkWell(
           onTap: () => controller.setPlannerTab(title),
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding:    EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.primaryPurple : AppColors.white,
+              color: isSelected ? AppColors.primaryPurple : AppColors.bgLight,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isSelected ? AppColors.primaryPurple : AppColors.lightDivider,
@@ -334,12 +316,12 @@ class DissertationPlannerView extends GetView<HomeController> {
             ),
             child: Row(
               children: [
-                Icon(icon, size: 16, color: isSelected ? AppColors.white : AppColors.textGrey),
-                   SizedBox(width: 8),
+                Icon(icon, size: 16, color: isSelected ? AppColors.white : AppColors.textSecondary),
+                const SizedBox(width: 8),
                 Text(
                   title,
                   style: TextStyle(
-                    color: isSelected ? AppColors.white : AppColors.textDark,
+                    color: isSelected ? AppColors.white : AppColors.textPrimary,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -354,7 +336,7 @@ class DissertationPlannerView extends GetView<HomeController> {
 
   Widget _buildTimelineItem(Map<String, String> task, bool isLast) {
     Color pColor = AppColors.primaryPurple;
-    if (task['priority'] == 'Medium') pColor = AppColors.statusOrange;
+    if (task['priority'] == 'Medium') pColor = AppColors.secondary;
     if (task['priority'] == 'Low') pColor = AppColors.statusGreen;
 
     return IntrinsicHeight(
@@ -370,7 +352,7 @@ class DissertationPlannerView extends GetView<HomeController> {
                 decoration: BoxDecoration(
                   color: pColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.white, width: 2),
+                  border: Border.all(color: AppColors.bgLight, width: 2),
                   boxShadow: [BoxShadow(color: pColor.withValues(alpha: 0.4), blurRadius: 4)],
                 ),
               ),
@@ -383,27 +365,27 @@ class DissertationPlannerView extends GetView<HomeController> {
                 ),
             ],
           ),
-             SizedBox(width: 16),
+          const SizedBox(width: 16),
           // Right column (Task Details)
           Expanded(
             child: Padding(
-              padding:    EdgeInsets.only(bottom: 24.0),
+              padding: const EdgeInsets.only(bottom: 24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     task['date']!,
-                    style:    TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
                   ),
-                     SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     task['title']!,
-                    style:    TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                   ),
-                     SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
                     task['subtitle']!,
-                    style:    TextStyle(fontSize: 12, color: AppColors.textGrey),
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -419,19 +401,15 @@ class DissertationPlannerView extends GetView<HomeController> {
   Widget _buildHeroBanner() {
     return Container(
       width: double.infinity,
-      padding:    EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient:    LinearGradient(
-          colors: [Color(0xFF2A0845), Color(0xFF5E35B1)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: AppColors.primaryGradient,
         boxShadow: [
           BoxShadow(
-            color:    Color(0xFF5E35B1).withValues(alpha: 0.3),
+            color: AppColors.primaryPurple.withValues(alpha: 0.3),
             blurRadius: 12,
-            offset:    Offset(0, 6),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -442,29 +420,29 @@ class DissertationPlannerView extends GetView<HomeController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                   Text(
+                const Text(
                   'Stay organized.\nMeet deadlines.',
                   style: TextStyle(color: AppColors.white, fontSize: 18, fontWeight: FontWeight.w600, height: 1.2),
                 ),
-                   SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'Plan every step of your dissertation and achieve your goals.',
                   style: TextStyle(color: AppColors.white.withValues(alpha: 0.8), fontSize: 12, fontWeight: FontWeight.w400, height: 1.3),
                 ),
-                   SizedBox(height: 16),
+                const SizedBox(height: 16),
                 InkWell(
                   onTap: () {},
                   child: Container(
-                    padding:    EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child:    Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.add, color: AppColors.primaryPurple, size: 16),
-                        SizedBox(width: 6),
+                        const SizedBox(width: 6),
                         Text(
                           'New Dissertation',
                           style: TextStyle(color: AppColors.primaryPurple, fontSize: 12, fontWeight: FontWeight.w600),
@@ -476,7 +454,7 @@ class DissertationPlannerView extends GetView<HomeController> {
               ],
             ),
           ),
-             SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             flex: 2,
             child: Container(
@@ -485,7 +463,7 @@ class DissertationPlannerView extends GetView<HomeController> {
                 color: AppColors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child:    Icon(Icons.library_books, color: AppColors.white, size: 48),
+              child: const Icon(Icons.library_books, color: AppColors.white, size: 48),
             ),
           ),
         ],
@@ -495,12 +473,11 @@ class DissertationPlannerView extends GetView<HomeController> {
 
   Widget _buildOverallProgressCard() {
     return Container(
-      padding:    EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.lightDivider),
-        boxShadow:    [BoxShadow(color: AppColors.lightShadow, blurRadius: 10, offset: Offset(0, 2))],
       ),
       child: Row(
         children: [
@@ -513,7 +490,7 @@ class DissertationPlannerView extends GetView<HomeController> {
                 Obx(() => CircularProgressIndicator(
                   value: controller.plannerOverallProgress.value,
                   strokeWidth: 8,
-                  backgroundColor: AppColors.lightDivider.withValues(alpha: 0.5),
+                  backgroundColor: AppColors.lightDivider,
                   color: AppColors.primaryPurple,
                   strokeCap: StrokeCap.round,
                 )),
@@ -523,11 +500,11 @@ class DissertationPlannerView extends GetView<HomeController> {
                     children: [
                       Obx(() => Text(
                         '${(controller.plannerOverallProgress.value * 100).toInt()}%',
-                        style:    TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
                       )),
-                         Text(
+                      Text(
                         'Completed',
-                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColors.textGrey),
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -535,7 +512,7 @@ class DissertationPlannerView extends GetView<HomeController> {
               ],
             ),
           ),
-             SizedBox(width: 16),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               children: [
@@ -546,14 +523,14 @@ class DissertationPlannerView extends GetView<HomeController> {
                     Obx(() => _buildProgressStat(Icons.check_box_outlined, AppColors.statusGreen, 'Tasks', '${controller.plannerTasksCompleted.value} / ${controller.plannerTotalTasks.value}', 'Completed')),
                   ],
                 ),
-                   SizedBox(height: 12),
-                Divider(height: 1, color: AppColors.lightDivider.withValues(alpha: 0.5)),
-                   SizedBox(height: 12),
+                const SizedBox(height: 12),
+                Divider(height: 1, color: AppColors.lightDivider),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Obx(() => _buildProgressStat(Icons.calendar_today,    Color(0xFF0288D1), 'Days Left', '${controller.plannerDaysLeft.value}', 'Until Deadline')),
-                    Obx(() => _buildProgressStat(Icons.flag_outlined, AppColors.statusOrange, 'Deadline', controller.plannerDeadlineDate.value, controller.plannerDeadlineDay.value)),
+                    Obx(() => _buildProgressStat(Icons.calendar_today, AppColors.secondary, 'Days Left', '${controller.plannerDaysLeft.value}', 'Until Deadline')),
+                    Obx(() => _buildProgressStat(Icons.flag_outlined, AppColors.statusGreen, 'Deadline', controller.plannerDeadlineDate.value, controller.plannerDeadlineDay.value)),
                   ],
                 ),
               ],
@@ -572,25 +549,25 @@ class DissertationPlannerView extends GetView<HomeController> {
           Row(
             children: [
               Icon(icon, size: 14, color: color),
-                 SizedBox(width: 4),
+              const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   title,
-                  style:    TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-             SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             value,
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: color),
           ),
           Text(
             subtitle,
-            style:    TextStyle(fontSize: 10, color: AppColors.textGrey, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -602,39 +579,38 @@ class DissertationPlannerView extends GetView<HomeController> {
   Widget _buildChapterCard(String chapter, String title, double progress, Color color, IconData icon) {
     return Container(
       width: 140, // Keeps fixed width for uniform look in both Horizontal Scroll and Wrap
-      margin:    EdgeInsets.only(right: 12),
-      padding:    EdgeInsets.all(12),
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.lightDivider),
-        boxShadow:    [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding:    EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 20),
           ),
-             SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             chapter,
-            style:    TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textDark),
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
           ),
-             SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             title,
-            style:    TextStyle(fontSize: 11, color: AppColors.textGrey, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-             SizedBox(height: 12),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -648,7 +624,7 @@ class DissertationPlannerView extends GetView<HomeController> {
                   ),
                 ),
               ),
-                 SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 '${(progress * 100).toInt()}%',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color),
@@ -663,7 +639,7 @@ class DissertationPlannerView extends GetView<HomeController> {
   Widget _buildUpcomingTasksList() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.lightDivider),
       ),
@@ -674,14 +650,14 @@ class DissertationPlannerView extends GetView<HomeController> {
 
           Color pColor = AppColors.primaryPurple;
           if (task['priority'] == 'High') pColor = AppColors.primaryPurple;
-          if (task['priority'] == 'Medium') pColor = AppColors.statusOrange;
+          if (task['priority'] == 'Medium') pColor = AppColors.secondary;
           if (task['priority'] == 'Low') pColor = AppColors.statusGreen;
 
           return Column(
             children: [
               _buildTaskItem(task['title']!, task['subtitle']!, task['date']!, task['daysLeft']!, task['priority']!, pColor),
               if (idx < controller.upcomingTasksList.length - 1)
-                Divider(height: 1, color: AppColors.lightDivider.withValues(alpha: 0.5)),
+                Divider(height: 1, color: AppColors.lightDivider),
             ],
           );
         }).toList(),
@@ -691,40 +667,40 @@ class DissertationPlannerView extends GetView<HomeController> {
 
   Widget _buildTaskItem(String title, String subtitle, String date, String daysLeft, String priority, Color priorityColor) {
     return Padding(
-      padding:    EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-             Icon(Icons.circle_outlined, color: AppColors.primaryPurple, size: 22),
-             SizedBox(width: 12),
+          Icon(Icons.circle_outlined, color: AppColors.primaryPurple, size: 22),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style:    TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
-                   SizedBox(height: 4),
-                Text(subtitle, style:    TextStyle(fontSize: 11, color: AppColors.textGrey)),
+                Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                const SizedBox(height: 4),
+                Text(subtitle, style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               ],
             ),
           ),
-             SizedBox(width: 8),
+          const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Row(
                 children: [
-                     Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.textGrey),
-                     SizedBox(width: 4),
-                  Text(date, style:    TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textDark)),
+                  Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.textSecondary),
+                  const SizedBox(width: 4),
+                  Text(date, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
                 ],
               ),
-                 SizedBox(height: 2),
-              Text(daysLeft, style:    TextStyle(fontSize: 10, color: AppColors.statusOrange, fontWeight: FontWeight.w500)),
-                 SizedBox(height: 6),
+              const SizedBox(height: 2),
+              Text(daysLeft, style: TextStyle(fontSize: 10, color: AppColors.secondary, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 6),
               Container(
-                padding:    EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: AppColors.bgLight,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: priorityColor),
                 ),
@@ -740,29 +716,28 @@ class DissertationPlannerView extends GetView<HomeController> {
   Widget _buildToolCard(String title, String subtitle, IconData icon, Color bgColor, Color iconColor) {
     return Container(
       width: 120,
-      margin:    EdgeInsets.only(right: 12),
-      padding:    EdgeInsets.all(12),
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.lightDivider),
-        boxShadow:    [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding:    EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: bgColor,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: iconColor, size: 24),
           ),
-             SizedBox(height: 12),
-          Text(title, style:    TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textDark), textAlign: TextAlign.center),
-             SizedBox(height: 4),
-          Text(subtitle, style:    TextStyle(fontSize: 10, color: AppColors.textGrey), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 12),
+          Text(title, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary), textAlign: TextAlign.center),
+          const SizedBox(height: 4),
+          Text(subtitle, style: TextStyle(fontSize: 10, color: AppColors.textSecondary), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
         ],
       ),
     );

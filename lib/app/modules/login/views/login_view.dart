@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../common/constant/app_colors.dart';
 import '../../../common/constant/image_constant.dart';
 import '../../../common/widget/button/custom_app_button.dart';
 import '../../../common/widget/button/social_button.dart';
@@ -14,8 +15,8 @@ class LoginView extends GetView<LoginController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
+    return Obx(() => Scaffold(
+      backgroundColor: AppColors.appBackground,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -39,7 +40,7 @@ class LoginView extends GetView<LoginController> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha:.15),
+                          color: AppColors.lightShadow,
                           blurRadius: 10,
                         ),
                       ],
@@ -52,9 +53,13 @@ class LoginView extends GetView<LoginController> {
 
             const SizedBox(height: 55),
 
-            const Text(
+            Text(
               "Welcome Back To Your Account",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
             ),
 
             const SizedBox(height: 25),
@@ -103,8 +108,8 @@ class LoginView extends GetView<LoginController> {
                                   ),
                                   child: Text(
                                     controller.emailError.value,
-                                    style: const TextStyle(
-                                      color: Colors.red,
+                                    style: TextStyle(
+                                      color: AppColors.error,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -138,8 +143,8 @@ class LoginView extends GetView<LoginController> {
                                 padding: const EdgeInsets.only(top: 5, left: 5),
                                 child: Text(
                                   controller.passwordError.value,
-                                  style: const TextStyle(
-                                    color: Colors.red,
+                                  style: TextStyle(
+                                    color: AppColors.error,
                                     fontSize: 12,
                                   ),
                                 ),
@@ -158,20 +163,27 @@ class LoginView extends GetView<LoginController> {
                               onChanged: (value) {
                                 controller.rememberMe.value = value ?? false;
                               },
+                              activeColor: AppColors.primaryPurple,
                             ),
                           ),
-                          const Text(
+                          Text(
                             "Remember Me",
-                            style: TextStyle(fontSize: 12),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                           const Spacer(),
                           TextButton(
                             onPressed: () {
                               Get.to(ForgotPasswordView());
                             },
-                            child: const Text(
+                            child: Text(
                               "Forget Password?",
-                              style: TextStyle(fontSize: 12),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.primaryPurple,
+                              ),
                             ),
                           ),
                         ],
@@ -191,13 +203,16 @@ class LoginView extends GetView<LoginController> {
                       const SizedBox(height: 25),
 
                       Row(
-                        children: const [
-                          Expanded(child: Divider()),
+                        children: [
+                          Expanded(child: Divider(color: AppColors.lightDivider)),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12),
-                            child: Text("Or"),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              "Or",
+                              style: TextStyle(color: AppColors.textSecondary),
+                            ),
                           ),
-                          Expanded(child: Divider()),
+                          Expanded(child: Divider(color: AppColors.lightDivider)),
                         ],
                       ),
 
@@ -228,15 +243,18 @@ class LoginView extends GetView<LoginController> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text("Don't Have An Account ? "),
+                          Text(
+                            "Don't Have An Account ? ",
+                            style: TextStyle(color: AppColors.textSecondary),
+                          ),
                           GestureDetector(
                             onTap: () {
                               Get.toNamed(Routes.SIGNUP);
                             },
-                            child: const Text(
+                            child: Text(
                               "SIGNUP",
                               style: TextStyle(
-                                color: Colors.deepPurple,
+                                color: AppColors.primaryPurple,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -257,12 +275,12 @@ class LoginView extends GetView<LoginController> {
                         return Container(
                           constraints: const BoxConstraints(maxHeight: 160),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.bgLight,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade300),
+                            border: Border.all(color: AppColors.lightDivider),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha:0.15),
+                                color: AppColors.lightShadow,
                                 blurRadius: 10,
                                 offset: const Offset(0, 5),
                               ),
@@ -277,16 +295,16 @@ class LoginView extends GetView<LoginController> {
                                   controller.filteredEmails[index];
                               return ListTile(
                                 dense: true,
-                                leading: const Icon(
+                                leading: Icon(
                                   Icons.account_circle_outlined,
                                   size: 18,
-                                  color: Colors.deepPurple,
+                                  color: AppColors.primaryPurple,
                                 ),
                                 title: Text(
                                   email,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
-                                    color: Colors.black87,
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                                 onTap: () {
@@ -306,6 +324,6 @@ class LoginView extends GetView<LoginController> {
           ],
         ),
       ),
-    );
+    ));
   }
 }

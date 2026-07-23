@@ -1,69 +1,36 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
 import '../../../common/constant/app_imports.dart';
 import '../controllers/home_controller.dart';
 
 class PlagiarismCheckerView extends GetView<HomeController> {
-    PlagiarismCheckerView({super.key});
+  const PlagiarismCheckerView({super.key});
 
   @override
   Widget build(BuildContext context) {
     Get.put(HomeController());
 
-    return Scaffold(
-      backgroundColor: AppColors.bgLight,
-      appBar: AppBar(
-        backgroundColor: AppColors.bgLight,
-        elevation: 0,
-        surfaceTintColor: AppColors.transparent,
-        leading: IconButton(
-          icon:   Icon(Icons.arrow_back, color: AppColors.textDark),
-          onPressed: () => Get.back(),
-        ),
-        title: Column(
-          children: [
-              Text(
-              'Plagiarism Checker',
-              style: TextStyle(
-                color: AppColors.textDark,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-              SizedBox(height: 2),
-            Text(
-              'Check your content for plagiarism and\nensure originality.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textGrey,
-                fontSize: 11,
-                fontWeight: FontWeight.w400,
-                height: 1.2,
-              ),
-            ),
-          ],
-        ),
-        centerTitle: true,
-        toolbarHeight: 80,
+    return Obx(() => Scaffold(
+      backgroundColor: AppColors.appBackground,
+      appBar: CustomAppBar(
+        title: 'Plagiarism Checker',
+        showBackButton: true,
         actions: [
           IconButton(
-            icon:   Icon(Icons.history, color: AppColors.primaryPurple),
+            icon: Icon(Icons.history, color: AppColors.primaryPurple),
             onPressed: () {},
           ),
         ],
       ),
       body: SingleChildScrollView(
-        physics:   BouncingScrollPhysics(),
-        padding:   EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Input Type Selector
             Container(
-              padding:   EdgeInsets.all(4),
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.bgLight,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.lightDivider),
               ),
@@ -75,7 +42,7 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                 ],
               ),
             ),
-              SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // 2. Dynamic Input Switcher Zone
             Obx(() {
@@ -88,7 +55,7 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                 return _buildTextInputSection();
               }
             }),
-              SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // 3. Feature Highlights
             SingleChildScrollView(
@@ -97,22 +64,22 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                 children: [
                   _buildFeatureCard('Accurate', 'Advanced AI\nTechnology', AppColors.primaryPurple, Icons.shield_outlined),
                   _buildFeatureCard('Secure', 'Your data is\nsafe with us', AppColors.statusGreen, Icons.lock_outline),
-                  _buildFeatureCard('Fast', 'Results in just\nseconds',   Color(0xFFEF5350), Icons.bolt_outlined),
-                  _buildFeatureCard('Reliable', 'Detailed\nreporting',   Color(0xFF4285F4), Icons.description_outlined),
+                  _buildFeatureCard('Fast', 'Results in just\nseconds', AppColors.error, Icons.bolt_outlined),
+                  _buildFeatureCard('Reliable', 'Detailed\nreporting', AppColors.secondary, Icons.description_outlined),
                 ],
               ),
             ),
-              SizedBox(height: 28),
+            const SizedBox(height: 28),
 
             // 4. Check Options Section
-              Text(
+            Text(
               'Check Options',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
             ),
-              SizedBox(height: 12),
+            const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.bgLight,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.lightDivider),
               ),
@@ -124,14 +91,14 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                     value: controller.plagiarismCheckInternet.value,
                     onTap: () => controller.plagiarismCheckInternet.value = !controller.plagiarismCheckInternet.value,
                   )),
-                  Divider(height: 1, color: AppColors.lightDivider.withValues(alpha: 0.5), indent: 48),
+                  Divider(height: 1, color: AppColors.lightDivider, indent: 48),
                   Obx(() => _buildCheckOption(
                     title: 'Check Academic Sources',
                     subtitle: 'Compare with journals, papers, and publications',
                     value: controller.plagiarismCheckAcademic.value,
                     onTap: () => controller.plagiarismCheckAcademic.value = !controller.plagiarismCheckAcademic.value,
                   )),
-                  Divider(height: 1, color: AppColors.lightDivider.withValues(alpha: 0.5), indent: 48),
+                  Divider(height: 1, color: AppColors.lightDivider, indent: 48),
                   Obx(() => _buildCheckOption(
                     title: 'Exclude Quotes',
                     subtitle: 'Do not check content inside quotation marks',
@@ -141,7 +108,7 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                 ],
               ),
             ),
-              SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // 5. Action Button (Updated with File Upload Validation)
             SizedBox(
@@ -161,50 +128,50 @@ class PlagiarismCheckerView extends GetView<HomeController> {
 
                   Get.snackbar('Processing', 'Scanning your submission now...', backgroundColor: AppColors.primaryPurple, colorText: AppColors.white);
                 },
-                icon:   Icon(Icons.search, color: AppColors.white, size: 20),
-                label:   Text(
+                icon: const Icon(Icons.search, color: AppColors.white, size: 20),
+                label: const Text(
                   'Check for Plagiarism',
                   style: TextStyle(color: AppColors.white, fontSize: 15, fontWeight: FontWeight.w600),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.buttonPrimary,
+                  backgroundColor: AppColors.primaryPurple,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   elevation: 0,
                 ),
               ),
             ),
-              SizedBox(height: 28),
+            const SizedBox(height: 28),
 
             // 6. Last Check Results Card
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                  Text(
+                Text(
                   'Your Last Check',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                 ),
                 InkWell(
                   onTap: () {},
                   child: Row(
                     children: [
-                        Text(
+                      Text(
                         'View History',
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
                       ),
-                        SizedBox(width: 4),
-                        Icon(Icons.chevron_right, color: AppColors.primaryPurple, size: 16),
+                      const SizedBox(width: 4),
+                      Icon(Icons.chevron_right, color: AppColors.primaryPurple, size: 16),
                     ],
                   ),
                 ),
               ],
             ),
-              SizedBox(height: 12),
+            const SizedBox(height: 12),
             _buildLastCheckCard(),
-              SizedBox(height: 24),
+            const SizedBox(height: 24),
           ],
         ),
       ),
-    );
+    ));
   }
 
   // ==========================================
@@ -218,23 +185,22 @@ class PlagiarismCheckerView extends GetView<HomeController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-              Text(
+            Text(
               'Enter Text to Check',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
             ),
             Obx(() => Text(
               '${controller.plagiarismWordCount.value} / 5000 Words',
-              style:   TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
             )),
           ],
         ),
-          SizedBox(height: 12),
+        const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.bgLight,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.lightDivider),
-            boxShadow:   [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))],
           ),
           child: Stack(
             children: [
@@ -242,12 +208,12 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                 controller: controller.plagiarismTextController,
                 maxLines: 8,
                 minLines: 8,
-                style:   TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textDark),
-                decoration:   InputDecoration(
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                decoration: InputDecoration(
                   hintText: 'Paste your text here to check for plagiarism...',
                   hintStyle: TextStyle(fontSize: 13, color: AppColors.lightTextHint, fontWeight: FontWeight.w400),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.all(16),
+                  contentPadding: const EdgeInsets.all(16),
                 ),
               ),
               Positioned(
@@ -256,12 +222,12 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                 child: InkWell(
                   onTap: () {},
                   child: Container(
-                    padding:   EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                      color: AppColors.primaryPurple.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child:   Icon(Icons.auto_fix_high, color: AppColors.primaryPurple, size: 20),
+                    child: Icon(Icons.auto_fix_high, color: AppColors.primaryPurple, size: 20),
                   ),
                 ),
               )
@@ -277,11 +243,11 @@ class PlagiarismCheckerView extends GetView<HomeController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-          Text(
+        Text(
           'Upload Document',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
         ),
-          SizedBox(height: 12),
+        const SizedBox(height: 12),
         Obx(() {
           // If no file is selected, show the upload box
           if (controller.plagiarismSelectedFileName.value.isEmpty) {
@@ -290,9 +256,9 @@ class PlagiarismCheckerView extends GetView<HomeController> {
               borderRadius: BorderRadius.circular(16),
               child: Container(
                 width: double.infinity,
-                padding:   EdgeInsets.symmetric(vertical: 36, horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: AppColors.bgLight,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.3), width: 1.5, style: BorderStyle.solid),
                 ),
@@ -300,22 +266,22 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding:   EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryPurple.withValues(alpha: 0.08),
+                        color: AppColors.primaryPurple.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
-                      child:   Icon(Icons.cloud_upload_outlined, color: AppColors.primaryPurple, size: 32),
+                      child: Icon(Icons.cloud_upload_outlined, color: AppColors.primaryPurple, size: 32),
                     ),
-                      SizedBox(height: 16),
-                      Text(
+                    const SizedBox(height: 16),
+                    Text(
                       'Browse file from device or tap here',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                     ),
-                      SizedBox(height: 6),
-                      Text(
+                    const SizedBox(height: 6),
+                    Text(
                       'Supports PDF, DOCX, TXT up to 10MB',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.textGrey),
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -325,44 +291,43 @@ class PlagiarismCheckerView extends GetView<HomeController> {
           // If a file IS selected, show the file details card
           else {
             return Container(
-              padding:   EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.bgLight,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.3)),
-                boxShadow:   [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))],
               ),
               child: Row(
                 children: [
                   Container(
-                    padding:   EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                      color: AppColors.primaryPurple.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child:   Icon(Icons.insert_drive_file_outlined, color: AppColors.primaryPurple, size: 28),
+                    child: Icon(Icons.insert_drive_file_outlined, color: AppColors.primaryPurple, size: 28),
                   ),
-                    SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           controller.plagiarismSelectedFileName.value,
-                          style:   TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                          SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           controller.plagiarismSelectedFileSize.value,
-                          style:   TextStyle(fontSize: 11, color: AppColors.textGrey, fontWeight: FontWeight.w500),
+                          style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
                   ),
                   IconButton(
-                    icon:   Icon(Icons.close, color: AppColors.error, size: 22),
+                    icon: Icon(Icons.close, color: AppColors.error, size: 22),
                     onPressed: controller.removePlagiarismFile,
                     tooltip: "Remove file",
                   ),
@@ -379,27 +344,27 @@ class PlagiarismCheckerView extends GetView<HomeController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-          Text(
+        Text(
           'Enter Web URL to Scan',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
         ),
-          SizedBox(height: 12),
+        const SizedBox(height: 12),
         TextFormField(
-          style:   TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textDark),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.white,
-            prefixIcon:   Icon(Icons.link, color: AppColors.primaryPurple, size: 20),
+            fillColor: AppColors.bgLight,
+            prefixIcon: Icon(Icons.link, color: AppColors.primaryPurple, size: 20),
             hintText: 'https://example.com/blog-post-article',
-            hintStyle:   TextStyle(fontSize: 13, color: AppColors.lightTextHint, fontWeight: FontWeight.w400),
-            contentPadding:   EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            hintStyle: TextStyle(fontSize: 13, color: AppColors.lightTextHint, fontWeight: FontWeight.w400),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:   BorderSide(color: AppColors.lightDivider),
+              borderSide: BorderSide(color: AppColors.lightDivider),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:   BorderSide(color: AppColors.primaryPurple, width: 1.5),
+              borderSide: BorderSide(color: AppColors.primaryPurple, width: 1.5),
             ),
           ),
         ),
@@ -419,7 +384,7 @@ class PlagiarismCheckerView extends GetView<HomeController> {
         child: Obx(() {
           final isSelected = controller.plagiarismSelectedInputType.value == title;
           return Container(
-            padding:   EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
               color: isSelected ? AppColors.primaryPurple : AppColors.transparent,
               borderRadius: BorderRadius.circular(8),
@@ -427,14 +392,14 @@ class PlagiarismCheckerView extends GetView<HomeController> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 16, color: isSelected ? AppColors.white : AppColors.textGrey),
-                  SizedBox(width: 6),
+                Icon(icon, size: 16, color: isSelected ? AppColors.white : AppColors.textSecondary),
+                const SizedBox(width: 6),
                 Text(
                   title,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: isSelected ? AppColors.white : AppColors.textGrey,
+                    color: isSelected ? AppColors.white : AppColors.textSecondary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -450,33 +415,33 @@ class PlagiarismCheckerView extends GetView<HomeController> {
   Widget _buildFeatureCard(String title, String subtitle, Color color, IconData icon) {
     return Container(
       width: 100,
-      margin:   EdgeInsets.only(right: 12),
-      padding:   EdgeInsets.all(12),
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.05),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.1)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding:   EdgeInsets.all(6),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 18),
           ),
-            SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
             title,
-            style:   TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textDark),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
           ),
-            SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             subtitle,
-            style:   TextStyle(fontSize: 9, color: AppColors.textGrey, height: 1.3),
+            style: TextStyle(fontSize: 9, color: AppColors.textSecondary, height: 1.3),
           ),
         ],
       ),
@@ -492,12 +457,12 @@ class PlagiarismCheckerView extends GetView<HomeController> {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding:   EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              margin:   EdgeInsets.only(top: 2),
+              margin: const EdgeInsets.only(top: 2),
               width: 20,
               height: 20,
               decoration: BoxDecoration(
@@ -508,21 +473,21 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                   width: 1.5,
                 ),
               ),
-              child: value ?   Icon(Icons.check, size: 14, color: AppColors.white) : null,
+              child: value ? const Icon(Icons.check, size: 14, color: AppColors.white) : null,
             ),
-              SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style:   TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                   ),
-                    SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style:   TextStyle(fontSize: 10, color: AppColors.textGrey),
+                    style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -535,12 +500,11 @@ class PlagiarismCheckerView extends GetView<HomeController> {
 
   Widget _buildLastCheckCard() {
     return Container(
-      padding:   EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.lightDivider),
-        boxShadow:   [BoxShadow(color: AppColors.lightShadow, blurRadius: 10, offset: Offset(0, 2))],
       ),
       child: Row(
         children: [
@@ -553,7 +517,7 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                 CircularProgressIndicator(
                   value: 0.18,
                   strokeWidth: 6,
-                  backgroundColor: AppColors.lightDivider.withValues(alpha: 0.5),
+                  backgroundColor: AppColors.lightDivider,
                   color: AppColors.statusGreen,
                   strokeCap: StrokeCap.round,
                 ),
@@ -561,13 +525,13 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                        Text(
+                      Text(
                         '18%',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.statusGreen),
                       ),
                       Text(
                         'Unique',
-                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: AppColors.textGrey),
+                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -575,18 +539,18 @@ class PlagiarismCheckerView extends GetView<HomeController> {
               ],
             ),
           ),
-            SizedBox(width: 24),
+          const SizedBox(width: 24),
           Expanded(
             child: Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildStatDetail('Total Words', '1,245', AppColors.textDark),
+                    _buildStatDetail('Total Words', '1,245', AppColors.textPrimary),
                     _buildStatDetail('Plagiarized', '82%', AppColors.error),
                   ],
                 ),
-                  SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -607,8 +571,8 @@ class PlagiarismCheckerView extends GetView<HomeController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style:   TextStyle(fontSize: 10, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
-            SizedBox(height: 4),
+          Text(label, style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 4),
           Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: valueColor)),
         ],
       ),

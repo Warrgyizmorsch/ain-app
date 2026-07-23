@@ -9,7 +9,7 @@ class ExpertsProfileView extends StatelessWidget {
     final ExpertData expert = Get.arguments as ExpertData;
     final int reviewCount = expert.customerReview?.length ?? 0;
 
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: const CustomAppBar(
         title: "Expert Profile",
@@ -237,7 +237,7 @@ class ExpertsProfileView extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
 
@@ -245,7 +245,7 @@ class ExpertsProfileView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: borderColor, width: 1.5),
       ),
@@ -301,16 +301,18 @@ class ExpertsProfileView extends StatelessWidget {
   }
 
   Widget _buildDarkPill(String label, {bool isDarker = false}) {
+    final Color strokeColor = isDarker ? AppColors.primary : AppColors.primaryPurple;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isDarker ? AppColors.primary : AppColors.primaryPurple,
+        color: AppColors.transparent,
+        border: Border.all(color: strokeColor, width: 1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label.toUpperCase(),
         style: AppTextStyles.overline.copyWith(
-          color: AppColors.white,
+          color: strokeColor,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.5,
         ),
@@ -322,7 +324,7 @@ class ExpertsProfileView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.lightDivider),
       ),
@@ -363,7 +365,7 @@ class ExpertsProfileView extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.lightDivider),
       ),

@@ -121,8 +121,8 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
             children: [
               Obx(() {
                 if (controller.isBankLoading.value) {
-                  return  Padding(
-                    padding: EdgeInsets.all(20.0),
+                  return Padding(
+                    padding: const EdgeInsets.all(20.0),
                     child: Center(
                       child: CircularProgressIndicator(color: AppColors.primary),
                     ),
@@ -136,69 +136,11 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
                   );
                 }
 
-                final uniqueCountries = controller.banksList
-                    .map((bank) => bank.name ?? 'Global')
-                    .toSet()
-                    .toList();
-
-                return DefaultTabController(
-                  length: uniqueCountries.length,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 2. Tab Bar Header
-                      TabBar(
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.start,
-                        indicatorColor: AppColors.primary,
-                        labelColor: AppColors.primary,
-                        unselectedLabelColor: Colors.grey.shade600,
-                        labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                        tabs: uniqueCountries.map((country) => Tab(text: country)).toList(),
-                      ),
-                      const SizedBox(height: 16),
-
-                      SizedBox(
-                        height: 200,
-                        child: TabBarView(
-                          children: uniqueCountries.map((country) {
-                            final countryBanks = controller.banksList
-                                .where((bank) => (bank.name ?? 'Global') == country)
-                                .toList();
-
-                            return ListView.separated(
-                              shrinkWrap: true,
-                              itemCount: countryBanks.length,
-                              separatorBuilder: (context, index) => const SizedBox(height: 12),
-                              itemBuilder: (context, index) {
-                                final bank = countryBanks[index];
-                                return Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade50,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: AppColors.lightDivider),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      _buildCopyableRow("Account Name", bank.accountHolder ?? "N/A"),
-                                       Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1, color: AppColors.lightDivider)),
-                                      _buildCopyableRow("Account Number", bank.accountNumber ?? "N/A"),
-                                       Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1, color: AppColors.lightDivider)),
-                                      _buildCopyableRow("Sort Code / Routing", bank.sortCode ?? "N/A"),
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-                  ),
+                return BankTransferDetailsWidget(
+                  banksList: controller.banksList,
+                  tabViewHeight: 220,
                 );
               }),
-
             ],
           ),
           const SizedBox(height: 20),
@@ -215,7 +157,7 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
                   decoration: BoxDecoration(
                     color: AppColors.priceBg.withValues(alpha:0.5),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primary.withValues(alpha:0.1)),
+                    border: Border.all(color: AppColors.primaryPurple.withValues(alpha:0.15)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,10 +228,10 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
                         height: 20,
                         margin: const EdgeInsets.only(top: 2),
                         decoration: BoxDecoration(
-                          color: controller.isAccepted.value ? AppColors.primary : Colors.white,
+                          color: controller.isAccepted.value ? AppColors.primaryPurple : AppColors.appBackground,
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: controller.isAccepted.value ? AppColors.primary : Colors.grey.shade400,
+                            color: controller.isAccepted.value ? AppColors.primaryPurple : AppColors.lightDivider,
                             width: 1.5,
                           ),
                         ),
@@ -301,22 +243,22 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
                       Expanded(
                         child: RichText(
                           text: TextSpan(
-                            style: AppTextStyles.termsText.copyWith(height: 1.4, color: Colors.grey.shade700),
+                            style: AppTextStyles.termsText.copyWith(height: 1.4, color: AppColors.textSecondary),
                             children: [
                               const TextSpan(text: AppStrings.termsSuffix),
                               TextSpan(
                                 text: AppStrings.termsOfUse,
-                                style: AppTextStyles.termsLink.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
+                                style: AppTextStyles.termsLink.copyWith(color: AppColors.primaryPurple, fontWeight: FontWeight.w600),
                               ),
                               const TextSpan(text: AppStrings.termsAnd),
                               TextSpan(
                                 text: AppStrings.privacyPolicy,
-                                style: AppTextStyles.termsLink.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
+                                style: AppTextStyles.termsLink.copyWith(color: AppColors.primaryPurple, fontWeight: FontWeight.w600),
                               ),
                               const TextSpan(text: AppStrings.termsMid),
                               TextSpan(
                                 text: AppStrings.moneyBackGuarantee,
-                                style: AppTextStyles.termsLink.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
+                                style: AppTextStyles.termsLink.copyWith(color: AppColors.primaryPurple, fontWeight: FontWeight.w600),
                               ),
                               const TextSpan(text: AppStrings.termsSuffix),
                             ],
@@ -354,9 +296,9 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200, width: 1.5),
+        border: Border.all(color: AppColors.lightDivider, width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha:0.02),
@@ -373,25 +315,25 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha:0.1),
+                  color: AppColors.primaryPurple.withValues(alpha:0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 20, color: AppColors.primary),
+                child: Icon(icon, size: 20, color: AppColors.primaryPurple),
               ),
               const SizedBox(width: 12),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Divider(height: 1, thickness: 1, color: AppColors.lightDivider),
           ),
           ...children,
         ],
@@ -408,62 +350,18 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  // Helper widget to easily copy bank details (Fixed Text Overflow)
-  Widget _buildCopyableRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              const SizedBox(height: 4),
-              Text(
-                  value,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        InkWell(
-          onTap: () {
-            Clipboard.setData(ClipboardData(text: value));
-            Get.snackbar(
-              "Copied",
-              "$label copied to clipboard",
-              snackPosition: SnackPosition.BOTTOM,
-              margin: const EdgeInsets.all(12),
-              backgroundColor: AppColors.success,
-              colorText: Colors.white,
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(color: AppColors.primary.withValues(alpha:0.1), borderRadius: BorderRadius.circular(6)),
-            child:  Icon(Icons.copy, size: 16, color: AppColors.primary),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -481,9 +379,9 @@ class _StepBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha:0.1),
+        color: AppColors.primaryPurple.withValues(alpha:0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primary.withValues(alpha:0.2)),
+        border: Border.all(color: AppColors.primaryPurple.withValues(alpha:0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -492,7 +390,7 @@ class _StepBadge extends StatelessWidget {
             width: 8,
             height: 8,
             decoration:  BoxDecoration(
-              color: AppColors.primary,
+              color: AppColors.primaryPurple,
               shape: BoxShape.circle,
             ),
           ),
@@ -501,7 +399,7 @@ class _StepBadge extends StatelessWidget {
             label,
             style: AppTextStyles.stepBadge.copyWith(
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: AppColors.primaryPurple,
             ),
           ),
         ],
@@ -535,7 +433,7 @@ class _PriceRow extends StatelessWidget {
         Text(
           value,
           style: isTotal
-              ? AppTextStyles.totalValue.copyWith(fontSize: 18, color: AppColors.primary)
+              ? AppTextStyles.totalValue.copyWith(fontSize: 18, color: AppColors.primaryPurple)
               : AppTextStyles.priceValue.copyWith(fontWeight: FontWeight.w600),
         ),
       ],

@@ -12,10 +12,10 @@ class AssignmentsView extends GetView<AssignmentsController> {
     // Local observable to track the active tab index
     final RxInt selectedTabIndex = 0.obs;
 
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: const CustomAppBar(
-        title: 'My Assignments',
+        title: AppStrings.myAssignments,
         showBackButton: false,
       ),
       body: SafeArea(
@@ -24,7 +24,7 @@ class AssignmentsView extends GetView<AssignmentsController> {
           children: [
             // --- CUSTOM TAB BAR (Using your _TabItem) ---
             Container(
-              color: Colors.white,
+              color: AppColors.bgLight,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -94,7 +94,7 @@ class AssignmentsView extends GetView<AssignmentsController> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   // --- 1. All Data List ---
@@ -233,11 +233,11 @@ class AssignmentsView extends GetView<AssignmentsController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 60, color: Colors.grey.shade300),
+            Icon(icon, size: 60, color: AppColors.textSecondary),
             const SizedBox(height: 16),
             Text(
               title,
-              style: AppTextStyles.titleLarge.copyWith(color: AppColors.textDark),
+              style: AppTextStyles.titleLarge.copyWith(color: AppColors.textPrimary),
             ),
             const SizedBox(height: 8),
             Text(
@@ -245,7 +245,7 @@ class AssignmentsView extends GetView<AssignmentsController> {
               textAlign: TextAlign.center,
               style: AppTextStyles.bodySmall.copyWith(
                 fontSize: 13,
-                color: AppColors.textGrey,
+                color: AppColors.textSecondary,
               ),
             ),
           ],
@@ -292,27 +292,27 @@ class _OrderTile extends StatelessWidget {
 
     switch (status) {
       case OrderStatus.completed:
-        statusColor = const Color(0xFF388E3C);
-        statusBgColor = const Color(0xFFE8F5E9);
-        iconColor = const Color(0xFF388E3C);
-        iconBgColor = const Color(0xFFE8F5E9);
+        statusColor = AppColors.statusGreen;
+        statusBgColor = AppColors.statusGreen.withValues(alpha: 0.15);
+        iconColor = AppColors.statusGreen;
+        iconBgColor = AppColors.statusGreen.withValues(alpha: 0.15);
         statusText = 'Completed';
         leadingIcon = Icons.assignment_turned_in_outlined;
         break;
       case OrderStatus.inProgress:
-        statusColor = const Color(0xFF5E35B1);
-        statusBgColor = const Color(0xFFEDE7F6);
-        iconColor = const Color(0xFF5E35B1);
-        iconBgColor = const Color(0xFFEDE7F6);
+        statusColor = AppColors.primaryPurple;
+        statusBgColor = AppColors.primaryPurple.withValues(alpha: 0.15);
+        iconColor = AppColors.primaryPurple;
+        iconBgColor = AppColors.primaryPurple.withValues(alpha: 0.15);
         statusText = 'Processing';
         leadingIcon = Icons.assignment_outlined;
         break;
       case OrderStatus.cancelled:
       case OrderStatus.pending:
-        statusColor = const Color(0xFFD32F2F);
-        statusBgColor = const Color(0xFFFFEBEE);
-        iconColor = const Color(0xFFD32F2F);
-        iconBgColor = const Color(0xFFFFEBEE);
+        statusColor = AppColors.error;
+        statusBgColor = AppColors.error.withValues(alpha: 0.15);
+        iconColor = AppColors.error;
+        iconBgColor = AppColors.error.withValues(alpha: 0.15);
         statusText = status == OrderStatus.pending ? 'Pending' : 'Cancelled';
         leadingIcon = Icons.assignment_late_outlined;
         break;
@@ -320,9 +320,9 @@ class _OrderTile extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.lightDivider),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -355,10 +355,10 @@ class _OrderTile extends StatelessWidget {
                     children: [
                       Text(
                         'Order #$orderId',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -366,7 +366,7 @@ class _OrderTile extends StatelessWidget {
                         date,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade500,
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -402,10 +402,10 @@ class _OrderTile extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3E5F5),
+                    color: AppColors.tagBg,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.description_outlined, color: Color(0xFF5E35B1), size: 22),
+                  child: Icon(Icons.description_outlined, color: AppColors.primaryPurple, size: 22),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -414,10 +414,10 @@ class _OrderTile extends StatelessWidget {
                     children: [
                       Text(
                         serviceName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -427,7 +427,7 @@ class _OrderTile extends StatelessWidget {
                         subtitle,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade500,
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 1,
@@ -438,10 +438,10 @@ class _OrderTile extends StatelessWidget {
                 ),
                 Text(
                   price,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -463,17 +463,17 @@ class _OrderTile extends StatelessWidget {
                       'Total Amount',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.grey.shade600,
+                        color: AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       price,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF311B92),
+                        color: AppColors.primaryPurple,
                       ),
                     ),
                   ],
@@ -481,24 +481,24 @@ class _OrderTile extends StatelessWidget {
                 OutlinedButton(
                   onPressed: onTap,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF5E35B1), width: 1.2),
+                    side: BorderSide(color: AppColors.primaryPurple, width: 1.2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
                       Text(
                         'View Details',
                         style: TextStyle(
-                          color: Color(0xFF5E35B1),
+                          color: AppColors.primaryPurple,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
                       ),
-                      SizedBox(width: 4),
-                      Icon(Icons.chevron_right, color: Color(0xFF5E35B1), size: 16),
+                      const SizedBox(width: 4),
+                      Icon(Icons.chevron_right, color: AppColors.primaryPurple, size: 16),
                     ],
                   ),
                 ),
@@ -534,7 +534,7 @@ class _TabItem extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: isActive ? const Color(0xFF5E35B1) : Colors.transparent,
+              color: isActive ? AppColors.primaryPurple : Colors.transparent,
               width: 2.0,
             ),
           ),
@@ -544,7 +544,7 @@ class _TabItem extends StatelessWidget {
           style: TextStyle(
             fontSize: 13, // Slightly adjusted for better readability
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-            color: isActive ? const Color(0xFF5E35B1) : Colors.grey.shade500,
+            color: isActive ? AppColors.primaryPurple : AppColors.textSecondary,
           ),
         ),
       ),
@@ -570,11 +570,11 @@ class CustomDashedDivider extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             direction: Axis.horizontal,
             children: List.generate(dashCount, (_) {
-              return const SizedBox(
+              return SizedBox(
                 width: dashWidth,
                 height: dashHeight,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(color: Color(0xFFE0E0E0)),
+                  decoration: BoxDecoration(color: AppColors.lightDivider),
                 ),
               );
             }),

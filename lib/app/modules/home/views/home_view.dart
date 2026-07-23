@@ -5,15 +5,19 @@ import 'package:ain/app/modules/profile/widget/payment_history_view.dart';
 import '../../../common/constant/app_imports.dart';
 import '../../../core/models/order_now_model/order_list_model.dart';
 import '../../assignments/controllers/assignments_controller.dart';
+import '../../assignments/widget/order_details_view.dart';
 import '../../bottom_nav_bar/controllers/bottom_nav_bar_controller.dart';
+import '../../profile/widget/edit_profile_widget.dart';
 import '../../profile/widget/saved_sample_widget.dart';
 import '../controllers/home_controller.dart';
 import '../widget/apa_generator_view.dart';
 import '../widget/dissertation_planner_view.dart';
 import '../widget/grade_calculator_view.dart';
+import '../widget/make_payment_view.dart';
 import '../widget/notifications_view.dart';
 import '../widget/plagiarism_checker_view.dart';
 import '../widget/reference_generator_view.dart';
+import '../widget/upload_brief_view.dart';
 import '../widget/word_counter_view.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -21,12 +25,12 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Obx(() => Scaffold(
       key: controller.scaffoldKey,
       backgroundColor: AppColors.appBackground,
       drawer: const AppDrawer(),
       appBar: CustomAppBar(
-        title: 'Home',
+        title: AppStrings.home,
         showBackButton: false,
         leading: Builder(
           builder: (context) => IconButton(
@@ -51,7 +55,7 @@ class HomeView extends GetView<HomeController> {
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -73,16 +77,18 @@ class HomeView extends GetView<HomeController> {
               const SizedBox(height: 24),
               const PromoBannerSlider(),
               const SizedBox(height: 32),
-              Text('Quick Actions', style: AppTextStyles.titleLarge),
+              Text(AppStrings.quickActions, style: AppTextStyles.titleLarge),
               const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
                     child: _buildQuickActionItem(
-                      icon: Icons.upload_file,
-                      color: AppColors.primary,
-                      title: 'Upload\nBrief',
-                      onTap: () {},
+                      icon: Icons.person_outline,
+                      color: AppColors.primaryPurple,
+                      title: AppStrings.ourExperts,
+                      onTap: () {
+                        Get.toNamed(Routes.EXPERTS);
+                      },
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -90,7 +96,7 @@ class HomeView extends GetView<HomeController> {
                     child: _buildQuickActionItem(
                       icon: Icons.chat_bubble_outline,
                       color: AppColors.warning,
-                      title: 'Chat with\nExpert',
+                      title: AppStrings.chatWithExpert,
                       onTap: () {
                         Get.toNamed(Routes.CHAT);
                       },
@@ -101,7 +107,7 @@ class HomeView extends GetView<HomeController> {
                     child: _buildQuickActionItem(
                       icon: Icons.screen_search_desktop_outlined,
                       color: AppColors.secondary,
-                      title: 'View\nSamples',
+                      title: AppStrings.viewSamples,
                       onTap: () {
                         Get.to(const SavedSamplesView());
                       },
@@ -112,9 +118,9 @@ class HomeView extends GetView<HomeController> {
                     child: _buildQuickActionItem(
                       icon: Icons.account_balance_wallet_outlined,
                       color: AppColors.success,
-                      title: 'Make\nPayment',
+                      title: AppStrings.makePayment,
                       onTap: () {
-                        Get.to(PaymentHistoryView());
+                        Get.to(MakePaymentView());
                       },
                     ),
                   ),
@@ -125,7 +131,7 @@ class HomeView extends GetView<HomeController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text('Academic Tools', style: AppTextStyles.titleLarge),
+                  Text(AppStrings.academicTools, style: AppTextStyles.titleLarge),
                 ],
               ),
               const SizedBox(height: 16),
@@ -144,31 +150,31 @@ class HomeView extends GetView<HomeController> {
                   _buildAcademicToolItem(
                     icon: Icons.calculate_outlined,
                     color: AppColors.warning,
-                    title: 'Grade\nCalculator',
+                    title: AppStrings.gradeCalculator,
                     onTap: () {
                       Get.to(() => GradeCalculatorView());
                     },
                   ),
                   _buildAcademicToolItem(
                     icon: Icons.text_fields,
-                    color: AppColors.primary,
-                    title: 'APA\nGenerator',
+                    color: AppColors.primaryPurple,
+                    title: AppStrings.apaGenerator,
                     onTap: () {
                       Get.to(() => const ApaGeneratorView());
                     },
                   ),
                   _buildAcademicToolItem(
                     icon: Icons.plagiarism_outlined,
-                    color: AppColors.primary,
-                    title: 'Plagiarism\nChecker',
+                    color: AppColors.primaryPurple,
+                    title: AppStrings.plagiarismChecker,
                     onTap: () {
                       Get.to(() => PlagiarismCheckerView());
                     },
                   ),
                   _buildAcademicToolItem(
                     icon: Icons.format_list_numbered,
-                    color: AppColors.primary,
-                    title: 'Word\nCounter',
+                    color: AppColors.primaryPurple,
+                    title: AppStrings.wordCounter,
                     onTap: () {
                       Get.to(() =>  WordCounterView());
                     },
@@ -176,7 +182,7 @@ class HomeView extends GetView<HomeController> {
                   _buildAcademicToolItem(
                     icon: Icons.library_books_outlined,
                     color: AppColors.success,
-                    title: 'Reference\nGenerator',
+                    title: AppStrings.referenceGenerator,
                     onTap: () {
                       Get.to(() =>  ReferenceGeneratorView());
                     },
@@ -184,7 +190,7 @@ class HomeView extends GetView<HomeController> {
                   _buildAcademicToolItem(
                     icon: Icons.edit_calendar_outlined,
                     color: AppColors.success,
-                    title: 'Dissertation\nPlanner',
+                    title: AppStrings.dissertationPlanner,
                     onTap: () {
                       Get.to(()=>DissertationPlannerView());
                     },
@@ -214,7 +220,7 @@ class HomeView extends GetView<HomeController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Overall Progress',
+                          AppStrings.overallProgress,
                           style: AppTextStyles.subtitle.copyWith(
                             color: AppColors.white,
                             fontWeight: FontWeight.w600,
@@ -222,7 +228,7 @@ class HomeView extends GetView<HomeController> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'All Assignments',
+                          AppStrings.allAssignments,
                           style: AppTextStyles.caption.copyWith(
                             color: AppColors.white70,
                           ),
@@ -243,7 +249,7 @@ class HomeView extends GetView<HomeController> {
                             ),
                           ),
                           child: Text(
-                            'View Details',
+                            AppStrings.viewDetails,
                             style: AppTextStyles.button.copyWith(
                               color: AppColors.primary,
                               fontSize: AppFontSize.s13,
@@ -291,11 +297,14 @@ class HomeView extends GetView<HomeController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('My Assignments', style: AppTextStyles.titleLarge),
+                  Text(AppStrings.myAssignments, style: AppTextStyles.titleLarge),
                   TextButton(
                     onPressed: () {
-                      // TODO: Navigate to Assignments Tab/Page
-                      // Example: Get.toNamed(Routes.ASSIGNMENTS);
+                      Get.until(
+                        (route) =>
+                            route.settings.name == Routes.BOTTOM_NAV_BAR,
+                      );
+                      Get.find<BottomNavController>().changeTab(2);
                     },
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
@@ -303,9 +312,9 @@ class HomeView extends GetView<HomeController> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: Text(
-                      'See All',
+                      AppStrings.seeAll,
                       style: AppTextStyles.subtitle.copyWith(
-                        color: AppColors.primary,
+                        color: AppColors.primaryPurple,
                         fontSize: AppFontSize.s12,
                       ),
                     ),
@@ -324,7 +333,7 @@ class HomeView extends GetView<HomeController> {
                         child: Padding(
                           padding: EdgeInsets.all(20.0),
                           child: CircularProgressIndicator(
-                            color: AppColors.primary,
+                            color: AppColors.primaryPurple,
                           ),
                         ),
                       );
@@ -339,7 +348,7 @@ class HomeView extends GetView<HomeController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 20),
                           child: Text(
-                            "No active assignments for today.",
+                            AppStrings.noActiveAssignmentsToday,
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.textGrey,
                             ),
@@ -361,6 +370,7 @@ class HomeView extends GetView<HomeController> {
                             padding: const EdgeInsets.only(bottom: 16),
                             child: _buildLeadCard(item),
                           );
+
                         } else if (item is ConfirmedOrder) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
@@ -379,18 +389,21 @@ class HomeView extends GetView<HomeController> {
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildLeadCard(Lead lead) {
     return _AssignmentCard(
-      title: lead.service ?? "Assignment",
+      title: lead.service ?? AppStrings.orderAssignment,
       subject: lead.subject ?? "General",
       dueDate: lead.deadline ?? "-",
       iconColor: AppColors.warning,
       iconBgColor: AppColors.warning.withValues(alpha: 0.1),
       statusType: AssignmentStatus.pending,
-      daysLeft: 'Action Required',
+      daysLeft: AppStrings.actionRequired,
+      onTap: () {
+        Get.to(() => const OrderDetailsView(), arguments: lead);
+      },
     );
   }
 
@@ -400,12 +413,12 @@ class HomeView extends GetView<HomeController> {
         order.deliveryDate!.toString().trim().isNotEmpty;
 
     return _AssignmentCard(
-      title: order.title ?? order.subject ?? "Assignment",
+      title: order.title ?? order.subject ?? AppStrings.orderAssignment,
       subject:
           order.moduleCode ??
-          (isDelivered ? "Module Complete" : "Expert Working"),
+          (isDelivered ? AppStrings.moduleComplete : AppStrings.expertWorking),
       dueDate: order.deliveryDate ?? order.createdAt ?? "-",
-      iconColor: isDelivered ? AppColors.success : AppColors.primary,
+      iconColor: isDelivered ? AppColors.success : AppColors.primaryPurple,
       iconBgColor: isDelivered
           ? AppColors.success.withValues(alpha: 0.1)
           : AppColors.tagBg,
@@ -413,7 +426,10 @@ class HomeView extends GetView<HomeController> {
           ? AssignmentStatus.completed
           : AssignmentStatus.inProgress,
       progress: isDelivered ? null : 0.85,
-      daysLeft: isDelivered ? null : 'In Progress',
+      daysLeft: isDelivered ? null : AppStrings.inProgress,
+      onTap: () {
+        Get.to(() => const OrderDetailsView(), arguments: order);
+      },
     );
   }
 
@@ -423,15 +439,27 @@ class HomeView extends GetView<HomeController> {
     required String title,
     required VoidCallback onTap,
   }) {
+    final bool isDark = Get.isRegistered<ThemeService>() && ThemeService.to.isDarkMode;
+    final Color effectiveColor = isDark
+        ? Color.lerp(color, Colors.white, 0.12)!.withValues(alpha: 0.85)
+        : color;
+    final Color effectiveBgColor = isDark
+        ? color.withValues(alpha: 0.12)
+        : color.withValues(alpha: 0.10);
+    final Border? effectiveBorder = isDark
+        ? Border.all(color: color.withValues(alpha: 0.18), width: 1)
+        : null;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(16),
+        border: isDark ? Border.all(color: AppColors.lightDivider, width: 0.8) : null,
         boxShadow:  [
           BoxShadow(
             color: AppColors.lightShadow,
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -449,10 +477,11 @@ class HomeView extends GetView<HomeController> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
+                    color: effectiveBgColor,
                     shape: BoxShape.circle,
+                    border: effectiveBorder,
                   ),
-                  child: Icon(icon, color: color, size: 24),
+                  child: Icon(icon, color: effectiveColor, size: 24),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -479,19 +508,31 @@ class HomeView extends GetView<HomeController> {
     required String title,
     required VoidCallback onTap,
   }) {
+    final bool isDark = Get.isRegistered<ThemeService>() && ThemeService.to.isDarkMode;
+    final Color effectiveColor = isDark
+        ? Color.lerp(color, Colors.white, 0.25)!.withValues(alpha: 0.85)
+        : color;
+    final Color effectiveBgColor = isDark
+        ? color.withValues(alpha: 0.12)
+        : color.withValues(alpha: 0.10);
+    final Border? effectiveBorder = isDark
+        ? Border.all(color: color.withValues(alpha: 0.18), width: 1)
+        : null;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.bgLight,
           borderRadius: BorderRadius.circular(16),
+          border: isDark ? Border.all(color: AppColors.lightDivider, width: 0.8) : null,
           boxShadow:  [
             BoxShadow(
               color: AppColors.lightShadow,
               blurRadius: 8,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -500,10 +541,11 @@ class HomeView extends GetView<HomeController> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: effectiveBgColor,
                 borderRadius: BorderRadius.circular(10),
+                border: effectiveBorder,
               ),
-              child: Icon(icon, color: color, size: 20),
+              child: Icon(icon, color: effectiveColor, size: 20),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -535,6 +577,7 @@ class _AssignmentCard extends StatelessWidget {
   final AssignmentStatus statusType;
   final double? progress;
   final String? daysLeft;
+  final VoidCallback? onTap;
 
   const _AssignmentCard({
     required this.title,
@@ -545,77 +588,104 @@ class _AssignmentCard extends StatelessWidget {
     required this.statusType,
     this.progress,
     this.daysLeft,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Get.isRegistered<ThemeService>() && ThemeService.to.isDarkMode;
+    final Color effectiveIconColor = isDark
+        ? Color.lerp(iconColor, Colors.white, 0.20)!.withValues(alpha: 0.85)
+        : iconColor;
+    final Color effectiveBgColor = isDark
+        ? iconColor.withValues(alpha: 0.15)
+        : iconBgColor;
+
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(20),
+        border: isDark ? Border.all(color: AppColors.lightDivider, width: 0.8) : null,
         boxShadow:  [
           BoxShadow(
             color: AppColors.lightShadow,
             spreadRadius: 2,
             blurRadius: 15,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  Icons.assignment_outlined,
-                  color: iconColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: AppTextStyles.subtitle.copyWith(
-                        fontWeight: FontWeight.w500,
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: effectiveBgColor,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        Icons.assignment_outlined,
+                        color: effectiveIconColor,
+                        size: 24,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(subject, style: AppTextStyles.caption),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Due: $dueDate',
-                      style: AppTextStyles.caption.copyWith(
-                        fontWeight: FontWeight.w500,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: AppTextStyles.subtitle.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            subject,
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Due: $dueDate',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: AppColors.lightTextHint,
+                      size: 20,
                     ),
                   ],
                 ),
-              ),
-               Icon(
-                Icons.chevron_right,
-                color: AppColors.lightTextHint,
-                size: 20,
-              ),
-            ],
+                if (statusType != AssignmentStatus.pending) ...[
+                  const SizedBox(height: 12),
+                  _buildStatusIndicator(),
+                ],
+              ],
+            ),
           ),
-          if (statusType != AssignmentStatus.pending) ...[
-            const SizedBox(height: 8),
-            _buildStatusIndicator(),
-          ],
-        ],
+        ),
       ),
     );
   }
@@ -661,7 +731,7 @@ class _AssignmentCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Completed',
+              AppStrings.completed,
               style: AppTextStyles.caption.copyWith(
                 fontWeight: FontWeight.w600,
                 color: AppColors.success,
@@ -675,7 +745,7 @@ class _AssignmentCard extends StatelessWidget {
         return Align(
           alignment: Alignment.centerRight,
           child: Text(
-            'Expert Assigned',
+            AppStrings.expertAssigned,
             style: AppTextStyles.caption.copyWith(
               fontWeight: FontWeight.w600,
               color: AppColors.primary,
@@ -695,12 +765,12 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.appBackground,
       child: SafeArea(
         child: Column(
           children: [
             Container(
-              color: AppColors.white,
+              color: AppColors.appBackground,
               padding: const EdgeInsets.only(
                 left: 8,
                 top: 8,
@@ -738,12 +808,12 @@ class AppDrawer extends StatelessWidget {
                   children: [
                     _DrawerItem(
                       icon: Icons.home_outlined,
-                      label: 'Home',
+                      label: AppStrings.home,
                       onTap: () => Get.back(),
                     ),
                     _DrawerItem(
                       icon: Icons.assignment_outlined,
-                      label: 'My Assignments',
+                      label: AppStrings.myAssignments,
                       onTap: () {
                         Get.until(
                           (route) =>
@@ -754,7 +824,7 @@ class AppDrawer extends StatelessWidget {
                     ),
                     _DrawerItem(
                       icon: Icons.wallet,
-                      label: 'Wallet',
+                      label: AppStrings.wallet,
                       onTap: () {
                         Get.back();
                         Get.toNamed(Routes.WALLET);
@@ -762,7 +832,7 @@ class AppDrawer extends StatelessWidget {
                     ),
                     _DrawerItem(
                       icon: Icons.chat_bubble_outline,
-                      label: 'Messages',
+                      label: AppStrings.messages,
                       onTap: () {
                         Get.back();
                         Get.toNamed(Routes.CHAT);
@@ -770,17 +840,17 @@ class AppDrawer extends StatelessWidget {
                     ),
                     _DrawerItem(
                       icon: Icons.radar,
-                      label: 'Resources & Tools',
+                      label: AppStrings.resourcesAndTools,
                       onTap: () => Get.toNamed(Routes.RESOURCES),
                     ),
                     _DrawerItem(
                       icon: Icons.person_outline,
-                      label: 'Our Experts',
+                      label: AppStrings.ourExperts,
                       onTap: () => Get.toNamed(Routes.EXPERTS),
                     ),
                     _DrawerItem(
                       icon: Icons.account_balance_wallet_outlined,
-                      label: 'Payments',
+                      label: AppStrings.payments,
                       onTap: () {
                         Get.back();
                         Get.to(() => PaymentHistoryView());
@@ -788,7 +858,7 @@ class AppDrawer extends StatelessWidget {
                     ),
                     _DrawerItem(
                       icon: Icons.notifications_none,
-                      label: 'Notifications',
+                      label: AppStrings.notifications,
                       onTap: () {
                         Get.to( NotificationsView());
 
@@ -796,17 +866,38 @@ class AppDrawer extends StatelessWidget {
                     ),
                     _DrawerItem(
                       icon: Icons.person_outline,
-                      label: 'Profile',
-                      onTap: () => Get.back(),
+                      label: AppStrings.profile,
+                      onTap: () {
+                        Get.until(
+                          (route) =>
+                              route.settings.name == Routes.BOTTOM_NAV_BAR,
+                        );
+                        Get.find<BottomNavController>().changeTab(3);
+                      },
                     ),
                     _DrawerItem(
                       icon: Icons.settings_outlined,
-                      label: 'Settings',
-                      onTap: () => Get.back(),
+                      label: AppStrings.settings,
+                      onTap: () {
+                        Get.until(
+                          (route) =>
+                              route.settings.name == Routes.BOTTOM_NAV_BAR,
+                        );
+                        Get.find<BottomNavController>().changeTab(3);
+                        Get.to(() => const EditProfileWidget());
+                      },
                     ),
+                    Obx(() => _DrawerItem(
+                      icon: Icons.palette_outlined,
+                      label: '${AppStrings.appTheme} (${ThemeService.to.themeModeName})',
+                      onTap: () {
+                        Get.back();
+                        ThemeSelectionDialog.show(context);
+                      },
+                    )),
                     _DrawerItem(
                       icon: Icons.help_outline,
-                      label: 'Support Center',
+                      label: AppStrings.supportCenter,
                       onTap: () => Get.back(),
                     ),
                   ],
@@ -830,7 +921,7 @@ class AppDrawer extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Need Help?',
+                            AppStrings.needHelp,
                             style: AppTextStyles.subtitle.copyWith(
                               color: AppColors.white,
                               fontWeight: FontWeight.w600,
@@ -838,7 +929,7 @@ class AppDrawer extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'We are here for you!',
+                            AppStrings.weAreHereForYou,
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.white70,
                             ),
@@ -860,7 +951,7 @@ class AppDrawer extends StatelessWidget {
                               ),
                             ),
                             child: Text(
-                              'Contact Support',
+                              AppStrings.contactUs,
                               style: AppTextStyles.caption.copyWith(
                                 color: AppColors.white,
                                 fontWeight: FontWeight.w600,

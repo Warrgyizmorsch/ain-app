@@ -7,10 +7,10 @@ class ContactUsView extends GetView<ContactUsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: const CustomAppBar(
-        title: 'Contact Us',
+        title: AppStrings.contactUs,
         showBackButton: false,
       ),
       // --- ADDED SingleChildScrollView HERE ---
@@ -64,6 +64,6 @@ class ContactUsView extends GetView<ContactUsController> {
           ],
         ),
       ),
-    );
+    ));
   }
 }

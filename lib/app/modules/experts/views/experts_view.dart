@@ -7,7 +7,7 @@ class ExpertsView extends GetView<ExpertsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: const CustomAppBar(title: 'Our Experts', showBackButton: true),
       body: Column(
@@ -16,25 +16,19 @@ class ExpertsView extends GetView<ExpertsController> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.bgLight,
                 borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.lightShadow,
-                    spreadRadius: 1,
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                border: Border.all(color: AppColors.lightDivider),
               ),
               child: TextField(
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
                 decoration: InputDecoration(
                   hintText: 'Search experts...',
                   hintStyle: AppTextStyles.hintText.copyWith(
                     color: AppColors.lightTextHint,
                     fontSize: 15,
                   ),
-                  prefixIcon:  Icon(
+                  prefixIcon: Icon(
                     Icons.search,
                     color: AppColors.lightTextHint,
                   ),
@@ -82,8 +76,8 @@ class ExpertsView extends GetView<ExpertsController> {
                       onSelected: (bool selected) {
                         controller.changeCategory(category);
                       },
-                      backgroundColor: AppColors.white,
-                      selectedColor: AppColors.secondary,
+                      backgroundColor: AppColors.bgLight,
+                      selectedColor: AppColors.primaryPurple,
                       showCheckmark: false,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -98,7 +92,7 @@ class ExpertsView extends GetView<ExpertsController> {
                         vertical: 8,
                       ),
                       elevation: isSelected ? 2 : 0,
-                      shadowColor: AppColors.secondary.withValues(alpha:0.4),
+                      shadowColor: AppColors.primaryPurple.withValues(alpha: 0.4),
                     ),
                   );
                 },
@@ -112,7 +106,7 @@ class ExpertsView extends GetView<ExpertsController> {
             child: Obx(() {
               // LOADING CHECK
               if (controller.isLoading.value) {
-                return  Center(
+                return Center(
                   child: CircularProgressIndicator(
                     color: AppColors.primaryPurple,
                   ),
@@ -162,7 +156,7 @@ class ExpertsView extends GetView<ExpertsController> {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
@@ -188,16 +182,9 @@ class _ExpertCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(20),
-        boxShadow:  [
-          BoxShadow(
-            color: AppColors.lightShadow,
-            spreadRadius: 2,
-            blurRadius: 15,
-            offset: Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: AppColors.lightDivider),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -210,7 +197,7 @@ class _ExpertCard extends StatelessWidget {
                 ? NetworkImage(imageUrl)
                 : null,
             child: imageUrl.isEmpty
-                ?  Icon(Icons.person, color: AppColors.lightTextDisabled)
+                ? Icon(Icons.person, color: AppColors.lightTextDisabled)
                 : null,
           ),
           const SizedBox(width: 16),
@@ -254,7 +241,7 @@ class _ExpertCard extends StatelessWidget {
                     Text(
                       "($orders Orders)",
                       style: AppTextStyles.caption.copyWith(
-                        color: AppColors.lightTextDisabled,
+                        color: AppColors.textSecondary,
                         fontSize: AppFontSize.s10,
                       ),
                     ),
@@ -269,7 +256,7 @@ class _ExpertCard extends StatelessWidget {
             onPressed: onViewProfile,
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primaryPurple,
-              side: BorderSide(color: AppColors.primaryPurple.withValues(alpha:0.3)),
+              side: BorderSide(color: AppColors.primaryPurple.withValues(alpha: 0.3)),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

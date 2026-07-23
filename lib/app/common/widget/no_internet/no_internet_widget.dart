@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
-
 import '../../../services/network_services.dart';
 import '../../constant/app_imports.dart';
 
@@ -90,7 +88,7 @@ class _NoInternetWidgetState extends State<NoInternetWidget>
         children: [
           AnimatedBuilder(
             animation: _pulseController,
-            builder: (_, __) {
+            builder: (context, child) {
               return Transform.scale(
                 scale: 1 + (_pulseController.value * .5),
                 child: Opacity(
@@ -144,7 +142,7 @@ class _NoInternetWidgetState extends State<NoInternetWidget>
                   sigmaY: 6,
                 ),
                 child: Container(
-                  color: Colors.black.withOpacity(.35),
+                  color: Colors.black.withValues(alpha: 0.35),
                   child: Center(
                     child: TweenAnimationBuilder<double>(
                       duration: const Duration(milliseconds: 350),
@@ -164,7 +162,7 @@ class _NoInternetWidgetState extends State<NoInternetWidget>
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(.12),
+                              color: Colors.black.withValues(alpha: 0.12),
                               blurRadius: 30,
                               offset: const Offset(0, 10),
                             ),

@@ -41,7 +41,7 @@ class AddToCartView extends GetView<AddToCartController> {
                       _item('Topic', controller.topic.value),
                       _item('Pages', controller.pages.value),
                       _item('Deadline', controller.deadline.value),
-                      _item('Amount to Pay', 'USD ${controller.amount.value}'),
+                      _item('Amount to Pay', '£${controller.amount.value}'),
                     ],
                   ),
                 ),
@@ -63,7 +63,7 @@ class AddToCartView extends GetView<AddToCartController> {
             Row(
               children: [
                 Checkbox(value: false, onChanged: (v) {}),
-                const Text('Pay \$1.87 with Wallet', style: TextStyle(color: Colors.grey)),
+                const Text('Pay £1.87 with Wallet', style: TextStyle(color: Colors.grey)),
               ],
             ),
 
@@ -87,7 +87,7 @@ class AddToCartView extends GetView<AddToCartController> {
                       // Pill shaped price highlight
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        child: Text('USD ${controller.amount.value}', style: const TextStyle(color: Color(0xff6C4CF1), fontSize: 18, fontWeight: FontWeight.bold)),
+                        child: Text('£${controller.amount.value}', style: const TextStyle(color: Color(0xff6C4CF1), fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),

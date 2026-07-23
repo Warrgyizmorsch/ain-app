@@ -75,10 +75,10 @@ class TextFormFieldCustom extends StatelessWidget {
           Container(
             height: height,
             decoration: BoxDecoration(
-              color: backgroundColor ?? Colors.white,
+              color: backgroundColor ?? AppColors.bgLight,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: borderColor ?? AppColors.transparent,
+                color: borderColor ?? AppColors.lightDivider,
                 width: borderWidth ?? 1.0,
               ),
             ),

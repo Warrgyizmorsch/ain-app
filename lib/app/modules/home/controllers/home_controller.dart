@@ -1,23 +1,98 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+
 
 import '../../../common/constant/app_imports.dart';
-import '../../../common/widget/file_picker/app_file_picker.dart';
 import '../../../core/models/accdemic_tools/assessment_model.dart';
 import '../../../core/models/login_model/login_response_model.dart';
 import '../../../core/models/notifications_model/get_notifications_model.dart';
 import '../../../services/storage_services.dart';
 
-// IMPORTANT: Ensure you have your helper imported
-// import '../../../helpers/app_file_picker_helper.dart';
 
 class HomeController extends GetxController {
   RxString username = ''.obs;
   final filters = ['All', 'Unread', 'Important'];
   final selectedFilterIndex = 0.obs;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // --- Form Controllers ---
+  final subjectController = TextEditingController();
+  final titleController = TextEditingController();
+  final deadlineController = TextEditingController();
+  final wordCountController = TextEditingController();
+  final serviceController = TextEditingController();
+  final instructionsController = TextEditingController();
+
+  // --- State Variables ---
+  // Using a String for file name to simulate file upload.
+  // In a real app, use Rx<File?> selectedFile = Rx<File?>(null);
+  final RxString uploadedFileName = ''.obs;
+  final RxString uploadedFileSize = ''.obs;
+
+  final RxString selectedUrgency = 'Standard'.obs;
+  final RxString selectedContact = 'Chat'.obs;
+
+
+
+  void pickFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+      );
+
+      if (result != null) {
+        PlatformFile file = result.files.first;
+
+        uploadedFileName.value = file.name;
+
+        double sizeInMb = file.size / (1024 * 1024);
+        if (sizeInMb >= 1) {
+          uploadedFileSize.value = '${sizeInMb.toStringAsFixed(2)} MB';
+        } else {
+          double sizeInKb = file.size / 1024;
+          uploadedFileSize.value = '${sizeInKb.toStringAsFixed(2)} KB';
+        }
+      } else {
+        debugPrint("User canceled the picker");
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to pick file. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  void removeFile() {
+    uploadedFileName.value = '';
+    uploadedFileSize.value = '';
+  }
+
+  void selectDeadline(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(const Duration(days: 3)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null) {
+      // Format date as needed
+      deadlineController.text = "${picked.day}/${picked.month}/${picked.year}";
+    }
+  }
+
+  void submitBrief() {
+    // Handle submission logic here
+    if (uploadedFileName.value.isEmpty) {
+      Get.snackbar('Error', 'Please upload a brief file',
+          backgroundColor: Colors.red.shade100, colorText: Colors.red.shade900);
+      return;
+    }
+    Get.snackbar('Success', 'Assignment brief submitted successfully!',
+        backgroundColor: Colors.green.shade100, colorText: Colors.green.shade900);
+  }
 
   void closeDrawer() {
     if (scaffoldKey.currentState?.isDrawerOpen ?? false) {
@@ -230,10 +305,8 @@ class HomeController extends GetxController {
   // ==========================================
   final wordCounterSelectedInputType = 'Text'.obs;
   final wordCounterTextController = TextEditingController();
-  final wordCounterUrlController = TextEditingController();
 
   final fileExtractedText = ''.obs;
-  final urlExtractedText = ''.obs;
   final activeTextForCounting = ''.obs;
 
   final wordCounterSelectedFile = Rxn<File>();
@@ -249,8 +322,6 @@ class HomeController extends GetxController {
       activeTextForCounting.value = wordCounterTextController.text;
     } else if (tab == 'File Upload') {
       activeTextForCounting.value = fileExtractedText.value;
-    } else if (tab == 'URL') {
-      activeTextForCounting.value = urlExtractedText.value;
     }
   }
 
@@ -333,25 +404,6 @@ class HomeController extends GetxController {
       }
       isWordCounterProcessing.value = false;
     }
-    // URL
-    else if (type == 'URL') {
-      final url = wordCounterUrlController.text.trim();
-      if (url.isEmpty) {
-        Get.snackbar("Empty", "Please enter a valid URL.", backgroundColor: AppColors.warning, colorText: AppColors.white);
-        return;
-      }
-      isWordCounterProcessing.value = true;
-      try {
-        await Future.delayed(const Duration(seconds: 2));
-        String extractedText = "Web scraping result for: $url\n\nThis is mock text extracted from the URL you entered.";
-        urlExtractedText.value = extractedText;
-        activeTextForCounting.value = extractedText;
-        Get.snackbar('Success', 'URL text extracted and counted!', backgroundColor: AppColors.statusGreen, colorText: AppColors.white);
-      } catch (e) {
-        Get.snackbar('Error', 'Failed to fetch the URL.', backgroundColor: AppColors.error, colorText: AppColors.white);
-      }
-      isWordCounterProcessing.value = false;
-    }
   }
 
 
@@ -410,8 +462,12 @@ class HomeController extends GetxController {
 
     // Dispose Word Counter Controllers
     wordCounterTextController.dispose();
-    wordCounterUrlController.dispose();
-
+    subjectController.dispose();
+    titleController.dispose();
+    deadlineController.dispose();
+    wordCountController.dispose();
+    serviceController.dispose();
+    instructionsController.dispose();
     super.onClose();
   }
 

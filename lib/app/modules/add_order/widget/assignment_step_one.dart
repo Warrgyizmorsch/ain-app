@@ -48,7 +48,7 @@ class AssignmentDetailsStep extends GetView<AddOrderController> {
                     Text(
                       "Tell us what you need — we'll handle the rest.",
                       style: AppTextStyles.sectionSub.copyWith(
-                        color: Colors.grey.shade600,
+                        color: AppColors.textSecondary,
                         fontSize: 14,
                       ),
                     ),
@@ -99,8 +99,8 @@ class AssignmentDetailsStep extends GetView<AddOrderController> {
                     textInputType: TextInputType.text,
                     textInputAction: TextInputAction.done,
                     borderColor: hasError ? AppColors.error : AppColors.lightDivider,
-                    borderWidth: 1.5,
-                    backgroundColor: Colors.white,
+                    borderWidth: 0,
+                    backgroundColor: AppColors.bgLight,
                     onChanged: (value) {
                       controller.validateTopic(value ?? "");
                       return null;
@@ -263,9 +263,9 @@ class AssignmentDetailsStep extends GetView<AddOrderController> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200, width: 1.5),
+        border: Border.all(color: AppColors.lightDivider, width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha:0.02),
@@ -283,25 +283,25 @@ class AssignmentDetailsStep extends GetView<AddOrderController> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha:0.1),
+                  color: AppColors.primaryPurple.withValues(alpha:0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 20, color: AppColors.primary),
+                child: Icon(icon, size: 20, color: AppColors.primaryPurple),
               ),
               const SizedBox(width: 12),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Divider(height: 1, thickness: 1, color: AppColors.lightDivider),
           ),
           // Section Form Fields
           ...children,
@@ -348,7 +348,7 @@ class _StepBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha:0.1), // Adjusted to match theme better
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primary.withValues(alpha:0.2)),
+        border: Border.all(color: AppColors.primaryPurple.withValues(alpha:0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -357,7 +357,7 @@ class _StepBadge extends StatelessWidget {
             width: 8,
             height: 8,
             decoration:  BoxDecoration(
-              color: AppColors.primary,
+              color: AppColors.primaryPurple,
               shape: BoxShape.circle,
             ),
           ),
@@ -366,7 +366,7 @@ class _StepBadge extends StatelessWidget {
             label,
             style: AppTextStyles.stepBadge.copyWith(
               fontWeight: FontWeight.w600,
-              color: AppColors.primary, // Pop of color
+              color: AppColors.primaryPurple, // Pop of color
             ),
           ),
         ],

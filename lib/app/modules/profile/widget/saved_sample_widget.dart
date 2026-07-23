@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:ain/app/common/constant/app_imports.dart';
 import '../../../core/models/sample_model/samples_list_model.dart';
 import '../controllers/profile_controller.dart';
@@ -12,28 +10,14 @@ class SavedSamplesView extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     Get.put(ProfileController());
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA), // Light background matching UI
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Get.back(),
-        ),
-        title: const Text(
-          'Saved Samples',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
+    return Obx(() => Scaffold(
+      backgroundColor: AppColors.appBackground,
+      appBar: CustomAppBar(
+        title: AppStrings.savedSamples,
+        showBackButton: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.black87),
+            icon: Icon(Icons.search, color: AppColors.textPrimary),
             onPressed: () {
               // Add Search Logic
             },
@@ -50,11 +34,11 @@ class SavedSamplesView extends GetView<ProfileController> {
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF311B6B), // Deep purple from UI
+                color: AppColors.primaryPurple,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF311B6B).withValues(alpha: 0.2),
+                    color: AppColors.primaryPurple.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -69,7 +53,7 @@ class SavedSamplesView extends GetView<ProfileController> {
                         const Text(
                           'All Your Saved Work',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -78,7 +62,7 @@ class SavedSamplesView extends GetView<ProfileController> {
                         Text(
                           'Access and manage your saved\nsamples anytime.',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: AppColors.white.withValues(alpha: 0.8),
                             fontSize: 12,
                             height: 1.4,
                           ),
@@ -87,7 +71,7 @@ class SavedSamplesView extends GetView<ProfileController> {
                         Obx(() => Text(
                           '${controller.sampleList.length}',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppColors.white,
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                           ),
@@ -95,7 +79,7 @@ class SavedSamplesView extends GetView<ProfileController> {
                         Text(
                           'Total Samples',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: AppColors.white.withValues(alpha: 0.8),
                             fontSize: 12,
                           ),
                         ),
@@ -107,20 +91,20 @@ class SavedSamplesView extends GetView<ProfileController> {
                     width: 90,
                     height: 90,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
+                      color: AppColors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        const Icon(Icons.folder, color: Color(0xFF9E86FF), size: 60),
+                        Icon(Icons.folder, color: AppColors.white.withValues(alpha: 0.8), size: 60),
                         Positioned(
                           top: 15,
                           child: Container(
                             width: 35,
                             height: 25,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.white,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Column(
@@ -138,10 +122,10 @@ class SavedSamplesView extends GetView<ProfileController> {
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: const BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.white,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.bookmark, color: Color(0xFF311B6B), size: 16),
+                            child: Icon(Icons.bookmark, color: AppColors.primaryPurple, size: 16),
                           ),
                         ),
                       ],
@@ -173,10 +157,10 @@ class SavedSamplesView extends GetView<ProfileController> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.bgLight,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: isSelected ? const Color(0xFF4527A0) : Colors.grey.shade300,
+                              color: isSelected ? AppColors.primaryPurple : AppColors.lightDivider,
                               width: 1.5,
                             ),
                           ),
@@ -186,13 +170,13 @@ class SavedSamplesView extends GetView<ProfileController> {
                               Icon(
                                 _getCategoryIcon(catName),
                                 size: 16,
-                                color: isSelected ? const Color(0xFF4527A0) : Colors.grey.shade600,
+                                color: isSelected ? AppColors.primaryPurple : AppColors.textSecondary,
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 catName,
                                 style: TextStyle(
-                                  color: isSelected ? const Color(0xFF4527A0) : Colors.black87,
+                                  color: isSelected ? AppColors.primaryPurple : AppColors.textPrimary,
                                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                                   fontSize: 13,
                                 ),
@@ -208,15 +192,13 @@ class SavedSamplesView extends GetView<ProfileController> {
             ),
             const SizedBox(height: 16),
 
-
-
             // --- 4. Main List View (Mobile Format) ---
             Obx(() {
               if (controller.isLoading.value) {
                 return  Center(
                   child: Padding(
                     padding: EdgeInsets.all(40.0),
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                    child: CircularProgressIndicator(color: AppColors.primaryPurple),
                   ),
                 );
               }
@@ -256,29 +238,29 @@ class SavedSamplesView extends GetView<ProfileController> {
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3E5F5), // Light purple background
+                color: AppColors.tagBg,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                    child: const Icon(Icons.star_border, color: Color(0xFF4527A0), size: 24),
+                    decoration: BoxDecoration(color: AppColors.bgLight, shape: BoxShape.circle),
+                    child: Icon(Icons.star_border, color: AppColors.primaryPurple, size: 24),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Save time and stay organized',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Your saved samples are secure and\navailable across all your devices.',
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade700, height: 1.3),
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.3),
                         ),
                       ],
                     ),
@@ -286,11 +268,11 @@ class SavedSamplesView extends GetView<ProfileController> {
                   OutlinedButton(
                     onPressed: () {},
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFF4527A0)),
+                      side: BorderSide(color: AppColors.primaryPurple),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     ),
-                    child: const Text('Explore Tools', style: TextStyle(color: Color(0xFF4527A0), fontSize: 12, fontWeight: FontWeight.bold)),
+                    child: Text('Explore Tools', style: TextStyle(color: AppColors.primaryPurple, fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -299,7 +281,7 @@ class SavedSamplesView extends GetView<ProfileController> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   // --- Helper Widgets ---
@@ -309,63 +291,6 @@ class SavedSamplesView extends GetView<ProfileController> {
     if (catName.toLowerCase().contains('doc')) return Icons.description_outlined;
     if (catName.toLowerCase().contains('cit')) return Icons.format_quote_outlined;
     return Icons.grid_view;
-  }
-
-  Widget _buildDropdownButton({required IconData icon, required String label, bool isSort = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (!isSort) ...[
-            Icon(icon, size: 16, color: Colors.grey.shade700),
-            const SizedBox(width: 6),
-          ],
-          if (isSort) ...[
-            Icon(icon, size: 16, color: Colors.grey.shade700),
-            const SizedBox(width: 6),
-          ],
-          Text(
-            label,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
-          ),
-          const SizedBox(width: 6),
-          Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey.shade700),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPageBtn(dynamic content, {required bool isActive}) {
-    return Container(
-      width: 32,
-      height: 32,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF4527A0) : Colors.white,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: isActive ? const Color(0xFF4527A0) : Colors.grey.shade300),
-      ),
-      child: content is String
-          ? Text(
-        content,
-        style: TextStyle(
-          color: isActive ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
-        ),
-      )
-          : Icon(
-        content as IconData,
-        size: 18,
-        color: Colors.grey.shade600,
-      ),
-    );
   }
 }
 
@@ -390,16 +315,26 @@ class _SampleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Dynamic styles based on type/category matching the image UI
+    // Dynamic styles based on type/category matching theme palette
     final isCitation = type.toLowerCase().contains('citation');
     final isLink = type.toLowerCase().contains('link');
 
-    final iconColor = isLink ? const Color(0xFF1976D2) : isCitation ? const Color(0xFF388E3C) : const Color(0xFF5E35B1);
-    final bgColor = isLink ? const Color(0xFFE3F2FD) : isCitation ? const Color(0xFFE8F5E9) : const Color(0xFFEDE7F6);
-    final iconData = isLink ? Icons.link : isCitation ? Icons.format_quote : Icons.description_outlined;
+    final iconColor = isLink 
+        ? AppColors.secondary 
+        : isCitation 
+            ? AppColors.statusGreen 
+            : AppColors.primaryPurple;
+            
+    final bgColor = iconColor.withValues(alpha: 0.15);
+    final iconData = isLink 
+        ? Icons.link 
+        : isCitation 
+            ? Icons.format_quote 
+            : Icons.description_outlined;
 
-    // Fallback UI strings for date and word count (since they aren't in SampleItem in provided code)
-    const mockDate = "May 12, 2025 • 10:30 AM";
+    final formattedDate = sample.createdAt.isNotEmpty 
+        ? sample.createdAt.split('T')[0] 
+        : "May 12, 2025";
     const mockWordCount = "2,450";
 
     return InkWell(
@@ -411,9 +346,9 @@ class _SampleCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.bgLight,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.lightDivider),
           boxShadow:  [
             BoxShadow(
               color: AppColors.lightShadow,
@@ -433,7 +368,7 @@ class _SampleCard extends StatelessWidget {
                 color: bgColor,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(iconData, color: iconColor, size: 30),
+              child: Icon(iconData, color: iconColor, size: 26),
             ),
             const SizedBox(width: 12),
 
@@ -446,34 +381,38 @@ class _SampleCard extends StatelessWidget {
                     title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    mockDate, // Replace with actual sample.date if available
+                    formattedDate,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      color: AppColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       // Word Count Badge
-                      if (!isLink) // Links typically don't have word counts in the UI
+                      if (!isLink)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFF3E0), // Light orange
+                            color: AppColors.secondary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             'Word Count: $mockWordCount',
-                            style: const TextStyle(color: Color(0xFFE65100), fontSize: 9, fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              color: AppColors.secondary,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       if (!isLink) const SizedBox(width: 8),
@@ -487,7 +426,11 @@ class _SampleCard extends StatelessWidget {
                         ),
                         child: Text(
                           'Type: $type',
-                          style: TextStyle(color: iconColor, fontSize: 9, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: iconColor,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -495,7 +438,6 @@ class _SampleCard extends StatelessWidget {
                 ],
               ),
             ),
-
           ],
         ),
       ),

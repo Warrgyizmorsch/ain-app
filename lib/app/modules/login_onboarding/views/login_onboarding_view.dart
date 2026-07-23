@@ -1,54 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../common/constant/app_colors.dart';
+import '../../../common/constant/app_constant_string.dart';
 import '../../../common/constant/image_constant.dart';
+import '../../../common/widget/button/custom_app_button.dart';
 import '../../../common/widget/button/social_button.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/login_onboarding_controller.dart';
-// TODO: Ensure your ImageConstants import is included here
 
 class LoginOnboardingView extends GetView<LoginOnboardingController> {
-    LoginOnboardingView({super.key});
+  const LoginOnboardingView({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       body: SafeArea(
         child: SingleChildScrollView(
-          physics:   BouncingScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
           child: Padding(
-            padding:   EdgeInsets.symmetric(horizontal: 28.0, vertical: 20.0),
+            padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                  SizedBox(height: 24),
+                const SizedBox(height: 24),
 
                 // Welcome Section
-                  Text(
-                  'Welcome Back 👋',
+                Text(
+                  AppStrings.welcomeBack,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color:  AppColors.black,
+                    color: AppColors.textPrimary,
                     letterSpacing: -0.5,
                   ),
                 ),
-                  SizedBox(height: 4),
-                  Text(
-                  'Login to continue your\nacademic journey',
+                const SizedBox(height: 4),
+                Text(
+                  AppStrings.loginSubtitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.appBackground,
+                    color: AppColors.textSecondary,
                     height: 1.4,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
 
-                  SizedBox(height: 8),
+                const SizedBox(height: 8),
 
                 // Central Illustration
                 Container(
@@ -61,74 +60,58 @@ class LoginOnboardingView extends GetView<LoginOnboardingController> {
                   ),
                 ),
 
-                  SizedBox(height: 10),
+                const SizedBox(height: 10),
 
                 // Login Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 58,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Get.offAllNamed(Routes.LOGIN);                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child:   Text(
-                      'Login',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                AppButton(
+                  title: AppStrings.login.toUpperCase(),
+                  onTap: () {
+                    Get.offAllNamed(Routes.LOGIN);
+                  },
                 ),
 
-                  SizedBox(height: 10),
+                const SizedBox(height: 10),
 
                 // Create Account Button
                 SizedBox(
                   width: double.infinity,
-                  height: 58,
+                  height: 48,
                   child: OutlinedButton(
                     onPressed: () {
                       Get.offAllNamed(Routes.SIGNUP);
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.secondary,
-                      side:   BorderSide(color: AppColors.secondary, width: 1.5),
+                      foregroundColor: AppColors.primaryPurple,
+                      side: BorderSide(color: AppColors.primaryPurple, width: 1.5),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       elevation: 0,
                     ),
-                    child:   Text(
-                      'Create Account',
+                    child: Text(
+                      AppStrings.createAccount.toUpperCase(),
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryPurple,
                       ),
                     ),
                   ),
                 ),
 
-                  SizedBox(height: 8),
+                const SizedBox(height: 8),
 
                 // Social Divider
-                  Text(
-                  'or continue with',
+                Text(
+                  AppStrings.orContinueWith,
                   style: TextStyle(
-                    color: AppColors.appBackground,
+                    color: AppColors.textSecondary,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
 
-                  SizedBox(height: 8),
+                const SizedBox(height: 8),
 
                 // Social Auth Row
                 Row(
@@ -136,7 +119,9 @@ class LoginOnboardingView extends GetView<LoginOnboardingController> {
                   children: [
                     SocialButton(
                       imagePath: ImageConstant.googleIcon,
-                      onTap: () {},
+                      onTap: () async {
+                        await controller.loginWithGoogle();
+                      },
                     ),
 
                     SocialButton(
@@ -150,14 +135,12 @@ class LoginOnboardingView extends GetView<LoginOnboardingController> {
                     ),
                   ],
                 ),
-                  SizedBox(height: 12),
+                const SizedBox(height: 12),
               ],
             ),
           ),
         ),
       ),
-    );
+    ));
   }
-
-
 }

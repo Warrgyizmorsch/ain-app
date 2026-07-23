@@ -1,37 +1,61 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-// Note: Adjust these imports based on your actual project structure
 import '../../../common/constant/app_imports.dart';
+import '../../../core/models/order_now_model/order_list_model.dart';
+import '../../../core/models/payment_model/bank_list_model.dart';
+import '../../../core/utils/api/payment_api/bank_list_api.dart';
+import '../../assignments/controllers/assignments_controller.dart';
+import '../../assignments/widget/order_details_view.dart';
 
-class PaymentHistoryView extends StatelessWidget {
+class PaymentHistoryView extends StatefulWidget {
   const PaymentHistoryView({super.key});
 
   @override
+  State<PaymentHistoryView> createState() => _PaymentHistoryViewState();
+}
+
+class _PaymentHistoryViewState extends State<PaymentHistoryView> {
+  List<BankDetail> banksList = [];
+  bool isLoadingBanks = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBankDetails();
+  }
+
+  Future<void> _fetchBankDetails() async {
+    try {
+      final response = await BankListApi.getBankList();
+      if (mounted) {
+        setState(() {
+          banksList = response.data ?? [];
+          isLoadingBanks = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoadingBanks = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA), // Light background matching UI
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Get.back(),
-        ),
-        title: const Text(
-          'Payments', // Updated title
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
+    // Ensure AssignmentsController is initialized
+    final controller = Get.put(AssignmentsController());
+
+    return Obx(() => Scaffold(
+      backgroundColor: AppColors.appBackground,
+      appBar: CustomAppBar(
+        title: AppStrings.payments,
+        showBackButton: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline, color: Color(0xFF5E35B1)),
+            icon: Icon(Icons.refresh, color: AppColors.primaryPurple),
             onPressed: () {
-              // TODO: Help action
+              controller.getOrderList();
+              _fetchBankDetails();
             },
           ),
         ],
@@ -54,31 +78,31 @@ class PaymentHistoryView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Transaction History',
+                Text(
+                  AppStrings.transactionHistory,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.grey.shade300),
+                    color: AppColors.bgLight,
+                    border: Border.all(color: AppColors.lightDivider),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.filter_alt_outlined, size: 16, color: Colors.black87),
+                      Icon(Icons.filter_alt_outlined, size: 16, color: AppColors.textPrimary),
                       const SizedBox(width: 6),
-                      const Text(
+                      Text(
                         'Filter',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                       ),
                       const SizedBox(width: 4),
-                      Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey.shade600),
+                      Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.textSecondary),
                     ],
                   ),
                 ),
@@ -86,66 +110,99 @@ class PaymentHistoryView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // 4. Transaction List
-            _buildTransactionTile(
-              icon: Icons.calculate_outlined,
-              iconColor: const Color(0xFF5E35B1),
-              iconBg: const Color(0xFFEDE7F6),
-              title: 'Grade Calculator (Premium)',
-              date: 'May 12, 2025 • 10:30 AM',
-              orderId: '#ORD12345',
-              amount: '\$399.00',
-            ),
-            const SizedBox(height: 12),
-            _buildTransactionTile(
-              icon: Icons.plagiarism_outlined,
-              iconColor: const Color(0xFF2E7D32),
-              iconBg: const Color(0xFFE8F5E9),
-              title: 'Plagiarism Checker (Premium)',
-              date: 'May 10, 2025 • 04:15 PM',
-              orderId: '#ORD12344',
-              amount: '\$499.00',
-            ),
-            const SizedBox(height: 12),
-            _buildTransactionTile(
-              icon: Icons.format_quote_outlined,
-              iconColor: const Color(0xFFE64A19),
-              iconBg: const Color(0xFFFBE9E7),
-              title: 'Reference Generator (Premium)',
-              date: 'May 8, 2025 • 11:20 AM',
-              orderId: '#ORD12343',
-              amount: '\$299.00',
-            ),
+            // 4. Dynamic Transaction List (Confirmed, Processing, Cancelled)
+            Obx(() {
+              final confirmedOrders = controller.orderResponse.value?.data?.confirmedOrders ?? [];
+
+              if (controller.isLoading.value) {
+                return Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
+                );
+              }
+
+              if (confirmedOrders.isEmpty) {
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppColors.bgLight,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.lightDivider),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.receipt_long_outlined, size: 48, color: AppColors.textSecondary),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No transaction history found',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Your completed or confirmed payments will appear here.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Column(
+                children: confirmedOrders.map((order) => _buildConfirmedTransactionTile(order)).toList(),
+              );
+            }),
             const SizedBox(height: 32),
 
-            // 5. Saved Payment Methods
+            // 5. Bank Transfer Details (Same as Order Now Step 2)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Saved Payment Methods',
+                Text(
+                  'Bank Transfer Details',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                InkWell(
-                  onTap: () {},
-                  child: const Row(
-                    children: [
-                      Text(
-                        'Manage',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF5E35B1)),
-                      ),
-                      Icon(Icons.chevron_right, size: 16, color: Color(0xFF5E35B1)),
-                    ],
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryPurple.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                )
+                  child: Text(
+                    'Bank Transfer',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
-            _buildSavedPaymentMethodCard(),
+            if (isLoadingBanks)
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
+              )
+            else if (banksList.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Center(child: Text("No bank details found.")),
+              )
+            else
+              BankTransferDetailsWidget(
+                banksList: banksList,
+                tabViewHeight: 250,
+              ),
             const SizedBox(height: 32),
 
             // 6. Support Banner
@@ -154,19 +211,74 @@ class PaymentHistoryView extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   // ==========================================
   // WIDGET BUILDERS
   // ==========================================
 
+  Widget _buildConfirmedTransactionTile(ConfirmedOrder order) {
+    final String title = order.title ?? order.subject ?? 'Assignment Order';
+    final String date = order.orderDate ?? order.createdAt ?? order.deliveryDate ?? '-';
+    final String orderIdStr = order.orderId?.toString() ?? '0000';
+    final String amountStr = '£${order.amount ?? '0.00'}';
+    final String rawStatus = (order.status ?? order.confirmedStatus ?? 'Confirmed').toLowerCase();
+
+    IconData icon;
+    Color iconColor;
+    Color iconBg;
+    Color statusColor;
+    String statusText;
+
+    if (rawStatus.contains('cancel') || rawStatus.contains('failed')) {
+      icon = Icons.cancel_outlined;
+      iconColor = AppColors.error;
+      iconBg = AppColors.error.withValues(alpha: 0.15);
+      statusColor = AppColors.error;
+      statusText = 'Cancelled';
+    } else if (rawStatus.contains('process') || rawStatus.contains('progress') || rawStatus.contains('pending')) {
+      icon = Icons.hourglass_top_outlined;
+      iconColor = AppColors.warning;
+      iconBg = AppColors.warning.withValues(alpha: 0.15);
+      statusColor = AppColors.warning;
+      statusText = 'Processing';
+    } else {
+      icon = Icons.assignment_turned_in_outlined;
+      iconColor = AppColors.statusGreen;
+      iconBg = AppColors.statusGreen.withValues(alpha: 0.15);
+      statusColor = AppColors.statusGreen;
+      statusText = 'Confirmed';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: InkWell(
+        onTap: () {
+          Get.to(() => const OrderDetailsView(), arguments: order);
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: _buildTransactionTile(
+          icon: icon,
+          iconColor: iconColor,
+          iconBg: iconBg,
+          title: title,
+          date: date,
+          orderId: '#$orderIdStr',
+          amount: amountStr,
+          status: statusText,
+          statusColor: statusColor,
+        ),
+      ),
+    );
+  }
+
   Widget _buildTotalSpentCard() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF311B92), // Deep purple from UI
+        color: AppColors.primaryPurple,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -178,16 +290,16 @@ class PaymentHistoryView extends StatelessWidget {
               Text(
                 'Total Spent',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: AppColors.white.withValues(alpha: 0.8),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 4),
               const Text(
-                '\$1,197.00',
+                '£1,197.00',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
                 ),
@@ -196,7 +308,7 @@ class PaymentHistoryView extends StatelessWidget {
               Text(
                 'Across all transactions',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: AppColors.white.withValues(alpha: 0.8),
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                 ),
@@ -209,7 +321,7 @@ class PaymentHistoryView extends StatelessWidget {
             width: 80,
             height: 70,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: AppColors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Stack(
@@ -222,10 +334,10 @@ class PaymentHistoryView extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: const BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       shape: BoxShape.circle,
                     ),
-                    child: const Text('₹', style: TextStyle(color: Color(0xFF311B92), fontWeight: FontWeight.bold, fontSize: 12)),
+                    child: Text('£', style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 12)),
                   ),
                 )
               ],
@@ -240,8 +352,9 @@ class PaymentHistoryView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.lightDivider),
         boxShadow: [
           BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
         ],
@@ -249,10 +362,10 @@ class PaymentHistoryView extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildQuickActionItem(Icons.credit_card, const Color(0xFF5E35B1), const Color(0xFFEDE7F6), 'Payment\nMethods'),
-          _buildQuickActionItem(Icons.receipt_long_outlined, const Color(0xFF2E7D32), const Color(0xFFE8F5E9), 'Invoices'),
-          _buildQuickActionItem(Icons.autorenew, const Color(0xFFE64A19), const Color(0xFFFBE9E7), 'Subscriptions'),
-          _buildQuickActionItem(Icons.shield_outlined, const Color(0xFF1565C0), const Color(0xFFE3F2FD), 'Security'),
+          _buildQuickActionItem(Icons.credit_card, AppColors.primaryPurple, AppColors.primaryPurple.withValues(alpha: 0.15), 'Payment\nMethods'),
+          _buildQuickActionItem(Icons.receipt_long_outlined, AppColors.statusGreen, AppColors.statusGreen.withValues(alpha: 0.15), 'Invoices'),
+          _buildQuickActionItem(Icons.autorenew, AppColors.secondary, AppColors.secondary.withValues(alpha: 0.15), 'Subscriptions'),
+          _buildQuickActionItem(Icons.shield_outlined, const Color(0xFF1565C0), const Color(0xFF1565C0).withValues(alpha: 0.15), 'Security'),
         ],
       ),
     );
@@ -273,10 +386,10 @@ class PaymentHistoryView extends StatelessWidget {
         Text(
           label,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: AppColors.textPrimary,
             height: 1.2,
           ),
         ),
@@ -292,13 +405,17 @@ class PaymentHistoryView extends StatelessWidget {
     required String date,
     required String orderId,
     required String amount,
+    String status = 'Paid',
+    Color? statusColor,
   }) {
+    final Color effectiveStatusColor = statusColor ?? AppColors.statusGreen;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.lightDivider),
         boxShadow: [
           BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
         ],
@@ -318,24 +435,24 @@ class PaymentHistoryView extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                   maxLines: 3, overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   date,
-                  style: TextStyle(fontSize: 10, color: Colors.grey.shade500, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEDE7F6), // Light purple badge bg
+                    color: AppColors.primaryPurple.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     'Order $orderId',
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF5E35B1)),
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
                   ),
                 ),
               ],
@@ -347,94 +464,17 @@ class PaymentHistoryView extends StatelessWidget {
             children: [
               Text(
                 amount,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 4),
-              const Text(
-                'Paid',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF388E3C)), // Green text
+              Text(
+                status,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: effectiveStatusColor),
               ),
             ],
           ),
           const SizedBox(width: 8),
-          Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 20),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSavedPaymentMethodCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
-        ],
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                // Mastercard Logo simulation
-                SizedBox(
-                  width: 40,
-                  child: Stack(
-                    children: [
-                      Container(width: 24, height: 24, decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.8), shape: BoxShape.circle)),
-                      Positioned(left: 14, child: Container(width: 24, height: 24, decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.8), shape: BoxShape.circle))),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  '.... .... .... 4242',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.black87, letterSpacing: 1.2),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEDE7F6),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    'Default',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF5E35B1)),
-                  ),
-                ),
-                const Spacer(),
-                Icon(Icons.more_vert, color: Colors.grey.shade500, size: 20),
-              ],
-            ),
-          ),
-          Divider(height: 1, thickness: 1, color: Colors.grey.shade100),
-          InkWell(
-            onTap: () {
-              // TODO: Add new payment method logic
-            },
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add, color: Color(0xFF5E35B1), size: 18),
-                  SizedBox(width: 6),
-                  Text(
-                    'Add New Payment Method',
-                    style: TextStyle(
-                      color: Color(0xFF5E35B1),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
+          Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20),
         ],
       ),
     );
@@ -449,7 +489,7 @@ class _SupportBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3E5F5), // Light purple background
+        color: AppColors.tagBg,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -457,22 +497,22 @@ class _SupportBanner extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.bgLight,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.headset_mic_outlined, color: Color(0xFF5E35B1), size: 24),
+            child: Icon(Icons.headset_mic_outlined, color: AppColors.primaryPurple, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Need help with payments?',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -480,7 +520,7 @@ class _SupportBanner extends StatelessWidget {
                   'Our support team is here to assist you.',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey.shade700,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -491,7 +531,7 @@ class _SupportBanner extends StatelessWidget {
               // TODO: Navigate to support
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF311B92), // Dark deep purple button
+              backgroundColor: AppColors.primaryPurple,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -500,7 +540,7 @@ class _SupportBanner extends StatelessWidget {
             ),
             child: const Text(
               'Contact Support',
-              style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+              style: TextStyle(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
         ],

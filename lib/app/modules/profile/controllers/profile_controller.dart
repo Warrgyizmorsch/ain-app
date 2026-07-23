@@ -5,11 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../home/controllers/home_controller.dart';
 import '../../../core/models/login_model/login_response_model.dart';
+import '../../../core/models/order_now_model/countries_master_model.dart';
+import '../../../core/models/profile_model/edit_profile_request_model.dart';
+import '../../../core/models/profile_model/edit_profile_response_model.dart';
 import '../../../core/models/profile_model/reset_password_request_model.dart';
 import '../../../core/models/sample_model/samples_category_response_model.dart';
 import '../../../core/models/sample_model/samples_details_response_model.dart';
 import '../../../core/models/sample_model/samples_list_model.dart';
+import '../../../core/utils/api/order_now_api/order_now_dropdown_api.dart';
+import '../../../core/utils/api/profile_api/edit_profile_api.dart';
+import '../../../core/utils/api/profile_api/profile_api.dart';
 import '../../../core/utils/api/profile_api/reset_password_api.dart';
 import '../../../core/utils/api/sample_api/sample_list_api.dart';
 import '../../../services/storage_services.dart';
@@ -21,6 +28,7 @@ class ProfileController extends GetxController {
   final emailController = TextEditingController();
   final mobileController = TextEditingController();
   Rx<File?> selectedProfilePhoto = Rx<File?>(null);
+  RxString networkProfilePhotoUrl = ''.obs;
   final qualificationController = TextEditingController();
   final collegeController = TextEditingController();
   final courseController = TextEditingController();
@@ -40,8 +48,10 @@ class ProfileController extends GetxController {
   final oldPasswordError = ''.obs;
   final newPasswordError = ''.obs;
   final confirmPasswordError = ''.obs;
-  // Country Dropdown
+  // Country & Country Code
   final selectedCountry = 'India'.obs;
+  final selectedCountryCode = '91'.obs;
+  final RxList<CountryData> countryList = <CountryData>[].obs;
 
   final countries = [
     'India',
@@ -49,6 +59,7 @@ class ProfileController extends GetxController {
     'United Kingdom',
     'Canada',
     'Australia',
+    'Albania',
   ];
   final RxString currentTheme = 'System Default'.obs;
 
@@ -78,12 +89,123 @@ class ProfileController extends GetxController {
       nameController.text = userData.name ?? '';
       emailController.text = userData.email ?? '';
       mobileController.text = userData.mobileNo ?? '';
+      if (userData.country != null && userData.country!.isNotEmpty) {
+        selectedCountry.value = userData.country!;
+      }
+      if (userData.countrycode != null && userData.countrycode!.isNotEmpty) {
+        selectedCountryCode.value = userData.countrycode!;
+      }
+      if (userData.photo != null && userData.photo!.isNotEmpty) {
+        networkProfilePhotoUrl.value = userData.photo!;
+      }
     }
+    fetchCountries();
+    fetchProfile();
     samplesCategory();
   }
 
-  void updateProfile() {
-    Get.snackbar('Success', 'Profile Updated Successfully');
+  Future<void> fetchCountries() async {
+    try {
+      final response = await OrderNowDropdownApi.getCountries();
+      if (response.success && response.data.isNotEmpty) {
+        countryList.assignAll(response.data);
+      }
+    } catch (e) {
+      debugPrint('Error fetching countries: $e');
+    }
+  }
+
+  Future<void> fetchProfile() async {
+    try {
+      final response = await ProfileApi.getProfile();
+      if (response.success && response.data != null) {
+        final userData = response.data!;
+        await StorageService.to.saveUser(userData);
+        nameController.text = userData.name ?? '';
+        emailController.text = userData.email ?? '';
+        mobileController.text = userData.mobileNo ?? '';
+        if (userData.country != null && userData.country!.isNotEmpty) {
+          selectedCountry.value = userData.country!;
+        }
+        if (userData.countrycode != null && userData.countrycode!.isNotEmpty) {
+          selectedCountryCode.value = userData.countrycode!;
+        }
+        if (userData.photo != null && userData.photo!.isNotEmpty) {
+          networkProfilePhotoUrl.value = userData.photo!;
+        }
+        if (Get.isRegistered<HomeController>()) {
+          Get.find<HomeController>().getData();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching profile: $e');
+    }
+  }
+
+  Future<void> updateProfile() async {
+    if (nameController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please enter your name',
+        backgroundColor: const Color(0xFFD32F2F),
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+
+      final request = EditProfileRequestModel(
+        name: nameController.text.trim(),
+        email: emailController.text.trim(),
+        mobileNo: mobileController.text.trim(),
+        countrycode: selectedCountryCode.value,
+        country: selectedCountry.value,
+        photo: selectedProfilePhoto.value,
+      );
+
+      final EditProfileResponseModel response =
+          await EditProfileApi.updateProfile(request: request);
+
+      if (response.success) {
+        if (response.data != null) {
+          await StorageService.to.saveUser(response.data!);
+          if (response.data!.photo != null && response.data!.photo!.isNotEmpty) {
+            networkProfilePhotoUrl.value = response.data!.photo!;
+          }
+        }
+        if (Get.isRegistered<HomeController>()) {
+          Get.find<HomeController>().getData();
+        }
+        selectedProfilePhoto.value = null;
+        Get.snackbar(
+          'Success',
+          response.message,
+          backgroundColor: const Color(0xFF2E7D32),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response.message,
+          backgroundColor: const Color(0xFFD32F2F),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to update profile: $e',
+        backgroundColor: const Color(0xFFD32F2F),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> openLiveChat() async {
@@ -172,17 +294,21 @@ class ProfileController extends GetxController {
     confirmPasswordError.value = '';
 
     // 2. Validate empty
-    if (oldPasswordController.text.isEmpty)
+    if (oldPasswordController.text.isEmpty) {
       oldPasswordError.value = 'Please enter old password';
-    if (newPasswordController.text.isEmpty)
+    }
+    if (newPasswordController.text.isEmpty) {
       newPasswordError.value = 'Please enter new password';
-    if (confirmPasswordController.text.isEmpty)
+    }
+    if (confirmPasswordController.text.isEmpty) {
       confirmPasswordError.value = 'Please confirm new password';
+    }
 
     if (oldPasswordError.isNotEmpty ||
         newPasswordError.isNotEmpty ||
-        confirmPasswordError.isNotEmpty)
+        confirmPasswordError.isNotEmpty) {
       return;
+    }
 
     final savedPassword = StorageService.to.getSavedPassword();
     if (oldPasswordController.text.trim() != savedPassword) {

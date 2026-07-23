@@ -8,22 +8,19 @@ class BottomNavView extends GetView<BottomNavController> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. WillPopScope lagayein back button ko handle karne ke liye
-    return WillPopScope(
-      onWillPop: () async {
-        // Agar user Home (index 0) par nahi hai, toh use Home par bhejein
-        if (controller.selectedIndex.value != 0) {
-          controller.changeTab(0);
-          return false; // App ko band hone se rokein
-        }
-        // Agar pehle se Home par hai, toh true return karein (ExitAppWrapper apna kaam karega)
-        return true;
-      },
-      // 2. ExitAppWrapper ko yahan root level par lagayein
-      child: ExitAppWrapper(
-        child: Obx(
-              () => Scaffold(
-            backgroundColor: AppColors.white,
+    return Obx(() {
+      final isHome = controller.selectedIndex.value == 0;
+      return PopScope(
+        canPop: isHome,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          if (controller.selectedIndex.value != 0) {
+            controller.changeTab(0);
+          }
+        },
+        child: ExitAppWrapper(
+          child: Scaffold(
+            backgroundColor: AppColors.appBackground,
             body: IndexedStack(
               index: controller.selectedIndex.value,
               children: controller.pages,
@@ -33,8 +30,8 @@ class BottomNavView extends GetView<BottomNavController> {
             bottomNavigationBar: const _BottomNavBar(),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -133,11 +130,11 @@ class _BottomNavBar extends GetView<BottomNavController> {
                     width: 54,
                     height: 54,
                     decoration: BoxDecoration(
-                      color: AppColors.buttonPrimary,
+                      color: AppColors.primaryPurple,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.buttonPrimary.withValues(alpha: 0.12),
+                          color: AppColors.primaryPurple.withValues(alpha: 0.12),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -189,13 +186,13 @@ class _NavItem extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: isActive ? AppColors.buttonPrimary : Colors.transparent,
+            color: isActive ? AppColors.primaryPurple : Colors.transparent,
             shape: BoxShape.circle,
           ),
           child: Center(
             child: ColorFiltered(
               colorFilter: ColorFilter.mode(
-                isActive ? AppColors.white : AppColors.buttonPrimary,
+                isActive ? AppColors.white : AppColors.primaryPurple,
                 BlendMode.srcIn,
               ),
               child: Image.asset(

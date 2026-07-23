@@ -56,6 +56,8 @@ class ApiConstant {
   static const String walletList = "app/wallet-history";
   static const String bankList = "app/banks";
   static const String addPayment = "app/add-payment";
+  static const String profileUpdate = "app/profile-update";
+  static const String profile = "app/profile";
 
 
 

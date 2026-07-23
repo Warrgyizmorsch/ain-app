@@ -2,54 +2,36 @@ import '../../../common/constant/app_imports.dart';
 import '../controllers/wallet_controller.dart';
 
 class WalletView extends GetView<WalletController> {
-    WalletView({super.key});
+  const WalletView({super.key});
 
   String getCurrencySymbol(String currencyCode) {
     switch (currencyCode.toUpperCase()) {
       case 'GBP':
-        return '£';
       case 'USD':
-        return '\$';
+        return '£';
       case 'EUR':
         return '€';
       default:
-        return currencyCode;
+        return currencyCode.isEmpty ? '£' : currencyCode;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon:   Icon(
-            Icons.arrow_back_ios_new,
-            size: 18,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        title:   Text(
-          'Wallet',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+    return Obx(() => Scaffold(
+      backgroundColor: AppColors.appBackground,
+      appBar: CustomAppBar(
+        title: 'Wallet',
+        showBackButton: true,
       ),
       body: SingleChildScrollView(
-        padding:   EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 24,
         ),
         child: Column(
           children: [
-              SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             Image.asset(
               ImageConstant.wallet,
@@ -57,38 +39,45 @@ class WalletView extends GetView<WalletController> {
               height: 90,
             ),
 
-              SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // Wallet Amount Card
             Container(
-              width: 150,
-              padding:   EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+              width: 160,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.bgLight,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color:   Color(0xFFB6E1FF),
+                  color: AppColors.primaryPurple.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
-                    Text(
+                  Text(
                     "Wallet Amount",
                     style: TextStyle(
                       fontSize: 11,
                       color: AppColors.textSecondary,
                     ),
                   ),
-                    SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
                   // Reactive Wallet Amount text
                   Obx(() {
                     if (controller.isLoadingAmount.value) {
-                      return   SizedBox(
+                      return SizedBox(
                         height: 28,
                         width: 28,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(color: AppColors.primaryPurple, strokeWidth: 2),
                       );
                     }
                     return Row(
@@ -96,19 +85,19 @@ class WalletView extends GetView<WalletController> {
                       children: [
                         Text(
                           getCurrencySymbol(controller.currency.value),
-                          style:   TextStyle(
+                          style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.primary,
+                            color: AppColors.primaryPurple,
                           ),
                         ),
-                          SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           controller.walletAmount.value.toStringAsFixed(2),
-                          style:   TextStyle(
+                          style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.primary,
+                            color: AppColors.primaryPurple,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -120,31 +109,32 @@ class WalletView extends GetView<WalletController> {
               ),
             ),
 
-              SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Transaction History',
                 style: AppTextStyles.bodySmall.copyWith(
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
 
-              SizedBox(height: 12),
+            const SizedBox(height: 12),
 
             Obx(() {
               if (controller.isLoadingTransactions.value) {
-                return   Padding(
-                  padding: EdgeInsets.only(top: 40),
-                  child: Center(child: CircularProgressIndicator()),
+                return Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
                 );
               }
 
               if (controller.transactions.isEmpty) {
-                return   Padding(
-                  padding: EdgeInsets.only(top: 20),
+                return Padding(
+                  padding: const EdgeInsets.only(top: 20),
                   child: Text(
                     'No Transaction history',
                     style: TextStyle(
@@ -157,25 +147,26 @@ class WalletView extends GetView<WalletController> {
 
               return ListView.separated(
                 shrinkWrap: true,
-                physics:   NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: controller.transactions.length,
-                separatorBuilder: (_, _) =>   SizedBox(height: 10),
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
                 itemBuilder: (context, index) {
                   final item = controller.transactions[index];
 
                   final isCredit = item.type.toLowerCase() == 'credit';
                   final sign = isCredit ? '+' : '-';
-                  final color = isCredit ? Colors.green : Colors.red;
+                  final color = isCredit ? AppColors.statusGreen : AppColors.error;
 
                   return Container(
-                    padding:   EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
+                      color: AppColors.bgLight,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color:   Color(0xFFD6B9FF),
+                        color: AppColors.lightDivider,
                       ),
                     ),
                     child: Row(
@@ -186,15 +177,16 @@ class WalletView extends GetView<WalletController> {
                             children: [
                               Text(
                                 item.description,
-                                style:   TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
-                                SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
                                 item.createdAt,
-                                style:   TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   color: AppColors.textSecondary,
                                 ),
@@ -219,6 +211,6 @@ class WalletView extends GetView<WalletController> {
           ],
         ),
       ),
-    );
+    ));
   }
 }

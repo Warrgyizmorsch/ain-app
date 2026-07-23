@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../../../common/constant/app_imports.dart';
 
 class ContactUsController extends GetxController {
@@ -76,7 +73,7 @@ class ContactUsController extends GetxController {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: AppColors.white,
+          backgroundColor: AppColors.bgLight,
           surfaceTintColor: AppColors.transparent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           title: Text('Request Call Back', style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s16)),
@@ -100,7 +97,7 @@ class ContactUsController extends GetxController {
                     hintText: 'Enter your name',
                     hintStyle: AppTextStyles.hintText.copyWith(fontSize: AppFontSize.s13),
                     filled: true,
-                    fillColor: AppColors.background,
+                    fillColor: AppColors.appBackground,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide.none,
@@ -119,7 +116,7 @@ class ContactUsController extends GetxController {
                     hintText: 'Phone Number',
                     hintStyle: AppTextStyles.hintText.copyWith(fontSize: AppFontSize.s13),
                     filled: true,
-                    fillColor: AppColors.background,
+                    fillColor: AppColors.appBackground,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide.none,

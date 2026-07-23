@@ -10,14 +10,14 @@ import '../widget/saved_sample_widget.dart';
 
 
 class ProfileView extends GetView<ProfileController> {
-    ProfileView({super.key});
+  const ProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar:   CustomAppBar(
-        title: 'Profile',
+        title: AppStrings.profile,
         showBackButton: false,
       ),
       body: SingleChildScrollView(
@@ -26,61 +26,92 @@ class ProfileView extends GetView<ProfileController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // --- Header Gradient Card ---
-            Container(
-              padding:   EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                    CircleAvatar(
-                    radius: 32,
-                    backgroundColor: AppColors.white,
-                    // TODO: Replace with network image if required
-                    // backgroundImage: NetworkImage('url'),
-                    child: Icon(Icons.person, size: 32, color: AppColors.textGrey),
-                  ),
-                    SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          controller.nameController.text,
-                          style: AppTextStyles.titleLarge.copyWith(
-                            color: AppColors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                          SizedBox(height: 4),
-                        Text(
-                          controller.emailController.text,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.white70,
-                            fontSize: 13,
-                          ),
-                        ),
-                          SizedBox(height: 10),
-                        Container(
-                          padding:   EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppColors.white.withValues(alpha:0.2),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            'Premium Member',
-                            style: AppTextStyles.caption.copyWith(
+            Obx(
+              () => Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        shape: BoxShape.circle,
+                        image: controller.selectedProfilePhoto.value != null
+                            ? DecorationImage(
+                                image: FileImage(
+                                  controller.selectedProfilePhoto.value!,
+                                ),
+                                fit: BoxFit.cover,
+                              )
+                            : (controller.networkProfilePhotoUrl.value.isNotEmpty
+                                ? DecorationImage(
+                                    image: NetworkImage(
+                                      controller.networkProfilePhotoUrl.value,
+                                    ),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null),
+                      ),
+                      child: (controller.selectedProfilePhoto.value == null &&
+                              controller.networkProfilePhotoUrl.value.isEmpty)
+                          ? Icon(
+                              Icons.person,
+                              size: 32,
+                              color: AppColors.textGrey,
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            controller.nameController.text.isNotEmpty
+                                ? controller.nameController.text
+                                : 'User Name',
+                            style: AppTextStyles.titleLarge.copyWith(
                               color: AppColors.white,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            controller.emailController.text,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.white70,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              AppStrings.premiumMember,
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 
@@ -89,7 +120,7 @@ class ProfileView extends GetView<ProfileController> {
             // --- Menu Section ---
             Container(
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.bgLight,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -104,7 +135,7 @@ class ProfileView extends GetView<ProfileController> {
                 children: [
                   _ProfileMenuTile(
                     icon: Icons.receipt_long_outlined,
-                    title: 'My Orders',
+                    title: AppStrings.myOrders,
                     onTap: () {
                       Get.to(() => MyOrdersWidget());
                     },
@@ -112,7 +143,7 @@ class ProfileView extends GetView<ProfileController> {
                   _Divider(),
                   _ProfileMenuTile(
                     icon: Icons.payment_outlined,
-                    title: 'Payments',
+                    title: AppStrings.payments,
                     onTap: () {
                       // Note: adjust route if this should be const
                       Get.to(PaymentHistoryView());
@@ -121,7 +152,7 @@ class ProfileView extends GetView<ProfileController> {
                   _Divider(),
                   _ProfileMenuTile(
                     icon: Icons.bookmark_border_outlined,
-                    title: 'Saved Samples',
+                    title: AppStrings.savedSamples,
                     onTap: () {
                       // Note: adjust route if this should be const
                       Get.to(SavedSamplesView());
@@ -130,16 +161,25 @@ class ProfileView extends GetView<ProfileController> {
                   _Divider(),
                   _ProfileMenuTile(
                     icon: Icons.card_giftcard_outlined,
-                    title: 'Refer & Earn',
-                    subtitle: 'Invite & earn rewards',
+                    title: AppStrings.referAndEarn,
+                    subtitle: AppStrings.inviteAndEarnRewards,
                     onTap: () {
                       Get.to(  ReferAndEarnScreen());
                     },
                   ),
                   _Divider(),
+                  Obx(() => _ProfileMenuTile(
+                    icon: Icons.palette_outlined,
+                    title: AppStrings.appTheme,
+                    subtitle: ThemeService.to.themeModeName,
+                    onTap: () {
+                      ThemeSelectionDialog.show(context);
+                    },
+                  )),
+                  _Divider(),
                   _ProfileMenuTile(
                     icon: Icons.help_outline,
-                    title: 'Support Center',
+                    title: AppStrings.supportCenter,
                     onTap: () {
                       controller.openLiveChat();
                     },
@@ -147,7 +187,7 @@ class ProfileView extends GetView<ProfileController> {
                   _Divider(),
                   _ProfileMenuTile(
                     icon: Icons.manage_accounts_outlined,
-                    title: 'Edit Profile',
+                    title: AppStrings.editProfile,
                     onTap: () {
                       Get.to(  EditProfileWidget());
                     },
@@ -155,7 +195,7 @@ class ProfileView extends GetView<ProfileController> {
                   _Divider(),
                   _ProfileMenuTile(
                     icon: Icons.lock_outline,
-                    title: 'Change Password',
+                    title: AppStrings.changePassword,
                     onTap: () {
                       Get.to(  ChangePasswordWidget());
                     },
@@ -174,7 +214,7 @@ class ProfileView extends GetView<ProfileController> {
               },
               icon:   Icon(Icons.logout, color: AppColors.error),
               label: Text(
-                'Log Out',
+                AppStrings.logout,
                 style: AppTextStyles.button.copyWith(
                   color: AppColors.error,
                   fontWeight: FontWeight.w600,
@@ -214,7 +254,7 @@ class _ProfileMenuTile extends StatelessWidget {
   final String? subtitle;
   final VoidCallback onTap;
 
-    _ProfileMenuTile({
+  const _ProfileMenuTile({
     required this.icon,
     required this.title,
     this.subtitle,

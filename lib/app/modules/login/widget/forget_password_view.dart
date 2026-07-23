@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import '../../../common/constant/app_colors.dart';
 import '../../../common/constant/image_constant.dart';
 import '../../../common/widget/button/custom_app_button.dart';
 import '../../../common/widget/text_field/custom_text_field.dart';
@@ -11,52 +12,54 @@ class ForgotPasswordView extends GetView<LoginController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: [
-                Image.asset(
-                  ImageConstant.loginBackground,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-                Positioned(
-                  bottom: -35,
-                  child: Container(
-                    height: 75,
-                    width: 75,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha:.15),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Image.asset(ImageConstant.appLogoFull),
+    return Obx(
+      () => Scaffold(
+        backgroundColor: AppColors.appBackground,
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  Image.asset(
+                    ImageConstant.loginBackground,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
                   ),
-                ),
-              ],
-            ),
+                  Positioned(
+                    bottom: -35,
+                    child: Container(
+                      height: 75,
+                      width: 75,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.lightShadow,
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Image.asset(ImageConstant.appLogoFull),
+                    ),
+                  ),
+                ],
+              ),
 
-            const SizedBox(height: 60),
+              const SizedBox(height: 60),
 
-            Obx(() {
-              if (controller.isOtpSent.value) {
-                return _buildOtpSection(context);
-              } else {
-                return _buildEmailSection(context);
-              }
-            }),
-          ],
+              Obx(() {
+                if (controller.isOtpSent.value) {
+                  return _buildOtpSection(context);
+                } else {
+                  return _buildEmailSection(context);
+                }
+              }),
+            ],
+          ),
         ),
       ),
     );
@@ -65,20 +68,24 @@ class ForgotPasswordView extends GetView<LoginController> {
   Widget _buildEmailSection(BuildContext context) {
     return Column(
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Text(
             "Reset Your Password",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
           ),
         ),
         const SizedBox(height: 10),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Text(
             "Enter your email address and we will send you instructions to reset your password.",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: Colors.grey),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
         ),
         const SizedBox(height: 30),
@@ -101,25 +108,33 @@ class ForgotPasswordView extends GetView<LoginController> {
                   padding: const EdgeInsets.only(top: 5, left: 5),
                   child: Text(
                     controller.emailError.value,
-                    style: const TextStyle(color: Colors.red, fontSize: 12),
+                    style: TextStyle(color: AppColors.error, fontSize: 12),
                   ),
                 ),
               const SizedBox(height: 30),
-              AppButton(
-                title: controller.isLoading.value
-                    ? "SENDING..."
-                    : "SEND INSTRUCTIONS",
-                onTap: controller.isLoading.value
-                    ? () {} // Disable button while loading
-                    : () => controller.forgotPassword(
-                        controller.emailController.text.trim(),
-                                            ),
+              Obx(
+                () => AppButton(
+                  title: controller.isLoading.value
+                      ? "SENDING..."
+                      : "SEND INSTRUCTIONS",
+                  onTap: controller.isLoading.value
+                      ? () {}
+                      : () => controller.forgotPassword(
+                          controller.emailController.text.trim(),
+                        ),
+                ),
               ),
               const SizedBox(height: 20),
               Center(
                 child: TextButton(
                   onPressed: () => Get.back(),
-                  child: const Text("Back to Login"),
+                  child: Text(
+                    "Back to Login",
+                    style: TextStyle(
+                      color: AppColors.primaryPurple,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -132,11 +147,15 @@ class ForgotPasswordView extends GetView<LoginController> {
   Widget _buildOtpSection(BuildContext context) {
     return Column(
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Text(
             "Verify OTP",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
           ),
         ),
         const SizedBox(height: 10),
@@ -145,20 +164,18 @@ class ForgotPasswordView extends GetView<LoginController> {
           child: RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.textSecondary,
                 height: 1.4,
               ),
               children: [
                 const TextSpan(text: "We have sent a verification code to\n"),
                 TextSpan(
-                  text: controller
-                      .emailController
-                      .text, // Display the email entered
-                  style: const TextStyle(
+                  text: controller.emailController.text,
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -183,17 +200,19 @@ class ForgotPasswordView extends GetView<LoginController> {
                   padding: const EdgeInsets.only(top: 8, left: 5),
                   child: Text(
                     controller.otpError.value,
-                    style: const TextStyle(color: Colors.red, fontSize: 12),
+                    style: TextStyle(color: AppColors.error, fontSize: 12),
                   ),
                 ),
               const SizedBox(height: 30),
-              AppButton(
-                title: controller.isLoadingOtp.value
-                    ? "VERIFYING..."
-                    : "VERIFY OTP",
-                onTap: controller.isLoadingOtp.value
-                    ? () {}
-                    : () => controller.verifyOtp(context),
+              Obx(
+                () => AppButton(
+                  title: controller.isLoadingOtp.value
+                      ? "VERIFYING..."
+                      : "VERIFY OTP",
+                  onTap: controller.isLoadingOtp.value
+                      ? () {}
+                      : () => controller.verifyOtp(context),
+                ),
               ),
               const SizedBox(height: 20),
 
@@ -207,15 +226,15 @@ class ForgotPasswordView extends GetView<LoginController> {
                       isTimerActive
                           ? "Resend code in "
                           : "Didn't receive the code? ",
-                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                     ),
                     if (isTimerActive)
                       Text(
                         controller.formattedOtpTimer,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                         ),
                       )
                     else
@@ -224,15 +243,15 @@ class ForgotPasswordView extends GetView<LoginController> {
                             ? null
                             : () => controller.forgotPassword(
                                 controller.emailController.text.trim(),
-                                                            ),
+                              ),
                         child: Text(
                           "Resend",
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: controller.isLoading.value
-                                ? Colors.grey
-                                : Colors.blue,
+                                ? AppColors.lightTextDisabled
+                                : AppColors.primaryPurple,
                           ),
                         ),
                       ),
@@ -247,7 +266,13 @@ class ForgotPasswordView extends GetView<LoginController> {
                     controller.otpController.clear();
                     controller.isOtpSent.value = false;
                   },
-                  child: const Text("Change Email Address"),
+                  child: Text(
+                    "Change Email Address",
+                    style: TextStyle(
+                      color: AppColors.primaryPurple,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -320,19 +345,28 @@ class _CustomOtpInputState extends State<CustomOtpInput> {
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             maxLength: 1,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+            cursorColor: AppColors.primaryPurple,
             decoration: InputDecoration(
               counterText: "",
               filled: true,
-              fillColor: Colors.grey.shade100,
+              fillColor: AppColors.bgLight,
               contentPadding: EdgeInsets.zero,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
+                borderSide: BorderSide(color: AppColors.lightDivider),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: AppColors.lightDivider),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.blue, width: 2),
+                borderSide: BorderSide(color: AppColors.primaryPurple, width: 2),
               ),
             ),
             onChanged: (value) {

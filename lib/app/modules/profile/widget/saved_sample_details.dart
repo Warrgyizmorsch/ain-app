@@ -4,11 +4,11 @@ import '../controllers/profile_controller.dart';
 class SampleDetailsView extends GetView<ProfileController> {
   final dynamic sample;
 
-    SampleDetailsView({super.key, required this.sample});
+  const SampleDetailsView({super.key, required this.sample});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar:   CustomAppBar(title: 'Sample Details'),
       body: SingleChildScrollView(
@@ -20,7 +20,7 @@ class SampleDetailsView extends GetView<ProfileController> {
               width: double.infinity,
               padding:   EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.bgLight,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow:   [
                   BoxShadow(
@@ -40,7 +40,7 @@ class SampleDetailsView extends GetView<ProfileController> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.background, // Equivalent to 0xFFEDE7F6
+                      color: AppColors.primaryPurple.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -122,7 +122,7 @@ class SampleDetailsView extends GetView<ProfileController> {
               width: double.infinity,
               padding:   EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.bgLight,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow:   [
                   BoxShadow(
@@ -207,7 +207,7 @@ class SampleDetailsView extends GetView<ProfileController> {
                 width: double.infinity,
                 padding:   EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: AppColors.bgLight,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow:   [
                     BoxShadow(
@@ -242,7 +242,7 @@ class SampleDetailsView extends GetView<ProfileController> {
         child: Container(
           padding:   EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration:   BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.bgLight,
             boxShadow: [
               BoxShadow(
                 color: AppColors.lightShadow,
@@ -267,7 +267,7 @@ class SampleDetailsView extends GetView<ProfileController> {
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildFormattedDescription(String text) {

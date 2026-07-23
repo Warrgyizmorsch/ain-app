@@ -1,29 +1,30 @@
 import '../../../common/constant/app_imports.dart';
 
 class ReferAndEarnScreen extends StatelessWidget {
-    ReferAndEarnScreen({super.key});
+  const ReferAndEarnScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
+    return Obx(() => Scaffold(
+      backgroundColor: AppColors.appBackground,
       appBar: CustomAppBar(
-        title: 'Refer and Earn',
+        title: AppStrings.referAndEarn,
         actions: [
           IconButton(
-            icon:   Icon(Icons.card_giftcard, color: AppColors.black),
+            icon: Icon(Icons.card_giftcard, color: AppColors.textPrimary),
             onPressed: () {},
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding:   EdgeInsets.all(16.0),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-              HeroSection(),
-              SizedBox(height: 24),
-              Row(
+            const HeroSection(),
+            const SizedBox(height: 24),
+            const Row(
               children: [
                 Expanded(
                   child: ReferralCodeCard(
@@ -40,18 +41,18 @@ class ReferAndEarnScreen extends StatelessWidget {
                 ),
               ],
             ),
-              SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-              EarningHighlightSection(),
-              SizedBox(height: 24),
+            const EarningHighlightSection(),
+            const SizedBox(height: 24),
 
             Text('More Ways to Earn 🎉', style: AppTextStyles.h1),
-              SizedBox(height: 12),
+            const SizedBox(height: 12),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                    BonusCard(
+                  BonusCard(
                     tag: 'EXTRA BONUS',
                     title: 'Invite 5 Friends',
                     subtitle: 'Earn £20 Bonus',
@@ -59,8 +60,8 @@ class ReferAndEarnScreen extends StatelessWidget {
                     current: 3,
                     target: 5,
                   ),
-                    SizedBox(width: 12),
-                    BonusCard(
+                  const SizedBox(width: 12),
+                  BonusCard(
                     tag: 'MEGA BONUS',
                     title: 'Invite 10 Friends',
                     subtitle: 'Earn £50 Bonus',
@@ -71,62 +72,62 @@ class ReferAndEarnScreen extends StatelessWidget {
                 ],
               ),
             ),
-              SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // How it works
             Text('How it works', style: AppTextStyles.h1),
-              SizedBox(height: 16),
-              Row(
+            const SizedBox(height: 16),
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                HowItWorksStep(
+                const HowItWorksStep(
                   step: 1,
                   title: 'Invite Friends',
                   desc: 'Share your code or link',
                 ),
                 Icon(Icons.arrow_right_alt, color: AppColors.lightDisabled),
-                HowItWorksStep(
+                const HowItWorksStep(
                   step: 2,
                   title: 'Friend Places Order',
                   desc: 'They get 20% OFF',
                 ),
                 Icon(Icons.arrow_right_alt, color: AppColors.lightDisabled),
-                HowItWorksStep(
+                const HowItWorksStep(
                   step: 3,
                   title: 'You Earn £10',
                   desc: 'After order completed',
                 ),
               ],
             ),
-              SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // Share Icons
             Text('Share your link', style: AppTextStyles.h1),
-              SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                  SocialShareIcon(
+                const SocialShareIcon(
                   icon: Icons.chat,
                   color: AppColors.success,
                   label: 'WhatsApp',
                 ),
-                  SocialShareIcon(
+                const SocialShareIcon(
                   icon: Icons.send,
                   color: Colors.blue,
                   label: 'Telegram',
                 ),
-                  SocialShareIcon(
+                const SocialShareIcon(
                   icon: Icons.camera_alt,
                   color: Colors.pink,
                   label: 'Instagram',
                 ),
-                  SocialShareIcon(
+                const SocialShareIcon(
                   icon: Icons.message,
                   color: Colors.blueAccent,
                   label: 'Messenger',
                 ),
-                  SocialShareIcon(
+                SocialShareIcon(
                   icon: Icons.more_horiz,
                   color: AppColors.lightDivider,
                   label: 'More',
@@ -134,20 +135,20 @@ class ReferAndEarnScreen extends StatelessWidget {
                 ),
               ],
             ),
-              SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // Bottom Banner
-              BottomBannerSection(),
-              SizedBox(height: 24),
+            const BottomBannerSection(),
+            const SizedBox(height: 24),
           ],
         ),
       ),
-    );
+    ));
   }
 }
 
 class HeroSection extends StatelessWidget {
-    HeroSection({super.key});
+  const HeroSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -159,18 +160,18 @@ class HeroSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Refer Friends,\nEarn £10', style: AppTextStyles.h2),
-                SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'Your friend gets 20% OFF on their first order and you earn £10 after their order is completed.',
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.textSecondary,
                 ),
               ),
-                SizedBox(height: 16),
+              const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: () {},
-                icon:   Icon(Icons.share, color: AppColors.white),
-                label:   Text(
+                icon: const Icon(Icons.share, color: AppColors.white),
+                label: Text(
                   'Invite Friends',
                   style: AppTextStyles.button,
                 ),
@@ -189,7 +190,10 @@ class HeroSection extends StatelessWidget {
           flex: 2,
           child: Container(
             height: 150,
-            color: AppColors.appBackground,
+            decoration: BoxDecoration(
+              color: AppColors.bgLight,
+              borderRadius: BorderRadius.circular(12),
+            ),
             alignment: Alignment.center,
             child: Text('3D Image', style: AppTextStyles.bodyMedium),
           ),
@@ -203,22 +207,22 @@ class ReferralCodeCard extends StatelessWidget {
   final String title;
   final String value;
 
-    ReferralCodeCard({super.key, required this.title, required this.value});
+  const ReferralCodeCard({super.key, required this.title, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:   EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.lightDivider),
         borderRadius: BorderRadius.circular(8),
-        color: AppColors.white,
+        color: AppColors.bgLight,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: AppTextStyles.caption),
-            SizedBox(height: 8),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -232,7 +236,7 @@ class ReferralCodeCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-                Icon(Icons.copy, size: 16, color: AppColors.primaryPurple),
+              Icon(Icons.copy, size: 16, color: AppColors.primaryPurple),
             ],
           ),
         ],
@@ -242,24 +246,24 @@ class ReferralCodeCard extends StatelessWidget {
 }
 
 class EarningHighlightSection extends StatelessWidget {
-    EarningHighlightSection({super.key});
+  const EarningHighlightSection({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:   EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.tagBg,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-            CircleAvatar(
+          CircleAvatar(
             radius: 30,
             backgroundColor: AppColors.primaryPurple,
-            child: Icon(Icons.account_balance_wallet, color: AppColors.white),
+            child: const Icon(Icons.account_balance_wallet, color: AppColors.white),
           ),
-            SizedBox(width: 16),
+          const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -272,8 +276,8 @@ class EarningHighlightSection extends StatelessWidget {
               ),
             ],
           ),
-            SizedBox(width: 24),
-            Expanded(
+          const SizedBox(width: 24),
+          Expanded(
             child: Text(
               'For every friend who places their first order',
               style: AppTextStyles.bodySmall,
@@ -293,7 +297,7 @@ class BonusCard extends StatelessWidget {
   final int current;
   final int target;
 
-    BonusCard({
+  const BonusCard({
     super.key,
     required this.tag,
     required this.title,
@@ -307,7 +311,7 @@ class BonusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 160,
-      padding:   EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(12),
@@ -315,19 +319,19 @@ class BonusCard extends StatelessWidget {
       child: Column(
         children: [
           Text(tag, style: AppTextStyles.stepBadge),
-            SizedBox(height: 8),
-            Icon(Icons.emoji_events, size: 32, color: AppColors.warning),
-            SizedBox(height: 8),
+          const SizedBox(height: 8),
+          Icon(Icons.emoji_events, size: 32, color: AppColors.warning),
+          const SizedBox(height: 8),
           Text(title, style: AppTextStyles.bodySmall),
           Text(
             subtitle,
             style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.bold),
           ),
-            SizedBox(height: 8),
+          const SizedBox(height: 8),
           LinearProgressIndicator(
             value: current / target,
-            backgroundColor: AppColors.white,
-            valueColor:   AlwaysStoppedAnimation<Color>(
+            backgroundColor: AppColors.bgLight,
+            valueColor: AlwaysStoppedAnimation<Color>(
               AppColors.primaryPurple,
             ),
           ),
@@ -342,7 +346,7 @@ class HowItWorksStep extends StatelessWidget {
   final String title;
   final String desc;
 
-    HowItWorksStep({
+  const HowItWorksStep({
     super.key,
     required this.step,
     required this.title,
@@ -362,9 +366,9 @@ class HowItWorksStep extends StatelessWidget {
               style: AppTextStyles.caption.copyWith(color: AppColors.white),
             ),
           ),
-            SizedBox(height: 8),
-            Icon(Icons.people, color: AppColors.primaryPurple),
-            SizedBox(height: 8),
+          const SizedBox(height: 8),
+          Icon(Icons.people, color: AppColors.primaryPurple),
+          const SizedBox(height: 8),
           Text(
             title,
             textAlign: TextAlign.center,
@@ -389,7 +393,7 @@ class SocialShareIcon extends StatelessWidget {
   final String label;
   final bool isIconDark;
 
-    SocialShareIcon({
+  const SocialShareIcon({
     super.key,
     required this.icon,
     required this.color,
@@ -409,7 +413,7 @@ class SocialShareIcon extends StatelessWidget {
             color: isIconDark ? AppColors.textPrimary : AppColors.white,
           ),
         ),
-          SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(label, style: AppTextStyles.overline),
       ],
     );
@@ -417,20 +421,20 @@ class SocialShareIcon extends StatelessWidget {
 }
 
 class BottomBannerSection extends StatelessWidget {
-    BottomBannerSection({super.key});
+  const BottomBannerSection({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:   EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-            Icon(Icons.card_giftcard, color: AppColors.white, size: 40),
-            SizedBox(width: 16),
+          const Icon(Icons.card_giftcard, color: AppColors.white, size: 40),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

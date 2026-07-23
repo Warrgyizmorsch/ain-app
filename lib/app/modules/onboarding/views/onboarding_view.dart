@@ -2,6 +2,7 @@ import 'package:ain/app/common/constant/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../common/widget/button/custom_app_button.dart';
 import '../controllers/onboarding_controller.dart';
 
 class OnboardingView extends GetView<OnboardingController> {
@@ -9,7 +10,7 @@ class OnboardingView extends GetView<OnboardingController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       body: Stack(
         children: [
@@ -53,7 +54,7 @@ class OnboardingView extends GetView<OnboardingController> {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
@@ -257,7 +258,7 @@ class _OnboardingPageState extends State<_OnboardingPage>
                     child: Image.asset(
                       widget.data.image,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) =>
+                      errorBuilder: (context, error, stackTrace) =>
                       const _PlaceholderIllustration(),
                     ),
                   ),
@@ -377,14 +378,18 @@ class _DeskPersonPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter o) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // ─────────────────────────────────────────────
-// Text Section
+// Animated Text Section — slide-in + fade per page
 // ─────────────────────────────────────────────
 class _TextSection extends StatelessWidget {
-  const _TextSection({required this.title, required this.description});
+  const _TextSection({
+    required this.title,
+    required this.description,
+  });
+
   final String title;
   final String description;
 
@@ -398,10 +403,10 @@ class _TextSection extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
               letterSpacing: 0.2,
             ),
           ),
@@ -409,10 +414,10 @@ class _TextSection extends StatelessWidget {
           Text(
             description,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w400,
-              color: Color(0xFF7A7A9D),
+              color: AppColors.textSecondary,
               height: 1.6,
             ),
           ),
@@ -437,7 +442,7 @@ class _BottomControls extends GetView<OnboardingController> {
         bottom: MediaQuery.of(context).padding.bottom + 20,
         top: 10,
       ),
-      color: Colors.white,
+      color: AppColors.bgLight,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -457,22 +462,23 @@ class _BottomControls extends GetView<OnboardingController> {
                   onPressed: controller.skipOnboarding,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: const BorderSide(
-                        color: Color(0xFFDDDDEE), width: 1.5),
+                    side: BorderSide(
+                        color: AppColors.lightDivider, width: 1.5),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: const Text('Skip',
+                  child: Text('Skip',
                       style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF7A7A9D))),
+                          color: AppColors.textSecondary)),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _AnimatedNextButton(
-                  onPressed: controller.nextPage,
+                child: AppButton(
+                  title: 'Next',
+                  onTap: controller.nextPage,
                 ),
               ),
             ],
@@ -542,12 +548,12 @@ class _AnimatedNextButtonState extends State<_AnimatedNextButton>
             borderRadius: BorderRadius.circular(10),
           ),
           alignment: Alignment.center,
-          child: const Text(
+          child: Text(
             'Next',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: AppColors.white,
             ),
           ),
         ),

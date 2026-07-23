@@ -12,18 +12,18 @@ class ExitAppWrapper extends StatelessWidget {
 
     await Get.dialog(
       AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bgLight,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title:  Row(
           children: [
             Icon(Icons.exit_to_app, color: AppColors.primary),
-            SizedBox(width: 8),
-            Text('Exit App', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const SizedBox(width: 8),
+            Text('Exit App', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textPrimary)),
           ],
         ),
-        content: const Text(
+        content: Text(
           'Are you sure you want to exit the application?',
-          style: TextStyle(fontSize: 14, color: Colors.black87),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
@@ -34,7 +34,7 @@ class ExitAppWrapper extends StatelessWidget {
             style: TextButton.styleFrom(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+            child: Text('Cancel', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
             onPressed: () {

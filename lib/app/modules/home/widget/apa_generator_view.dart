@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
 import '../../../common/constant/app_imports.dart';
 import '../controllers/home_controller.dart';
 
@@ -11,28 +8,14 @@ class ApaGeneratorView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     Get.put(HomeController());
 
-    return Scaffold(
-      backgroundColor: AppColors.bgLight,
-      appBar: AppBar(
-        backgroundColor: AppColors.bgLight,
-        elevation: 0,
-        surfaceTintColor: AppColors.transparent,
-        leading: IconButton(
-          icon:  Icon(Icons.arrow_back, color: AppColors.textDark),
-          onPressed: () => Get.back(),
-        ),
-        title:  Text(
-          'APA Generator',
-          style: TextStyle(
-            color: AppColors.textDark,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
+    return Obx(() => Scaffold(
+      backgroundColor: AppColors.appBackground,
+      appBar: CustomAppBar(
+        title: 'APA Generator',
+        showBackButton: true,
         actions: [
           IconButton(
-            icon:  Icon(Icons.info_outline, color: AppColors.textDark),
+            icon: Icon(Icons.info_outline, color: AppColors.textPrimary),
             onPressed: () {},
           ),
         ],
@@ -82,14 +65,14 @@ class ApaGeneratorView extends GetView<HomeController> {
                             Text(
                               displayText,
                               style: TextStyle(
-                                color: isSelected ? AppColors.white : AppColors.textDark,
+                                color: isSelected ? AppColors.white : AppColors.textPrimary,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             if (isMore) ...[
                               const SizedBox(width: 4),
-                              Icon(Icons.keyboard_arrow_down, size: 16, color: isSelected ? AppColors.white : AppColors.textDark),
+                              Icon(Icons.keyboard_arrow_down, size: 16, color: isSelected ? AppColors.white : AppColors.textPrimary),
                             ]
                           ],
                         ),
@@ -133,11 +116,11 @@ class ApaGeneratorView extends GetView<HomeController> {
             // 3. Section: Additional Options
             Row(
               children: [
-                 Icon(Icons.settings_outlined, color: AppColors.textDark, size: 20),
+                Icon(Icons.settings_outlined, color: AppColors.textPrimary, size: 20),
                 const SizedBox(width: 8),
-                 Text(
+                Text(
                   'Additional Options',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                 ),
               ],
             ),
@@ -179,7 +162,7 @@ class ApaGeneratorView extends GetView<HomeController> {
                   style: TextStyle(color: AppColors.white, fontSize: 15, fontWeight: FontWeight.w600),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.buttonPrimary,
+                  backgroundColor: AppColors.primaryPurple,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   elevation: 0,
                 ),
@@ -193,11 +176,11 @@ class ApaGeneratorView extends GetView<HomeController> {
               children: [
                 Row(
                   children: [
-                     Icon(Icons.description_outlined, color: AppColors.textDark, size: 20),
+                    Icon(Icons.description_outlined, color: AppColors.textPrimary, size: 20),
                     const SizedBox(width: 8),
-                     Text(
+                    Text(
                       'Your APA Citation',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                     ),
                   ],
                 ),
@@ -216,7 +199,7 @@ class ApaGeneratorView extends GetView<HomeController> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   // ==========================================
@@ -235,9 +218,9 @@ class ApaGeneratorView extends GetView<HomeController> {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: AppColors.bgLight,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -251,7 +234,7 @@ class ApaGeneratorView extends GetView<HomeController> {
               ),
             ),
             const SizedBox(height: 20),
-             Text('More Source Types', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+            Text('More Source Types', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
             const SizedBox(height: 16),
             Wrap(
               spacing: 12,
@@ -266,9 +249,9 @@ class ApaGeneratorView extends GetView<HomeController> {
                   width: (Get.width - 52) / 2, // Perfect 2-column grid
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryPurple.withValues(alpha: 0.05),
+                    color: AppColors.primaryPurple.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.1)),
+                    border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     children: [
@@ -277,7 +260,7 @@ class ApaGeneratorView extends GetView<HomeController> {
                       Expanded(
                         child: Text(
                           option['title'] as String,
-                          style:  TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                         ),
                       ),
                     ],
@@ -471,43 +454,50 @@ class ApaGeneratorView extends GetView<HomeController> {
         _buildInputField(
             controller: controller.apaTitleCtrl,
             label: 'Book Title',
-            hint: 'e.g., Clean Code in Flutter Architecture',
+            hint: 'e.g., Mobile Application Architecture',
             isRequired: true
         ),
         const SizedBox(height: 12),
         _buildInputField(
             controller: controller.apaAuthorCtrl,
             label: 'Author(s)',
-            hint: 'e.g., Martin, R. C.',
+            hint: 'e.g., Doe, J.',
             isRequired: true,
             suffixIcon: Icons.person_outline
         ),
         const SizedBox(height: 12),
-        _buildInputField(
-            controller: controller.apaDateCtrl,
-            label: 'Publication Year',
-            hint: 'e.g., 2025',
-            suffixIcon: Icons.calendar_today_outlined
+        Row(
+          children: [
+            Expanded(
+              child: _buildInputField(
+                  controller: controller.apaDateCtrl,
+                  label: 'Year',
+                  hint: 'e.g., 2024',
+                  suffixIcon: Icons.calendar_today_outlined
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildInputField(
+                  controller: controller.apaSiteNameCtrl,
+                  label: 'Publisher',
+                  hint: 'e.g., Academic Press'
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         _buildInputField(
-            controller: controller.apaSiteNameCtrl,
-            label: 'Publisher',
-            hint: 'e.g., O\'Reilly Media',
-            suffixIcon: Icons.business_outlined
-        ),
-        const SizedBox(height: 12),
-        _buildInputField(
-            controller: controller.refDoiCtrl,
-            label: 'ISBN / DOI (Optional)',
-            hint: 'e.g., 978-0132350884'
+            controller: controller.apaUrlCtrl,
+            label: 'DOI or URL (Optional)',
+            hint: 'https://doi.org/...'
         ),
       ],
     );
   }
 
   // ==========================================
-  // ATOMIC HELPER COMPONENTS
+  // REUSABLE INPUT FIELD BUILDER
   // ==========================================
 
   Widget _buildInputField({
@@ -519,15 +509,15 @@ class ApaGeneratorView extends GetView<HomeController> {
   }) {
     return TextFormField(
       controller: controller,
-      style:  TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textDark),
+      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
       decoration: InputDecoration(
         filled: true,
-        fillColor: AppColors.white,
+        fillColor: AppColors.bgLight,
         floatingLabelBehavior: FloatingLabelBehavior.always,
         label: RichText(
           text: TextSpan(
             text: label,
-            style:  TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textDark),
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
             children: [
               if (isRequired)
                 const TextSpan(text: ' *', style: TextStyle(color: AppColors.error)),
@@ -535,16 +525,16 @@ class ApaGeneratorView extends GetView<HomeController> {
           ),
         ),
         hintText: hint,
-        hintStyle:  TextStyle(fontSize: 12, color: AppColors.lightTextHint, fontWeight: FontWeight.w400),
-        suffixIcon: suffixIcon != null ? Icon(suffixIcon, color: AppColors.textGrey, size: 18) : null,
+        hintStyle: TextStyle(fontSize: 12, color: AppColors.lightTextHint, fontWeight: FontWeight.w400),
+        suffixIcon: suffixIcon != null ? Icon(suffixIcon, color: AppColors.textSecondary, size: 18) : null,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:  BorderSide(color: AppColors.lightDivider),
+          borderSide: BorderSide(color: AppColors.lightDivider),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:  BorderSide(color: AppColors.primaryPurple, width: 1.5),
+          borderSide: BorderSide(color: AppColors.primaryPurple, width: 1.5),
         ),
       ),
     );
@@ -557,7 +547,7 @@ class ApaGeneratorView extends GetView<HomeController> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primaryPurple.withValues(alpha: 0.05) : AppColors.white,
+          color: isActive ? AppColors.primaryPurple.withValues(alpha: 0.15) : AppColors.bgLight,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isActive ? AppColors.primaryPurple : AppColors.lightDivider,
@@ -572,7 +562,7 @@ class ApaGeneratorView extends GetView<HomeController> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isActive ? AppColors.primaryPurple : AppColors.textGrey,
+                color: isActive ? AppColors.primaryPurple : AppColors.textSecondary,
               ),
             ),
             const SizedBox(width: 8),
@@ -603,14 +593,14 @@ class ApaGeneratorView extends GetView<HomeController> {
         width: double.infinity,
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: AppColors.primaryPurple.withValues(alpha: 0.03),
+          color: AppColors.primaryPurple.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.1)),
+          border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.2)),
         ),
-        child:  Center(
+        child: Center(
           child: Text(
             'Fill out the details above to generate your APA citation.',
-            style: TextStyle(color: AppColors.textGrey, fontSize: 13),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
             textAlign: TextAlign.center,
           ),
         ),
@@ -619,9 +609,9 @@ class ApaGeneratorView extends GetView<HomeController> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.primaryPurple.withValues(alpha: 0.03),
+        color: AppColors.primaryPurple.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.1)),
+        border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -634,7 +624,7 @@ class ApaGeneratorView extends GetView<HomeController> {
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      style:  TextStyle(fontSize: 13, color: AppColors.textDark, height: 1.5, fontWeight: FontWeight.w500),
+                      style: TextStyle(fontSize: 13, color: AppColors.textPrimary, height: 1.5, fontWeight: FontWeight.w500),
                       children: [
                         if (parts['author']!.isNotEmpty) TextSpan(text: '${parts['author']}. '),
                         if (parts['date']!.isNotEmpty) TextSpan(text: '(${parts['date']}). '),
@@ -645,19 +635,19 @@ class ApaGeneratorView extends GetView<HomeController> {
                         if (parts['siteName']!.isNotEmpty) TextSpan(text: '${parts['siteName']}.\n'),
                         if (parts['url']!.isNotEmpty) TextSpan(
                           text: parts['url'],
-                          style: TextStyle(color: AppColors.primaryPurple.withValues(alpha: 0.9)),
+                          style: TextStyle(color: AppColors.primaryPurple),
                         ),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
-                 Icon(Icons.star_border, color: AppColors.primaryPurple, size: 22),
+                Icon(Icons.star_border, color: AppColors.primaryPurple, size: 22),
               ],
             ),
           ),
 
-          Divider(height: 1, color: AppColors.primaryPurple.withValues(alpha: 0.1)),
+          Divider(height: 1, color: AppColors.primaryPurple.withValues(alpha: 0.2)),
 
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),

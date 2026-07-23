@@ -51,7 +51,7 @@ class PaymentView extends GetView<PaymentController> {
               decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
               child: Column(
                 children: [
-                  _priceRow("Basic Price (USD)",  controller.basePrice.value),
+                  _priceRow("Basic Price (GBP)",  controller.basePrice.value),
                   _priceRow("Discount",  controller.discount.value, isDiscount: true),
                   const Divider(),
                   _priceRow("Total",  controller.amount.value , isTotal: true),

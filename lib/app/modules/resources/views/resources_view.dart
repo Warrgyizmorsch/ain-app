@@ -1,29 +1,27 @@
 import '../../../common/constant/app_imports.dart';
+import '../../home/widget/apa_generator_view.dart';
+import '../../home/widget/dissertation_planner_view.dart';
+import '../../home/widget/grade_calculator_view.dart';
+import '../../home/widget/notifications_view.dart';
+import '../../home/widget/plagiarism_checker_view.dart';
+import '../../home/widget/reference_generator_view.dart';
+import '../../home/widget/word_counter_view.dart';
 
 class ResourcesView extends StatelessWidget {
   const ResourcesView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor:AppColors.appBackground,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FB),
-        elevation: 0,
-        title: const Text(
-          'Resources & Tools',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: false,
+    return Obx(() => Scaffold(
+      backgroundColor: AppColors.appBackground,
+      appBar: CustomAppBar(
+        title: 'Resources & Tools',
+        showBackButton: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black, size: 28),
+            icon: Icon(Icons.notifications_none, color: AppColors.textPrimary, size: 26),
             onPressed: () {
-              // TODO: Navigate to Notifications
+              Get.to(() => NotificationsView());
             },
           ),
           const SizedBox(width: 8),
@@ -38,22 +36,16 @@ class ResourcesView extends StatelessWidget {
               // --- Search Bar ---
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.bgLight,
                   borderRadius: BorderRadius.circular(30), // Pill-shaped
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withValues(alpha:0.08),
-                      spreadRadius: 1,
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  border: Border.all(color: AppColors.lightDivider),
                 ),
                 child: TextField(
+                  style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
                   decoration: InputDecoration(
                     hintText: 'Search resources or tools...',
-                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
-                    prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
+                    hintStyle: TextStyle(color: AppColors.lightTextHint, fontSize: 15),
+                    prefixIcon: Icon(Icons.search, color: AppColors.lightTextHint),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                   ),
@@ -66,27 +58,25 @@ class ResourcesView extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Quick Tools',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
-                      // TODO: See All action
-                    },
+                    onPressed: () {},
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: const Text(
+                    child: Text(
                       'See All',
                       style: TextStyle(
-                        color: Color(0xFF5E35B1), // Purple text
+                        color: AppColors.primaryPurple,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -104,43 +94,49 @@ class ResourcesView extends StatelessWidget {
                 crossAxisCount: 3,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 0.85, // Adjusts height vs width to match the image
-                children: const [
+                childAspectRatio: 0.85,
+                children: [
                   _ToolCard(
                     icon: Icons.calculate_outlined,
                     label: 'Grade\nCalculator',
-                    iconColor: Color(0xFF673AB7),
-                    iconBgColor: Color(0xFFEDE7F6), // Light Purple
+                    iconColor: AppColors.primaryPurple,
+                    iconBgColor: AppColors.primaryPurple.withValues(alpha: 0.15),
+                    onTap: () => Get.to(() => const GradeCalculatorView()),
                   ),
                   _ToolCard(
                     icon: Icons.assignment_outlined,
                     label: 'APA\nGenerator',
-                    iconColor: Color(0xFF673AB7),
-                    iconBgColor: Color(0xFFEDE7F6),
+                    iconColor: AppColors.primaryPurple,
+                    iconBgColor: AppColors.primaryPurple.withValues(alpha: 0.15),
+                    onTap: () => Get.to(() => const ApaGeneratorView()),
                   ),
                   _ToolCard(
                     icon: Icons.plagiarism_outlined,
                     label: 'Plagiarism\nChecker',
-                    iconColor: Color(0xFF388E3C), // Green
-                    iconBgColor: Color(0xFFE8F5E9),
+                    iconColor: AppColors.statusGreen,
+                    iconBgColor: AppColors.statusGreen.withValues(alpha: 0.15),
+                    onTap: () => Get.to(() => const PlagiarismCheckerView()),
                   ),
                   _ToolCard(
                     icon: Icons.text_snippet_outlined,
                     label: 'Word\nCounter',
-                    iconColor: Color(0xFF673AB7),
-                    iconBgColor: Color(0xFFEDE7F6),
+                    iconColor: AppColors.primaryPurple,
+                    iconBgColor: AppColors.primaryPurple.withValues(alpha: 0.15),
+                    onTap: () => Get.to(() => const WordCounterView()),
                   ),
                   _ToolCard(
                     icon: Icons.format_quote_outlined,
                     label: 'Reference\nGenerator',
-                    iconColor: Color(0xFFFF7043), // Orange
-                    iconBgColor: Color(0xFFFBE9E7),
+                    iconColor: AppColors.secondary,
+                    iconBgColor: AppColors.secondary.withValues(alpha: 0.15),
+                    onTap: () => Get.to(() => const ReferenceGeneratorView()),
                   ),
                   _ToolCard(
                     icon: Icons.event_note_outlined,
                     label: 'Dissertation\nPlanner',
-                    iconColor: Color(0xFF388E3C),
-                    iconBgColor: Color(0xFFE8F5E9),
+                    iconColor: AppColors.statusGreen,
+                    iconBgColor: AppColors.statusGreen.withValues(alpha: 0.15),
+                    onTap: () => Get.to(() => const DissertationPlannerView()),
                   ),
                 ],
               ),
@@ -152,11 +148,7 @@ class ResourcesView extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF310A5D), Color(0xFF5E35B1)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  gradient: AppColors.primaryGradient,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -169,7 +161,7 @@ class ResourcesView extends StatelessWidget {
                           const Text(
                             'Upgrade Your Academic\nPerformance',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppColors.white,
                               fontSize: 16,
                               height: 1.3,
                               fontWeight: FontWeight.bold,
@@ -179,29 +171,28 @@ class ResourcesView extends StatelessWidget {
                           const Text(
                             'Explore our expert tools',
                             style: TextStyle(
-                              color: Colors.white70,
+                              color: AppColors.white70,
                               fontSize: 12,
                             ),
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            onPressed: () {
-                              // TODO: Explore Now Action
-                            },
+                            onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF310A5D), // Text color
+                              backgroundColor: AppColors.white,
+                              foregroundColor: AppColors.primaryPurple,
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Explore Now',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
+                                color: AppColors.primaryPurple,
                               ),
                             ),
                           ),
@@ -212,12 +203,9 @@ class ResourcesView extends StatelessWidget {
                       flex: 4,
                       child: Align(
                         alignment: Alignment.centerRight,
-                        // Using a large rocket icon as a placeholder.
-                        // If you have the 3D rocket asset, replace this with:
-                        // Image.asset('assets/images/rocket.png', height: 100),
                         child: Icon(
                           Icons.rocket_launch,
-                          color: Colors.amber.shade400,
+                          color: AppColors.secondary,
                           size: 80,
                         ),
                       ),
@@ -231,7 +219,7 @@ class ResourcesView extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -241,36 +229,29 @@ class _ToolCard extends StatelessWidget {
   final String label;
   final Color iconColor;
   final Color iconBgColor;
+  final VoidCallback onTap;
 
   const _ToolCard({
     required this.icon,
     required this.label,
     required this.iconColor,
     required this.iconBgColor,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha:0.06),
-            spreadRadius: 2,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: AppColors.lightDivider),
       ),
       child: Material(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
-          onTap: () {
-            // TODO: Handle tool click
-          },
+          onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
@@ -294,11 +275,11 @@ class _ToolCard extends StatelessWidget {
                 Text(
                   label,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                    height: 1.2, // Adjust line height for the broken lines
+                    color: AppColors.textPrimary,
+                    height: 1.2,
                   ),
                 ),
                 const SizedBox(height: 4),

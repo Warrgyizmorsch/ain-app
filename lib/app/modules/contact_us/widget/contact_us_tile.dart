@@ -23,7 +23,7 @@ class ContactTile extends StatelessWidget {
         vertical: 12,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: AppColors.lightDivider,
@@ -31,15 +31,16 @@ class ContactTile extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
         child: Row(
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: AppColors.background,
+              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
               child: Icon(
                 icon,
                 size: 18,
-                color: AppColors.secondary,
+                color: AppColors.primary,
               ),
             ),
 
@@ -58,9 +59,10 @@ class ContactTile extends StatelessWidget {
               ),
             ),
 
-            const Icon(
+            Icon(
               Icons.chevron_right,
               size: 22,
+              color: AppColors.textSecondary,
             ),
           ],
         ),

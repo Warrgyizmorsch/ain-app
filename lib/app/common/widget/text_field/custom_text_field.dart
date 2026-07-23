@@ -80,9 +80,10 @@ class TextFieldCustom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine the baseline border color to use
-    final currentBorderColor = borderColor ?? AppColors.textSecondary;
+    // Determine the baseline border color to use dynamically according to active theme
+    final currentBorderColor = borderColor ?? AppColors.lightDivider;
     final fallbackFocusColor = borderColor ?? AppColors.primary;
+    final currentFillColor = backgroundColor ?? AppColors.bgLight;
 
     return SizedBox(
       width: width,
@@ -125,7 +126,7 @@ class TextFieldCustom extends StatelessWidget {
           contentPadding: contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           errorStyle: AppTextStyles.error,
           hintStyle: TextStyle(
-            color: hintTextColor ?? AppColors.textSecondary,
+            color: hintTextColor ?? AppColors.lightTextHint,
             fontSize: hintTextSize ?? AppFontSize.s14,
             fontFamily: hintTextStyle ?? FontFamily.regular,
           ),
@@ -151,7 +152,7 @@ class TextFieldCustom extends StatelessWidget {
             borderSide: BorderSide(color: AppColors.error, width: borderWidth ?? 1.5),
           ),
           filled: true,
-          fillColor: backgroundColor ?? Colors.white,
+          fillColor: currentFillColor,
         ),
       ),
     );

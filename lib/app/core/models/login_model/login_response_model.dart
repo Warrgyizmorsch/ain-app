@@ -25,6 +25,8 @@ class UserData {
   final String? name;
   final String? email;
   final String? mobileNo;
+  final String? countrycode;
+  final String? country;
   final int? roleId;
   final int? departmentId;
   final String? photo;
@@ -38,6 +40,8 @@ class UserData {
     this.name,
     this.email,
     this.mobileNo,
+    this.countrycode,
+    this.country,
     this.roleId,
     this.departmentId,
     this.photo,
@@ -53,6 +57,8 @@ class UserData {
       name: json['name'],
       email: json['email'],
       mobileNo: json['mobile_no'],
+      countrycode: json['countrycode']?.toString(),
+      country: json['country'],
       roleId: json['role_id'],
       departmentId: json['department_id'],
       photo: json['photo'],
@@ -69,6 +75,8 @@ class UserData {
       'name': name,
       'email': email,
       'mobile_no': mobileNo,
+      'countrycode': countrycode,
+      'country': country,
       'role_id': roleId,
       'department_id': departmentId,
       'photo': photo,

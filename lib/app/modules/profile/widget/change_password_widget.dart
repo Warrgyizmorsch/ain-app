@@ -2,7 +2,7 @@ import '../../../common/constant/app_imports.dart';
 import '../controllers/profile_controller.dart';
 
 class ChangePasswordWidget extends GetView<ProfileController> {
-    ChangePasswordWidget({super.key});
+    const ChangePasswordWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +10,7 @@ class ChangePasswordWidget extends GetView<ProfileController> {
     return Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: CustomAppBar(
-        title: "Change Password",
+        title: AppStrings.changePassword,
       ),
       body: SingleChildScrollView(
         padding:   EdgeInsets.all(16),

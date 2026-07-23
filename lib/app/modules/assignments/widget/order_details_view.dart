@@ -69,7 +69,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       });
     }
 
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: const CustomAppBar(
         title: 'Order Details',
@@ -78,7 +78,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
         decoration:  BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.bgLight,
           boxShadow: [
             BoxShadow(
               color: AppColors.lightShadow,
@@ -150,7 +150,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
               _buildIconDetailRow(Icons.format_list_numbered, AppStrings.pages, wordCount),
                Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
-              _buildIconDetailRow(Icons.monetization_on_outlined, AppStrings.total, "\$$price", valueColor: AppColors.primary, isValueBold: true),
+              _buildIconDetailRow(Icons.monetization_on_outlined, AppStrings.total, "£$price", valueColor: AppColors.primary, isValueBold: true),
             ]),
             const SizedBox(height: 12),
 
@@ -199,7 +199,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   // ==========================================
@@ -214,7 +214,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.bgLight,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
         return Padding(
@@ -227,7 +227,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
               return  SizedBox(
                 height: 200,
                 child: Center(
-                  child: CircularProgressIndicator(color: AppColors.primary),
+                  child: CircularProgressIndicator(color: AppColors.primaryPurple),
                 ),
               );
             }
@@ -239,102 +239,60 @@ class OrderDetailsView extends GetView<AssignmentsController> {
               );
             }
 
-            // --- Dynamic Country Tabs Extraction ---
-            final uniqueCountries = controller.banksList
-                .map((bank) => bank.name ?? 'Global')
-                .toSet()
-                .toList();
-
-            return DefaultTabController(
-              length: uniqueCountries.length,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 50, height: 5,
-                        margin: const EdgeInsets.only(bottom: 20),
-                        decoration: BoxDecoration(color: AppColors.lightDivider, borderRadius: BorderRadius.circular(10)),
-                      ),
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 50, height: 5,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(color: AppColors.lightDivider, borderRadius: BorderRadius.circular(10)),
                     ),
-                    Row(
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: AppColors.warning.withValues(alpha: 0.1), shape: BoxShape.circle),
+                        child: const Icon(Icons.account_balance_wallet, color: AppColors.warning),
+                      ),
+                      const SizedBox(width: 12),
+                      Text("Payment Pending", style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s18)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Please complete your payment to confirm order $orderId and begin the work process.",
+                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(color: AppColors.warning.withValues(alpha: 0.1), shape: BoxShape.circle),
-                          child: const Icon(Icons.account_balance_wallet, color: AppColors.warning),
-                        ),
-                        const SizedBox(width: 12),
-                        Text("Payment Pending", style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s18)),
+                        Text("Total Amount Due:", style: AppTextStyles.subtitle.copyWith(fontSize: AppFontSize.s14)),
+                        Text("£$amountDue", style: AppTextStyles.h1.copyWith(color: AppColors.warning, fontSize: AppFontSize.s20)),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Please complete your payment to confirm order $orderId and begin the work process.",
-                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: 24),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Total Amount Due:", style: AppTextStyles.subtitle.copyWith(fontSize: AppFontSize.s14)),
-                          Text("\$$amountDue", style: AppTextStyles.h1.copyWith(color: AppColors.warning, fontSize: AppFontSize.s20)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
+                  ),
+                  const SizedBox(height: 24),
 
-                    Text("Bank Transfer Details", style: AppTextStyles.sectionHeading.copyWith(fontSize: AppFontSize.s14)),
-                    const SizedBox(height: 12),
+                  Text("Bank Transfer Details", style: AppTextStyles.sectionHeading.copyWith(fontSize: AppFontSize.s14)),
+                  const SizedBox(height: 12),
 
-                    // --- Dynamic Tab Bar for Countries ---
-                    TabBar(
-                      isScrollable: true,
-                      tabAlignment: TabAlignment.start,
-                      indicatorColor: AppColors.primary,
-                      labelColor: AppColors.primary,
-                      unselectedLabelColor: AppColors.textSecondary,
-                      labelStyle: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w600),
-                      tabs: uniqueCountries.map((country) => Tab(text: country),).toList(),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // --- Dynamic Tab Bar View (Content Filtered by Country) ---
-                    SizedBox(
-                      height: 240,
-                      child: TabBarView(
-                        children: uniqueCountries.map((country) {
-                          final countryBanks = controller.banksList
-                              .where((bank) => (bank.name ?? 'Global') == country)
-                              .toList();
-
-                          return ListView.separated(
-                            shrinkWrap: true,
-                            itemCount: countryBanks.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              final bank = countryBanks[index];
-                              return _buildPremiumBox([
-                                _buildCopyableRow("Account Name", bank.accountHolder ?? "N/A"),
-                                 Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1, color: AppColors.lightDivider)),
-                                _buildCopyableRow("Account Number", bank.accountNumber ?? "N/A"),
-                                 Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1, color: AppColors.lightDivider)),
-                                _buildCopyableRow("Sort Code / Routing", bank.sortCode ?? "N/A"),
-                              ]);
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ),
+                  BankTransferDetailsWidget(
+                    banksList: controller.banksList,
+                    tabViewHeight: 240,
+                    isBottomSheet: true,
+                  ),
 
                     const SizedBox(height: 24),
                     SizedBox(
@@ -358,13 +316,12 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                     const SizedBox(height: 20),
                   ],
                 ),
-              ),
-            );
-          }),
-        );
-      },
-    );
-  }
+              );
+            }),
+          );
+        },
+      );
+    }
 
   void _showUploadScreenshotSheet(BuildContext context, String orderId) {
     final Rx<File?> selectedFile = Rx<File?>(null);
@@ -372,7 +329,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.bgLight,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
         return Padding(
@@ -501,56 +458,6 @@ class OrderDetailsView extends GetView<AssignmentsController> {
     );
   }
 
-  Widget _buildCopyableRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.subtitle.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: AppFontSize.s14,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        // Copy Button
-        InkWell(
-          onTap: () {
-            Get.snackbar(
-              "Copied",
-              "$label copied to clipboard",
-              snackPosition: SnackPosition.BOTTOM,
-              margin: const EdgeInsets.all(12),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: AppColors.priceBg,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child:  Icon(Icons.copy, size: 16, color: AppColors.primary),
-          ),
-        ),
-      ],
-    );
-  }
-
   // ==========================================
   // UI BUILDER WIDGETS
   // ==========================================
@@ -606,7 +513,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
 
   Widget _buildActionCard(BuildContext context, {required IconData icon, required String title, required String subtitle, required Color iconColor, required VoidCallback onTap}) {
     return Material(
-      color: AppColors.white,
+      color: AppColors.bgLight,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -639,7 +546,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
   Widget _buildTopCard(String title, String orderId, String deadline, String status, Color statusColor, double progress, String progressText) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(12),
         boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 8, offset: Offset(0, 2))],
       ),
@@ -728,7 +635,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
   Widget _buildPremiumBox(List<Widget> children) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(10), boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))]),
+      decoration: BoxDecoration(color: AppColors.bgLight, borderRadius: BorderRadius.circular(10), boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
     );
   }
@@ -755,7 +662,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
   Widget _buildFileRow(String fileName, String fileSize) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.lightDivider, width: 1)),
+      decoration: BoxDecoration(color: AppColors.bgLight, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.lightDivider, width: 1)),
       child: Row(
         children: [
           Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: AppColors.error.withValues(alpha:0.1), borderRadius: BorderRadius.circular(6)), child: const Icon(Icons.picture_as_pdf, color: AppColors.error, size: 16)),
@@ -807,7 +714,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              backgroundColor: AppColors.white,
+              backgroundColor: AppColors.bgLight,
               surfaceTintColor: AppColors.transparent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: Text('Rate your experience', textAlign: TextAlign.center, style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s16)),
@@ -852,7 +759,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                             borderRadius: BorderRadius.circular(8),
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(color: isSelected ? AppColors.priceBg : AppColors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: isSelected ? AppColors.primary : AppColors.lightDivider)),
+                              decoration: BoxDecoration(color: isSelected ? AppColors.priceBg : AppColors.bgLight, borderRadius: BorderRadius.circular(8), border: Border.all(color: isSelected ? AppColors.primary : AppColors.lightDivider)),
                               child: Text(option, style: AppTextStyles.bodySmall.copyWith(color: isSelected ? AppColors.primary : AppColors.textPrimary, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                             ),
                           );
@@ -916,7 +823,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: AppColors.white,
+          backgroundColor: AppColors.bgLight,
           surfaceTintColor: AppColors.transparent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           title: Text('Raise a Ticket', style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s16)),
@@ -936,7 +843,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                     decoration: InputDecoration(
                       hintText: 'Type your issue here...',
                       hintStyle: AppTextStyles.hintText.copyWith(fontSize: AppFontSize.s13),
-                      filled: true, fillColor: AppColors.background,
+                      filled: true, fillColor: AppColors.appBackground,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.all(10),
                     ),
