@@ -20,10 +20,12 @@ class PlagiarismCheckerView extends GetView<HomeController> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Input Type Selector
@@ -38,7 +40,7 @@ class PlagiarismCheckerView extends GetView<HomeController> {
                 children: [
                   _buildInputTypeTab('Text', Icons.description_outlined),
                   _buildInputTypeTab('File Upload', Icons.upload_file_outlined),
-                  _buildInputTypeTab('URL', Icons.link),
+                  // _buildInputTypeTab('URL', Icons.link),
                 ],
               ),
             ),
@@ -167,11 +169,13 @@ class PlagiarismCheckerView extends GetView<HomeController> {
             ),
             const SizedBox(height: 12),
             _buildLastCheckCard(),
-            const SizedBox(height: 24),
+             const SizedBox(height: 80),
           ],
         ),
       ),
-    ));
+      const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+    ],
+  )));
   }
 
   // ==========================================

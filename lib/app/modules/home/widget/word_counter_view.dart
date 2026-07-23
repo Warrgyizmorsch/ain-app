@@ -25,10 +25,13 @@ class WordCounterView extends GetView<HomeController> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Column(
+      body: Stack(
+
+        children: [
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Input Type Selector
@@ -124,94 +127,96 @@ class WordCounterView extends GetView<HomeController> {
                 ],
               ),
             ),
-            const SizedBox(height: 28),
-
-            // 4. Options Section
-            Row(
-              children: [
-                Icon(Icons.settings_outlined, color: AppColors.textPrimary, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'Options',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Options Wrap
-            Obx(() => Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildOptionToggle('Exclude Quotes', Icons.format_quote, excludeQuotes.value, () => excludeQuotes.value = !excludeQuotes.value),
-                _buildOptionToggle('Exclude Numbers', Icons.numbers, excludeNumbers.value, () => excludeNumbers.value = !excludeNumbers.value),
-              ],
-            )),
-            const SizedBox(height: 24),
-
-            // 5. Action Button (WITH LOADING STATE)
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: Obx(() => ElevatedButton.icon(
-                onPressed: controller.isWordCounterProcessing.value
-                    ? null
-                    : () => controller.processWordCount(),
-                icon: controller.isWordCounterProcessing.value
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2.5))
-                    : const Icon(Icons.bar_chart, color: AppColors.white, size: 20),
-                label: Text(
-                  controller.isWordCounterProcessing.value ? 'Processing...' : 'Count Words',
-                  style: const TextStyle(color: AppColors.white, fontSize: 15, fontWeight: FontWeight.w600),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryPurple,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  elevation: 0,
-                  disabledBackgroundColor: AppColors.primaryPurple.withValues(alpha: 0.6),
-                ),
-              )),
-            ),
-            const SizedBox(height: 28),
-
-            // 6. Recent Counts Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.history, color: AppColors.textPrimary, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Recent Counts',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                    ),
-                  ],
-                ),
-                InkWell(
-                  onTap: () {},
-                  child: Row(
-                    children: [
-                      Text(
-                        'View All',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.chevron_right, color: AppColors.primaryPurple, size: 16),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _buildRecentCountCard(),
-
-            const SizedBox(height: 40),
+            // const SizedBox(height: 28),
+            //
+            // // 4. Options Section
+            // Row(
+            //   children: [
+            //     Icon(Icons.settings_outlined, color: AppColors.textPrimary, size: 20),
+            //     const SizedBox(width: 8),
+            //     Text(
+            //       'Options',
+            //       style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            //     ),
+            //   ],
+            // ),
+            // const SizedBox(height: 12),
+            //
+            // // Options Wrap
+            // Obx(() => Wrap(
+            //   spacing: 8,
+            //   runSpacing: 8,
+            //   children: [
+            //     _buildOptionToggle('Exclude Quotes', Icons.format_quote, excludeQuotes.value, () => excludeQuotes.value = !excludeQuotes.value),
+            //     _buildOptionToggle('Exclude Numbers', Icons.numbers, excludeNumbers.value, () => excludeNumbers.value = !excludeNumbers.value),
+            //   ],
+            // )),
+            // const SizedBox(height: 24),
+            //
+            // // 5. Action Button (WITH LOADING STATE)
+            // SizedBox(
+            //   width: double.infinity,
+            //   height: 52,
+            //   child: Obx(() => ElevatedButton.icon(
+            //     onPressed: controller.isWordCounterProcessing.value
+            //         ? null
+            //         : () => controller.processWordCount(),
+            //     icon: controller.isWordCounterProcessing.value
+            //         ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2.5))
+            //         : const Icon(Icons.bar_chart, color: AppColors.white, size: 20),
+            //     label: Text(
+            //       controller.isWordCounterProcessing.value ? 'Processing...' : 'Count Words',
+            //       style: const TextStyle(color: AppColors.white, fontSize: 15, fontWeight: FontWeight.w600),
+            //     ),
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: AppColors.primaryPurple,
+            //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            //       elevation: 0,
+            //       disabledBackgroundColor: AppColors.primaryPurple.withValues(alpha: 0.6),
+            //     ),
+            //   )),
+            // ),
+            // const SizedBox(height: 28),
+            //
+            // // 6. Recent Counts Section
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     Row(
+            //       children: [
+            //         Icon(Icons.history, color: AppColors.textPrimary, size: 20),
+            //         const SizedBox(width: 8),
+            //         Text(
+            //           'Recent Counts',
+            //           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            //         ),
+            //       ],
+            //     ),
+            //     InkWell(
+            //       onTap: () {},
+            //       child: Row(
+            //         children: [
+            //           Text(
+            //             'View All',
+            //             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
+            //           ),
+            //           const SizedBox(width: 4),
+            //           Icon(Icons.chevron_right, color: AppColors.primaryPurple, size: 16),
+            //         ],
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            // const SizedBox(height: 12),
+            // _buildRecentCountCard(),
+            //
+            const SizedBox(height: 100),
           ],
         ),
       ),
-    ));
+      const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+    ],
+  )));
   }
 
   // ==========================================

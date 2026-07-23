@@ -10,9 +10,14 @@ import '../../../core/models/order_now_model/services_master_model.dart';
 import '../../../core/models/order_now_model/subjects_master_model.dart';
 import '../../../core/models/order_now_model/urgencies_master_model.dart';
 import '../../../core/models/order_now_model/word_count_master_model.dart';
+import '../../../core/models/order_now_model/order_list_model.dart';
 import '../../../core/models/payment_model/bank_list_model.dart';
 import '../../../core/utils/api/order_now_api/order_now_dropdown_api.dart';
 import '../../../core/utils/api/payment_api/bank_list_api.dart';
+import '../../../core/models/order_now_model/edit_order_request_model.dart';
+import '../../../core/utils/api/order_now_api/edit_order_api.dart';
+import '../../assignments/controllers/assignments_controller.dart';
+import '../../bottom_nav_bar/controllers/bottom_nav_bar_controller.dart';
 
 class AddOrderController extends GetxController {
   final isLoading = false.obs;
@@ -73,6 +78,8 @@ class AddOrderController extends GetxController {
     'First Class Work',
   ];
 
+  dynamic editingOrderData;
+
   @override
   void onInit() {
     super.onInit();
@@ -80,6 +87,13 @@ class AddOrderController extends GetxController {
     _attachCalculationListeners();
     // Concurrently download app configuration layers
     fetchAllMasterData();
+    populateFormFromArguments();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    populateFormFromArguments();
   }
 
   // ─── CORE FORM VALIDATIONS ─────────────────────────────────────────────────
@@ -272,6 +286,7 @@ class AddOrderController extends GetxController {
         bankList(),
       ]);
 
+      populateFormFromArguments();
     } catch (e) {
       Get.snackbar('Error', 'Error pairing network drop configurations: $e');
     } finally {
@@ -300,7 +315,7 @@ class AddOrderController extends GetxController {
         wordCount.assignAll(response.data);
 
         // Pre-selects first dictionary node layout item to solve initial empty 0 computations
-        if (wordCount.isNotEmpty) {
+        if (wordCount.isNotEmpty && selectedPageConfig.value == null) {
           selectedPageConfig.value = wordCount.first;
         }
       }
@@ -339,6 +354,233 @@ class AddOrderController extends GetxController {
       }
     } catch (e) {
       debugPrint('Academic subjects configuration exception: $e');
+    }
+  }
+
+  String? _getEditingOrderId() {
+    if (editingOrderData == null) return null;
+    if (editingOrderData is Lead) {
+      return (editingOrderData as Lead).orderId;
+    }
+    if (editingOrderData is ConfirmedOrder) {
+      return (editingOrderData as ConfirmedOrder).orderId;
+    }
+    if (editingOrderData is Map) {
+      return editingOrderData['orderId']?.toString() ?? editingOrderData['order_id']?.toString();
+    }
+    return null;
+  }
+
+  void populateFormFromArguments() {
+    final arg = Get.arguments;
+    if (arg == null) return;
+    editingOrderData = arg;
+
+    if (arg is Lead) {
+      final lead = arg;
+
+      // 1. Topic / Title
+      if (lead.name != null && lead.name!.isNotEmpty) {
+        topicController.text = lead.name!;
+      } else if (lead.orderId != null && lead.orderId!.isNotEmpty) {
+        topicController.text = 'Order #${lead.orderId}';
+      }
+
+      // 2. Requirements
+      if (lead.requirements != null && lead.requirements!.isNotEmpty) {
+        requirementsController.text = lead.requirements!;
+      }
+
+      // 3. Services
+      if (lead.service != null && lead.service!.isNotEmpty && services.isNotEmpty) {
+        try {
+          final target = lead.service!.toLowerCase().trim();
+          final matched = services.firstWhere(
+            (s) => s.name.toLowerCase().trim() == target,
+            orElse: () => services.firstWhere(
+              (s) => s.name.toLowerCase().contains(target) || target.contains(s.name.toLowerCase()),
+              orElse: () => services.first,
+            ),
+          );
+          selectedService.value = matched;
+        } catch (_) {}
+      }
+
+      // 4. Subject
+      if (lead.subject != null && lead.subject!.isNotEmpty && subjects.isNotEmpty) {
+        try {
+          final target = lead.subject!.toLowerCase().trim();
+          final matched = subjects.firstWhere(
+            (sub) => sub.name.toLowerCase().trim() == target,
+            orElse: () => subjects.firstWhere(
+              (sub) => sub.name.toLowerCase().contains(target) || target.contains(sub.name.toLowerCase()),
+              orElse: () => subjects.first,
+            ),
+          );
+          selectedSubject.value = matched;
+        } catch (_) {}
+      }
+
+      // 5. Work Type
+      if (lead.workType != null && lead.workType!.isNotEmpty) {
+        try {
+          final target = lead.workType!.toLowerCase().trim();
+          final matchedWorkType = workTypes.firstWhere(
+            (wt) => wt.toLowerCase().trim() == target,
+            orElse: () => workTypes.firstWhere(
+              (wt) => target.contains(wt.toLowerCase()) || wt.toLowerCase().contains(target),
+              orElse: () => workTypes.first,
+            ),
+          );
+          selectedWorkType.value = matchedWorkType;
+        } catch (_) {}
+      }
+
+      // 6. Urgency / Deadline
+      if (lead.deadline != null && lead.deadline!.isNotEmpty && urgencies.isNotEmpty) {
+        try {
+          final target = lead.deadline!.toLowerCase().trim();
+          final matchedUrgency = urgencies.firstWhere(
+            (u) => u.name.toLowerCase().trim() == target,
+            orElse: () => urgencies.firstWhere(
+              (u) => u.name.toLowerCase().contains(target) || target.contains(u.name.toLowerCase()),
+              orElse: () => urgencies.first,
+            ),
+          );
+          selectedUrgency.value = matchedUrgency;
+        } catch (_) {}
+      }
+
+      // 7. Word Count
+      if (lead.wordCount != null && lead.wordCount!.isNotEmpty && wordCount.isNotEmpty) {
+        try {
+          final cleanWordCount = lead.wordCount!.replaceAll(RegExp(r'[^0-9]'), '');
+          if (cleanWordCount.isNotEmpty) {
+            final parsedCount = int.tryParse(cleanWordCount);
+            if (parsedCount != null) {
+              final matchedWord = wordCount.firstWhere(
+                (w) => w.value == parsedCount,
+                orElse: () => wordCount.firstWhere(
+                  (w) => w.name.toLowerCase().contains(lead.wordCount!.toLowerCase()) || lead.wordCount!.toLowerCase().contains(w.name.toLowerCase()),
+                  orElse: () => wordCount.first,
+                ),
+              );
+              selectedPageConfig.value = matchedWord;
+            }
+          } else {
+            final matchedWord = wordCount.firstWhere(
+              (w) => w.name.toLowerCase().contains(lead.wordCount!.toLowerCase()) || lead.wordCount!.toLowerCase().contains(w.name.toLowerCase()),
+              orElse: () => wordCount.first,
+            );
+            selectedPageConfig.value = matchedWord;
+          }
+        } catch (_) {}
+      }
+
+      // 8. Country
+      if (lead.countrycode != null && lead.countrycode!.isNotEmpty && countries.isNotEmpty) {
+        try {
+          final target = lead.countrycode!.toLowerCase().trim();
+          final matchedCountry = countries.firstWhere(
+            (c) => c.name.toLowerCase().trim() == target,
+            orElse: () => countries.firstWhere(
+              (c) => c.name.toLowerCase().contains(target) || target.contains(c.name.toLowerCase()),
+              orElse: () => countries.first,
+            ),
+          );
+          selectedCountry.value = matchedCountry;
+        } catch (_) {}
+      }
+    } else if (arg is ConfirmedOrder) {
+      final order = arg;
+      if (order.title != null && order.title!.isNotEmpty) {
+        topicController.text = order.title!;
+      }
+
+      if (order.subject != null && order.subject!.isNotEmpty && subjects.isNotEmpty) {
+        try {
+          final target = order.subject!.toLowerCase().trim();
+          final matched = subjects.firstWhere(
+            (sub) => sub.name.toLowerCase().trim() == target,
+            orElse: () => subjects.first,
+          );
+          selectedSubject.value = matched;
+        } catch (_) {}
+      }
+
+      if (order.wordCount != null && order.wordCount!.isNotEmpty && wordCount.isNotEmpty) {
+        try {
+          final cleanWordCount = order.wordCount!.replaceAll(RegExp(r'[^0-9]'), '');
+          if (cleanWordCount.isNotEmpty) {
+            final parsedCount = int.tryParse(cleanWordCount);
+            if (parsedCount != null) {
+              final matchedWord = wordCount.firstWhere((w) => w.value == parsedCount, orElse: () => wordCount.first);
+              selectedPageConfig.value = matchedWord;
+            }
+          }
+        } catch (_) {}
+      }
+    } else if (arg is Map<String, dynamic>) {
+      if (arg['topic'] != null) topicController.text = arg['topic'].toString();
+      if (arg['name'] != null) topicController.text = arg['name'].toString();
+      if (arg['requirements'] != null) requirementsController.text = arg['requirements'].toString();
+
+      if (arg['service'] != null && services.isNotEmpty) {
+        try {
+          final target = arg['service'].toString().toLowerCase().trim();
+          final matched = services.firstWhere(
+            (s) => s.name.toLowerCase().trim() == target,
+            orElse: () => services.first,
+          );
+          selectedService.value = matched;
+        } catch (_) {}
+      }
+
+      if (arg['subject'] != null && subjects.isNotEmpty) {
+        try {
+          final target = arg['subject'].toString().toLowerCase().trim();
+          final matched = subjects.firstWhere(
+            (sub) => sub.name.toLowerCase().trim() == target,
+            orElse: () => subjects.first,
+          );
+          selectedSubject.value = matched;
+        } catch (_) {}
+      }
+
+      if (arg['workType'] != null) {
+        try {
+          final target = arg['workType'].toString().toLowerCase().trim();
+          final matchedWorkType = workTypes.firstWhere(
+            (wt) => wt.toLowerCase().trim() == target,
+            orElse: () => workTypes.first,
+          );
+          selectedWorkType.value = matchedWorkType;
+        } catch (_) {}
+      }
+
+      if (arg['urgency'] != null && urgencies.isNotEmpty) {
+        try {
+          final target = arg['urgency'].toString().toLowerCase().trim();
+          final matchedUrgency = urgencies.firstWhere(
+            (u) => u.name.toLowerCase().trim() == target,
+            orElse: () => urgencies.first,
+          );
+          selectedUrgency.value = matchedUrgency;
+        } catch (_) {}
+      }
+
+      if (arg['wordCount'] != null && wordCount.isNotEmpty) {
+        try {
+          final cleanWordCount = arg['wordCount'].toString().replaceAll(RegExp(r'[^0-9]'), '');
+          if (cleanWordCount.isNotEmpty) {
+            final parsedCount = int.tryParse(cleanWordCount);
+            if (parsedCount != null) {
+              final matchedWord = wordCount.firstWhere((w) => w.value == parsedCount, orElse: () => wordCount.first);
+              selectedPageConfig.value = matchedWord;
+            }
+          }
+        } catch (_) {}
+      }
     }
   }
 
@@ -449,7 +691,63 @@ class AddOrderController extends GetxController {
         sourcePage: "Mobile App",
       );
 
-      // 5. Network boundary execute karna
+      // Check if updating an existing order or creating a new order
+      final existingOrderId = _getEditingOrderId();
+      if (existingOrderId != null && existingOrderId.isNotEmpty) {
+        EditOrderRequest editRequest = EditOrderRequest(
+          orderId: existingOrderId,
+          service: selectedService.value?.name ?? "",
+          workType: selectedWorkType.value ?? "Standard",
+          subject: selectedSubject.value?.name ?? "",
+          urgency: selectedUrgency.value?.id.toString() ?? "5",
+          wordCount: selectedPageConfig.value?.value ?? 0,
+          topic: topicController.text.trim(),
+          requirements: requirementsController.text.trim(),
+          finalPrice: finalPrice.toStringAsFixed(2),
+          sourcePage: "Mobile App",
+        );
+
+        final response = await EditOrderApi.editOrder(
+          request: editRequest,
+          files: pickedFiles,
+        );
+
+        if (response != null && response.success == true) {
+          Get.snackbar(
+            'Order Updated',
+            response.message ?? 'Order updated successfully!',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green.withValues(alpha:0.1),
+            colorText: Colors.green,
+          );
+
+          if (Get.isRegistered<AssignmentsController>()) {
+            Get.find<AssignmentsController>().getOrderList();
+          }
+
+          if (Get.isRegistered<BottomNavController>()) {
+            Get.find<BottomNavController>().changeTab(2);
+          }
+
+          Get.offAllNamed(
+            Routes.BOTTOM_NAV_BAR,
+            arguments: {'index': 2},
+          );
+          clearAllFields();
+          return;
+        } else {
+          Get.snackbar(
+            'Update Error',
+            response.message ?? 'Failed to update order. Try again.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.redAccent.withValues(alpha:0.1),
+            colorText: Colors.red,
+          );
+          return;
+        }
+      }
+
+      // 5. Place New Order Network boundary execute karna
       final response = await PlaceOrderApi.placeOrder(
         request: request,
         files: pickedFiles,
@@ -469,18 +767,17 @@ class AddOrderController extends GetxController {
 
 
         // Target navigation stack cleanup routing
-        Get.offNamed(
-          Routes.PAYMENT,
-          arguments: {
-            'orderId': response.orderId,
-            'topic': topicController.text.trim(),
-            'pages': selectedPageConfig.value?.name ?? '',
-            'deadline': selectedUrgency.value?.name ?? '',
-            'amount': finalPrice.toStringAsFixed(2),
-            'service': selectedService.value?.name ?? '',
-            'discount':savingsAmount.toStringAsFixed(2),
-            'basePrice':formattedEstimatedPrice
-          },
+        if (Get.isRegistered<AssignmentsController>()) {
+          Get.find<AssignmentsController>().getOrderList();
+        }
+
+        if (Get.isRegistered<BottomNavController>()) {
+          Get.find<BottomNavController>().changeTab(2);
+        }
+
+        Get.offAllNamed(
+          Routes.BOTTOM_NAV_BAR,
+          arguments: {'index': 2},
         );
         clearAllFields();
       } else {

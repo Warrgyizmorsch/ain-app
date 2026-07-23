@@ -34,147 +34,151 @@ class MakePaymentView extends GetView<AssignmentsController> {
         ),
         body: isLoading
             ? Center(child: CircularProgressIndicator(color: AppColors.primaryPurple))
-            : SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1. Total Spent Card
-                    _buildTotalSpentCard(),
-                    const SizedBox(height: 24),
-
-
-                    // 2. Quick Actions Row
-                    _buildQuickActionsRow(),
-                    const SizedBox(height: 32),
-
-                    // 3. Pending Payments Header
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            : Stack(
+                children: [
+                  SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // 1. Total Spent Card
+                        _buildTotalSpentCard(),
+                        const SizedBox(height: 24),
+
+                        // 2. Quick Actions Row
+                        _buildQuickActionsRow(),
+                        const SizedBox(height: 32),
+
+                        // 3. Pending Payments Header
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(Icons.pending_actions, color: AppColors.error, size: 22),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Pending Payments',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                            Row(
+                              children: [
+                                Icon(Icons.pending_actions, color: AppColors.error, size: 22),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Pending Payments',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.error.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '${pendingAssignments.length} Pending',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.error,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.error.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '${pendingAssignments.length} Pending',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.error,
+                        const SizedBox(height: 14),
+
+                        // 4. Pending Assignment Cards from AssignmentsController
+                        if (pendingAssignments.isEmpty)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: AppColors.bgLight,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.lightDivider),
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
+                            child: Center(
+                              child: Text(
+                                'No pending payments found.',
+                                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                              ),
+                            ),
+                          )
+                        else
+                          ...pendingAssignments.map((lead) => Padding(
+                            padding: const EdgeInsets.only(bottom: 14.0),
+                            child: _buildPendingAssignmentCard(lead),
+                          )),
 
-                    // 4. Pending Assignment Cards from AssignmentsController
-                    if (pendingAssignments.isEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: AppColors.bgLight,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.lightDivider),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'No pending payments found.',
-                            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                          ),
-                        ),
-                      )
-                    else
-                      ...pendingAssignments.map((lead) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14.0),
-                        child: _buildPendingAssignmentCard(lead),
-                      )),
+                        const SizedBox(height: 24),
 
-                    const SizedBox(height: 24),
-
-                    // 5. Bank Transfer Details (Same as Order Now Step 2)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+                        // 5. Bank Transfer Details (Same as Order Now Step 2)
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(Icons.account_balance_outlined, color: AppColors.primaryPurple, size: 22),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Bank Transfer Details',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                            Row(
+                              children: [
+                                Icon(Icons.account_balance_outlined, color: AppColors.primaryPurple, size: 22),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Bank Transfer Details',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryPurple.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Official Accounts',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
                               ),
                             ),
                           ],
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryPurple.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(6),
+                        const SizedBox(height: 14),
+
+                        if (isBankLoading)
+                          Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
+                          )
+                        else if (banksList.isEmpty)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: AppColors.bgLight,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.lightDivider),
+                            ),
+                            child: Center(
+                              child: Text("No bank details found.", style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                            ),
+                          )
+                        else
+                          BankTransferDetailsWidget(
+                            banksList: banksList,
+                            tabViewHeight: 250,
                           ),
-                          child: Text(
-                            'Official Accounts',
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
-                          ),
-                        ),
+
+                        const SizedBox(height: 28),
+
+                        // 6. Support Banner
+                        _buildSupportBanner(),
+                        const SizedBox(height: 80),
                       ],
                     ),
-                    const SizedBox(height: 14),
-
-                    if (isBankLoading)
-                      Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
-                      )
-                    else if (banksList.isEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: AppColors.bgLight,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.lightDivider),
-                        ),
-                        child: Center(
-                          child: Text("No bank details found.", style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                        ),
-                      )
-                    else
-                      BankTransferDetailsWidget(
-                        banksList: banksList,
-                        tabViewHeight: 250,
-                      ),
-
-                    const SizedBox(height: 28),
-
-                    // 6. Support Banner
-                    _buildSupportBanner(),
-                    const SizedBox(height: 32),
-                  ],
-                ),
+                  ),
+                  const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+                ],
               ),
       );
     });

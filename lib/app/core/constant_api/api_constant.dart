@@ -40,6 +40,7 @@ class ApiConstant {
   static const String SUBJECTS = "app/subjects";
   static const String WORK_TYPES = "app/work-types";
   static const String PLACE_ORDER = "app/place-order";
+  static const String EDIT_ORDER = "app/edit-order";
   static const String ORDER_LIST = "app/order-list";
   static const String RESET_PASSWORD = "app/reset-password";
   static const String RAISE_TICKET = "app/raise-ticket";

@@ -24,9 +24,11 @@ class SavedSamplesView extends GetView<ProfileController> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // --- 1. Top Banner ---
@@ -277,11 +279,13 @@ class SavedSamplesView extends GetView<ProfileController> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 80),
           ],
         ),
       ),
-    ));
+      const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+    ],
+  )));
   }
 
   // --- Helper Widgets ---

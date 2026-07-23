@@ -24,8 +24,10 @@ class WalletView extends GetView<WalletController> {
         title: 'Wallet',
         showBackButton: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 24,
         ),
@@ -208,9 +210,12 @@ class WalletView extends GetView<WalletController> {
                 },
               );
             }),
+            const SizedBox(height: 80),
           ],
         ),
       ),
-    ));
+      const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+    ],
+  )));
   }
 }

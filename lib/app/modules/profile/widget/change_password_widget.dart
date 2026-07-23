@@ -12,9 +12,11 @@ class ChangePasswordWidget extends GetView<ProfileController> {
       appBar: CustomAppBar(
         title: AppStrings.changePassword,
       ),
-      body: SingleChildScrollView(
-        padding:   EdgeInsets.all(16),
-        child: Form(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding:   EdgeInsets.all(16),
+            child: Form(
           key: controller.formKey,
           child: Column(
             children: [
@@ -126,12 +128,15 @@ class ChangePasswordWidget extends GetView<ProfileController> {
                     title: 'Update Password',
                     onTap: controller.updatePassword,
                   ),
+                  const SizedBox(height: 80),
                 ],
               ),
             ],
           ),
         ),
       ),
-    );
+      const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+    ],
+  ));
   }
 }

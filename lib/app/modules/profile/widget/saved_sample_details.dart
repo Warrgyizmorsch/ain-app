@@ -11,9 +11,11 @@ class SampleDetailsView extends GetView<ProfileController> {
     return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar:   CustomAppBar(title: 'Sample Details'),
-      body: SingleChildScrollView(
-        padding:   EdgeInsets.all(16.0),
-        child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding:   EdgeInsets.all(16.0),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
@@ -233,10 +235,13 @@ class SampleDetailsView extends GetView<ProfileController> {
               );
             }),
 
-              SizedBox(height: 40),
-          ],
+               const SizedBox(height: 80),
+            ],
+          ),
         ),
-      ),
+        const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+      ],
+    ),
 
       bottomNavigationBar: SafeArea(
         child: Container(

@@ -11,13 +11,13 @@ import '../../profile/widget/edit_profile_widget.dart';
 import '../../profile/widget/saved_sample_widget.dart';
 import '../controllers/home_controller.dart';
 import '../widget/apa_generator_view.dart';
-import '../widget/dissertation_planner_view.dart';
+// import '../widget/dissertation_planner_view.dart';
 import '../widget/grade_calculator_view.dart';
 import '../widget/make_payment_view.dart';
 import '../widget/notifications_view.dart';
 import '../widget/plagiarism_checker_view.dart';
-import '../widget/reference_generator_view.dart';
-import '../widget/upload_brief_view.dart';
+// import '../widget/reference_generator_view.dart';
+// import '../widget/upload_brief_view.dart';
 import '../widget/word_counter_view.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -155,22 +155,22 @@ class HomeView extends GetView<HomeController> {
                       Get.to(() => GradeCalculatorView());
                     },
                   ),
-                  _buildAcademicToolItem(
-                    icon: Icons.text_fields,
-                    color: AppColors.primaryPurple,
-                    title: AppStrings.apaGenerator,
-                    onTap: () {
-                      Get.to(() => const ApaGeneratorView());
-                    },
-                  ),
-                  _buildAcademicToolItem(
-                    icon: Icons.plagiarism_outlined,
-                    color: AppColors.primaryPurple,
-                    title: AppStrings.plagiarismChecker,
-                    onTap: () {
-                      Get.to(() => PlagiarismCheckerView());
-                    },
-                  ),
+                  // _buildAcademicToolItem(
+                  //   icon: Icons.text_fields,
+                  //   color: AppColors.primaryPurple,
+                  //   title: AppStrings.apaGenerator,
+                  //   onTap: () {
+                  //     Get.to(() => const ApaGeneratorView());
+                  //   },
+                  // ),
+                  // _buildAcademicToolItem(
+                  //   icon: Icons.plagiarism_outlined,
+                  //   color: AppColors.primaryPurple,
+                  //   title: AppStrings.plagiarismChecker,
+                  //   onTap: () {
+                  //     Get.to(() => PlagiarismCheckerView());
+                  //   },
+                  // ),
                   _buildAcademicToolItem(
                     icon: Icons.format_list_numbered,
                     color: AppColors.primaryPurple,
@@ -179,22 +179,22 @@ class HomeView extends GetView<HomeController> {
                       Get.to(() =>  WordCounterView());
                     },
                   ),
-                  _buildAcademicToolItem(
-                    icon: Icons.library_books_outlined,
-                    color: AppColors.success,
-                    title: AppStrings.referenceGenerator,
-                    onTap: () {
-                      Get.to(() =>  ReferenceGeneratorView());
-                    },
-                  ),
-                  _buildAcademicToolItem(
-                    icon: Icons.edit_calendar_outlined,
-                    color: AppColors.success,
-                    title: AppStrings.dissertationPlanner,
-                    onTap: () {
-                      Get.to(()=>DissertationPlannerView());
-                    },
-                  ),
+                  // _buildAcademicToolItem(
+                  //   icon: Icons.library_books_outlined,
+                  //   color: AppColors.success,
+                  //   title: AppStrings.referenceGenerator,
+                  //   onTap: () {
+                  //     Get.to(() =>  ReferenceGeneratorView());
+                  //   },
+                  // ),
+                  // _buildAcademicToolItem(
+                  //   icon: Icons.edit_calendar_outlined,
+                  //   color: AppColors.success,
+                  //   title: AppStrings.dissertationPlanner,
+                  //   onTap: () {
+                  //     Get.to(()=>DissertationPlannerView());
+                  //   },
+                  // ),
                 ],
               ),
               const SizedBox(height: 32),

@@ -16,10 +16,12 @@ class ReferAndEarnScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const HeroSection(),
@@ -139,11 +141,13 @@ class ReferAndEarnScreen extends StatelessWidget {
 
             // Bottom Banner
             const BottomBannerSection(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 80),
           ],
         ),
       ),
-    ));
+      const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+    ],
+  )));
   }
 }
 

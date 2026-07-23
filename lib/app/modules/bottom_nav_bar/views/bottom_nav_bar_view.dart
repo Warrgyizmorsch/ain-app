@@ -21,9 +21,15 @@ class BottomNavView extends GetView<BottomNavController> {
         child: ExitAppWrapper(
           child: Scaffold(
             backgroundColor: AppColors.appBackground,
-            body: IndexedStack(
-              index: controller.selectedIndex.value,
-              children: controller.pages,
+            body: Stack(
+              children: [
+                IndexedStack(
+                  index: controller.selectedIndex.value,
+                  children: controller.pages,
+                ),
+
+                  const GlobalChatWidget(bottomMargin: 95.0, rightMargin: 16.0),
+              ],
             ),
             // Using extendBody allows the body background to show through the bottom nav transparent areas
             extendBody: true,
@@ -44,7 +50,6 @@ class _BottomNavBar extends GetView<BottomNavController> {
           () => SafeArea(
         top: false,
         child: Container(
-          // Changing this structure prevents any forced white box below or behind the bar
           color: Colors.transparent,
           height: 80,
           margin: const EdgeInsets.only(bottom: 0, left: 24, right: 24),

@@ -252,7 +252,6 @@ class HomeController extends GetxController {
 
   void pickPlagiarismFile() async {
     try {
-      // Native OS file picker ko strictly single file ke liye force kiya
       FilePickerResult? result = await FilePicker.pickFiles(
         allowMultiple: false, // <-- ONLY ALLOW SINGLE FILE
         type: FileType.any,   // <-- ALLOW ALL FILE TYPES (PNG, JPG, PDF, etc.)
@@ -296,7 +295,85 @@ class HomeController extends GetxController {
   final assessments = <Assessment>[].obs;
   final targetGradePercentage = 85.0.obs;
 
+// ==========================================
+  // 5. GRADE CALCULATOR (RAPIDTABLES STYLE)
+  // ==========================================
 
+  final gradeRows = <AssessmentRowData>[].obs;
+  final showGradeResults = false.obs;
+  final targetGradeCtrl = TextEditingController(text: '85'); // What-If input
+
+  void addGradeRow() {
+    gradeRows.add(AssessmentRowData(id: DateTime.now().millisecondsSinceEpoch.toString()));
+  }
+
+  void removeGradeRow(String id) {
+    final row = gradeRows.firstWhere((r) => r.id == id);
+    row.dispose();
+    gradeRows.remove(row);
+  }
+
+  void clearGrades() {
+    for (var r in gradeRows) {
+      r.dispose();
+    }
+    gradeRows.clear();
+    showGradeResults.value = false;
+    // Add two blank rows to start fresh just like a clear table
+    gradeRows.addAll([
+      AssessmentRowData(id: '${DateTime.now().millisecondsSinceEpoch}_1'),
+      AssessmentRowData(id: '${DateTime.now().millisecondsSinceEpoch}_2'),
+    ]);
+  }
+
+  // --- Calculations ---
+
+  // Total entered weight
+  double get totalWeight {
+    return gradeRows.fold(0.0, (sum, row) => sum + (double.tryParse(row.weightCtrl.text) ?? 0.0));
+  }
+
+  // Sum of (Grade * Weight)
+  double get _sumGradeWeight {
+    return gradeRows.fold(0.0, (sum, row) {
+      double g = double.tryParse(row.gradeCtrl.text) ?? 0.0;
+      double w = double.tryParse(row.weightCtrl.text) ?? 0.0;
+      return sum + (g * w);
+    });
+  }
+
+  // Matches RapidTables calculation: Sum(g*w) / Sum(w)
+  double get currentPercentage {
+    if (totalWeight == 0) return 0.0;
+    return _sumGradeWeight / totalWeight;
+  }
+
+  // Total points earned against the 100% course scale
+  double get currentWeightedScore {
+    return _sumGradeWeight / 100;
+  }
+
+  String get estimatedGrade {
+    if (totalWeight == 0) return '-';
+    final score = currentPercentage;
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
+  }
+
+  double get neededInRemaining {
+    double remainingWeight = 100 - totalWeight;
+    if (remainingWeight <= 0) return 0.0;
+
+    double target = double.tryParse(targetGradeCtrl.text) ?? 85.0;
+    // We need (Target * 100) - current sum of (g*w)
+    double neededScore = (target * 100) - _sumGradeWeight;
+    double neededPercentage = neededScore / remainingWeight;
+
+    return neededPercentage > 0 ? neededPercentage : 0.0;
+  }
   // ==========================================
   // WORD COUNTER PARAMETERS
   // ==========================================
@@ -317,7 +394,6 @@ class HomeController extends GetxController {
 
   void setWordCounterTab(String tab) {
     wordCounterSelectedInputType.value = tab;
-    // Tab change karte hi us tab ka data grid ko bhej do
     if (tab == 'Text') {
       activeTextForCounting.value = wordCounterTextController.text;
     } else if (tab == 'File Upload') {
@@ -549,38 +625,6 @@ class HomeController extends GetxController {
     selectedFilterIndex.value = index;
   }
 
-  double get totalWeight {
-    return assessments.fold(0, (sum, item) => sum + item.weight);
-  }
-
-  double get currentWeightedScore {
-    return assessments.fold(0, (sum, item) => sum + (item.score / item.outOf) * item.weight);
-  }
-
-  double get currentPercentage {
-    if (totalWeight == 0) return 0.0;
-    return (currentWeightedScore / totalWeight) * 100;
-  }
-
-  String get estimatedGrade {
-    final score = currentPercentage;
-    if (score >= 90) return 'A';
-    if (score >= 80) return 'A-';
-    if (score >= 70) return 'B';
-    if (score >= 60) return 'C';
-    if (score >= 50) return 'D';
-    return 'F';
-  }
-
-  double get neededInRemaining {
-    double remainingWeight = 100 - totalWeight;
-    if (remainingWeight <= 0) return 0.0;
-
-    double neededScore = targetGradePercentage.value - currentWeightedScore;
-    double neededPercentage = (neededScore / remainingWeight) * 100;
-
-    return neededPercentage > 0 ? neededPercentage : 0.0;
-  }
 
   void addAssessment(Assessment newAssessment) {
     if (totalWeight + newAssessment.weight > 100) {
@@ -596,5 +640,23 @@ class HomeController extends GetxController {
 
   void updateTargetGrade(double newTarget) {
     targetGradePercentage.value = newTarget;
+  }
+}
+
+class AssessmentRowData {
+  final String id;
+  final TextEditingController nameCtrl;
+  final TextEditingController gradeCtrl;
+  final TextEditingController weightCtrl;
+
+  AssessmentRowData({required this.id, String name = '', String grade = '', String weight = ''})
+      : nameCtrl = TextEditingController(text: name),
+        gradeCtrl = TextEditingController(text: grade),
+        weightCtrl = TextEditingController(text: weight);
+
+  void dispose() {
+    nameCtrl.dispose();
+    gradeCtrl.dispose();
+    weightCtrl.dispose();
   }
 }

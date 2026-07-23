@@ -21,10 +21,12 @@ class DissertationPlannerView extends GetView<HomeController> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        physics:    BouncingScrollPhysics(),
-        padding:    EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Top Navigation Tabs
@@ -58,11 +60,13 @@ class DissertationPlannerView extends GetView<HomeController> {
               }
             }),
 
-               SizedBox(height: 40),
+               const SizedBox(height: 80),
           ],
         ),
       ),
-    ));
+      const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+    ],
+  )));
   }
 
   // ==========================================

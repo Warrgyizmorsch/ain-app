@@ -38,10 +38,12 @@ class EditProfileWidget extends GetView<ProfileController> {
             const SizedBox(width: 8),
           ],
         ),
-        body: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          child: Column(
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // --- 1. Top Header Card ---
@@ -447,12 +449,14 @@ class EditProfileWidget extends GetView<ProfileController> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 80),
             ],
           ),
         ),
-      ),
-    );
+        const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+      ],
+    ),
+  ));
   }
 
   // ==========================================

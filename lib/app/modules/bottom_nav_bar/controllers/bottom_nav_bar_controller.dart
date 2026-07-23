@@ -16,6 +16,24 @@ class BottomNavController extends GetxController {
      ProfileView(),
   ];
 
+  @override
+  void onInit() {
+    super.onInit();
+    _checkArguments();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    _checkArguments();
+  }
+
+  void _checkArguments() {
+    if (Get.arguments != null && Get.arguments is Map && Get.arguments['index'] != null) {
+      selectedIndex.value = Get.arguments['index'] as int;
+    }
+  }
+
   void changeTab(int index) {
     selectedIndex.value = index;
 

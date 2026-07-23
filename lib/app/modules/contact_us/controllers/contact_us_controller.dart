@@ -56,13 +56,7 @@ class ContactUsController extends GetxController {
   }
 
   Future<void> openLiveChat() async {
-    final Uri uri = Uri.parse(
-      'https://assignment-in-need.vercel.app/about',
-    );
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+   Get.toNamed(Routes.CHAT);
   }
 
   void requestCallBack(BuildContext context) {

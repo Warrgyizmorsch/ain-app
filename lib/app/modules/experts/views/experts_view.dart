@@ -10,150 +10,155 @@ class ExpertsView extends GetView<ExpertsController> {
     return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: const CustomAppBar(title: 'Our Experts', showBackButton: true),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.bgLight,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.lightDivider),
-              ),
-              child: TextField(
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
-                decoration: InputDecoration(
-                  hintText: 'Search experts...',
-                  hintStyle: AppTextStyles.hintText.copyWith(
-                    color: AppColors.lightTextHint,
-                    fontSize: 15,
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.bgLight,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.lightDivider),
                   ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: AppColors.lightTextHint,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 14,
+                  child: TextField(
+                    style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText: 'Search experts...',
+                      hintStyle: AppTextStyles.hintText.copyWith(
+                        color: AppColors.lightTextHint,
+                        fontSize: 15,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: AppColors.lightTextHint,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
 
-          const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-          SizedBox(
-            height: 40,
-            child: Obx(() {
-              final currentSelected = controller.selectedCategory.value;
+              SizedBox(
+                height: 40,
+                child: Obx(() {
+                  final currentSelected = controller.selectedCategory.value;
 
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                itemCount: controller.categories.length,
-                itemBuilder: (context, index) {
-                  final category = controller.categories[index];
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    itemCount: controller.categories.length,
+                    itemBuilder: (context, index) {
+                      final category = controller.categories[index];
 
-                  final isSelected = currentSelected == category;
+                      final isSelected = currentSelected == category;
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: FilterChip(
-                      label: Text(
-                        category,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: isSelected
-                              ? AppColors.white
-                              : AppColors.textPrimary,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w400,
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: FilterChip(
+                          label: Text(
+                            category,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: isSelected
+                                  ? AppColors.white
+                                  : AppColors.textPrimary,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                            ),
+                          ),
+                          selected: isSelected,
+                          onSelected: (bool selected) {
+                            controller.changeCategory(category);
+                          },
+                          backgroundColor: AppColors.bgLight,
+                          selectedColor: AppColors.primaryPurple,
+                          showCheckmark: false,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? AppColors.transparent
+                                  : AppColors.lightDivider,
+                            ),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          elevation: isSelected ? 2 : 0,
+                          shadowColor: AppColors.primaryPurple.withValues(alpha: 0.4),
                         ),
-                      ),
-                      selected: isSelected,
-                      onSelected: (bool selected) {
-                        controller.changeCategory(category);
-                      },
-                      backgroundColor: AppColors.bgLight,
-                      selectedColor: AppColors.primaryPurple,
-                      showCheckmark: false,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(
-                          color: isSelected
-                              ? AppColors.transparent
-                              : AppColors.lightDivider,
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      elevation: isSelected ? 2 : 0,
-                      shadowColor: AppColors.primaryPurple.withValues(alpha: 0.4),
-                    ),
-                  );
-                },
-              );
-            }),
-          ),
-
-          const SizedBox(height: 8),
-
-          Expanded(
-            child: Obx(() {
-              // LOADING CHECK
-              if (controller.isLoading.value) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.primaryPurple,
-                  ),
-                );
-              }
-
-              final experts = controller.filteredExperts;
-
-              if (experts.isEmpty) {
-                return Center(
-                  child: Text(
-                    'No experts found in this category.',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.textSecondary,
-                      fontSize: 16,
-                    ),
-                  ),
-                );
-              }
-
-              return ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                itemCount: experts.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final expert = experts[index];
-                  return _ExpertCard(
-                    name: expert.name ?? "Unknown",
-                    expertise: expert.subject ?? "N/A",
-                    rating: expert.successRate?.toString() ?? "0",
-                    orders: expert.finishOrder?.toString() ?? "0",
-                    imageUrl: expert.image ?? "",
-                    onViewProfile: () {
-                      Get.to(
-                        () => const ExpertsProfileView(),
-                        arguments: expert,
                       );
                     },
                   );
-                },
-              );
-            }),
+                }),
+              ),
+
+              const SizedBox(height: 8),
+
+              Expanded(
+                child: Obx(() {
+                  // LOADING CHECK
+                  if (controller.isLoading.value) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryPurple,
+                      ),
+                    );
+                  }
+
+                  final experts = controller.filteredExperts;
+
+                  if (experts.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No experts found in this category.',
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 16,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    itemCount: experts.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final expert = experts[index];
+                      return _ExpertCard(
+                        name: expert.name ?? "Unknown",
+                        expertise: expert.subject ?? "N/A",
+                        rating: expert.successRate?.toString() ?? "0",
+                        orders: expert.finishOrder?.toString() ?? "0",
+                        imageUrl: expert.image ?? "",
+                        onViewProfile: () {
+                          Get.to(
+                            () => const ExpertsProfileView(),
+                            arguments: expert,
+                          );
+                        },
+                      );
+                    },
+                  );
+                }),
+              ),
+            ],
           ),
+          const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
         ],
       ),
     ));

@@ -1,3 +1,4 @@
+import 'dart:io';
 import '../../../common/constant/app_imports.dart';
 import '../controllers/add_order_controller.dart';
 
@@ -78,9 +79,181 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
                   ),
                 ),
                 borderColor: AppColors.lightDivider,
-                borderWidth: 1.5,
+                borderWidth:0,
               ),
               const SizedBox(height: 16),
+
+              // --- Upload File Section ---
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'ATTACH DOCUMENTS',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '(OPTIONAL)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  GestureDetector(
+                    onTap: controller.pickFile,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.bgLight,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.primaryPurple.withValues(alpha: 0.3),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.cloud_upload_outlined,
+                              color: AppColors.primaryPurple,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Tap to browse & attach files',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'PDF, DOC, DOCX, ZIP, PNG, JPG (Multiple files supported)',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // --- Uploaded Files List ---
+                  Obx(() {
+                    final files = controller.pickedFiles;
+                    if (files.isEmpty) return const SizedBox.shrink();
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            'Attached Files (${files.length})',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: files.length,
+                          separatorBuilder: (context, index) => const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+                            final file = files[index];
+                            final fileName = file.path.split(RegExp(r'[/\\]')).last;
+                            final fileSize = _getFileSize(file);
+
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: AppColors.bgLight,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: AppColors.lightDivider),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      _getFileIcon(fileName),
+                                      color: AppColors.primaryPurple,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          fileName,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if (fileSize.isNotEmpty) ...[
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            fileSize,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                                    onPressed: () => controller.removeFile(index),
+                                    tooltip: 'Remove file',
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  }),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -138,7 +311,7 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
 
                 return BankTransferDetailsWidget(
                   banksList: controller.banksList,
-                  tabViewHeight: 220,
+                  tabViewHeight: 250,
                 );
               }),
             ],
@@ -274,10 +447,10 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
           const SizedBox(height: 32),
 
           // --- Bottom Action ---
-          AppButton(
-            title: 'Place Order & Pay',
+          Obx(() => AppButton(
+            title: controller.editingOrderData != null ? 'Update Order' : 'Place Order',
             onTap: controller.addToCart,
-          ),
+          )),
           const SizedBox(height: 24),
         ],
       ),
@@ -438,5 +611,37 @@ class _PriceRow extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+String _getFileSize(File file) {
+  try {
+    final bytes = file.lengthSync();
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  } catch (_) {
+    return '';
+  }
+}
+
+IconData _getFileIcon(String fileName) {
+  final ext = fileName.split('.').last.toLowerCase();
+  switch (ext) {
+    case 'pdf':
+      return Icons.picture_as_pdf;
+    case 'doc':
+    case 'docx':
+      return Icons.description;
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+    case 'gif':
+      return Icons.image;
+    case 'zip':
+    case 'rar':
+      return Icons.folder_zip;
+    default:
+      return Icons.insert_drive_file;
   }
 }

@@ -22,10 +22,12 @@ class UploadBriefView extends GetView<HomeController> {
             ),
           ],
         ),
-        body: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Top Banner ──────────────────────────────────────────────
@@ -254,10 +256,13 @@ class UploadBriefView extends GetView<HomeController> {
                   child: Text('Submit Brief', style: AppTextStyles.button.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 80),
             ],
           ),
         ),
+        const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+      ],
+    ),
       );
     });
   }

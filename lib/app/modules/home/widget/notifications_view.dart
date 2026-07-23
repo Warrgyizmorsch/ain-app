@@ -16,40 +16,45 @@ class NotificationsView extends GetView<HomeController> {
         title: 'Notifications',
         showBackButton: true,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          const SizedBox(height: 16),
-          _buildFilterTabs(),
-          const SizedBox(height: 16),
+          Column(
+            children: [
+              const SizedBox(height: 16),
+              _buildFilterTabs(),
+              const SizedBox(height: 16),
 
-          Expanded(
-            child: Obx(() {
-              final list = controller.filteredNotifications;
+              Expanded(
+                child: Obx(() {
+                  final list = controller.filteredNotifications;
 
-              if (list.isEmpty) {
-                return Center(
-                  child: Text(
-                    "No notifications found.",
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-                  ),
-                );
-              }
+                  if (list.isEmpty) {
+                    return Center(
+                      child: Text(
+                        "No notifications found.",
+                        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                      ),
+                    );
+                  }
 
-              return ListView.separated(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: list.length,
-                separatorBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Divider(color: AppColors.lightDivider, height: 1, thickness: 1),
-                ),
-                itemBuilder: (context, index) {
-                  final item = list[index];
-                  return _buildNotificationTile(item);
-                },
-              );
-            }),
+                  return ListView.separated(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+                    itemCount: list.length,
+                    separatorBuilder: (context, index) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Divider(color: AppColors.lightDivider, height: 1, thickness: 1),
+                    ),
+                    itemBuilder: (context, index) {
+                      final item = list[index];
+                      return _buildNotificationTile(item);
+                    },
+                  );
+                }),
+              ),
+            ],
           ),
+          const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
         ],
       ),
     ));

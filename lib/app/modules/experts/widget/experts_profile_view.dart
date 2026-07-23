@@ -19,7 +19,9 @@ class ExpertsProfileView extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Get.toNamed(Routes.ADD_ORDER);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryPurple,
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -34,9 +36,11 @@ class ExpertsProfileView extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -233,11 +237,13 @@ class ExpertsProfileView extends StatelessWidget {
               ...expert.customerReview!.map((review) => _buildReviewCard(review)),
             ],
 
-            const SizedBox(height: 20), // Bottom padding
+            const SizedBox(height: 80),
           ],
         ),
       ),
-    ));
+      const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+    ],
+  )));
   }
 
 

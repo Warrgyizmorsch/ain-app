@@ -68,8 +68,8 @@ class ConfirmedOrder {
   final String? receivedAmount;
   final dynamic dueAmount; // Using dynamic or num since it returns 0 (int) or string
   final String? createdAt;
-  final List<dynamic>? images;
-  final List<dynamic>? files;
+  final List<String>? images; // Upgraded to List<String>
+  final List<String>? files;
 
   ConfirmedOrder({
     this.type,
@@ -110,8 +110,12 @@ class ConfirmedOrder {
       receivedAmount: json['received_amount']?.toString(),
       dueAmount: json['due_amount'],
       createdAt: json['created_at'],
-      images: json['images'] != null ? List<dynamic>.from(json['images']) : [],
-      files: json['files'] != null ? List<dynamic>.from(json['files']) : [],
+      images: json['images'] != null
+          ? List<String>.from(json['images'].map((x) => x.toString()))
+          : [],
+      files: json['files'] != null
+          ? List<String>.from(json['files'].map((x) => x.toString()))
+          : [],
     );
   }
 
@@ -158,8 +162,8 @@ class Lead {
   final dynamic convertedAt;
   final String? createdAt;
   final String? subject;
-  final List<dynamic>? images;
-  final List<dynamic>? files;
+  final List<String>? images;
+  final List<String>? files;
 
   Lead({
     this.type,
@@ -208,8 +212,12 @@ class Lead {
       convertedAt: json['converted_at'],
       createdAt: json['created_at'],
       subject: json['subject'],
-      images: json['images'] != null ? List<dynamic>.from(json['images']) : [],
-      files: json['files'] != null ? List<dynamic>.from(json['files']) : [],
+      images: json['images'] != null
+          ? List<String>.from(json['images'].map((x) => x.toString()))
+          : [],
+      files: json['files'] != null
+          ? List<String>.from(json['files'].map((x) => x.toString()))
+          : [],
     );
   }
 

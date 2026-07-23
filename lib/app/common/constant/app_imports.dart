@@ -20,4 +20,5 @@ export '../../common/widget/custom_no_data/custom_no_data_widget.dart';
 export '../../common/widget/dialog/theme_selection_dialog.dart';
 export '../../services/theme_service.dart';
 export '../../common/widget/bank_details/bank_transfer_details_widget.dart';
+export '../../common/widget/global_chat/global_chat_widget.dart';
 

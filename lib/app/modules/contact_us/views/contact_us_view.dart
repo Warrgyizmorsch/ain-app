@@ -15,7 +15,7 @@ class ContactUsView extends GetView<ContactUsController> {
       ),
       // --- ADDED SingleChildScrollView HERE ---
       body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(), // Optional: adds a nice bounce effect
+        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
@@ -61,6 +61,8 @@ class ContactUsView extends GetView<ContactUsController> {
               subtitle: "We'll call you back",
               onTap: () => controller.requestCallBack(context),
             ),
+
+            const SizedBox(height: 80),
           ],
         ),
       ),

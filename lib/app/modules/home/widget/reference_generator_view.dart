@@ -21,10 +21,12 @@ class ReferenceGeneratorView extends GetView<HomeController> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ==========================================
@@ -159,11 +161,13 @@ class ReferenceGeneratorView extends GetView<HomeController> {
 
             // Dynamic Result Card
             Obx(() => _buildResultCard(controller.refCitationParts)),
-            const SizedBox(height: 40),
+            const SizedBox(height: 80),
           ],
         ),
       ),
-    ));
+      const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+    ],
+  )));
   }
 
   // ==========================================

@@ -28,6 +28,9 @@ class OrderDetailsView extends GetView<AssignmentsController> {
     String workType = "N/A";
     String wordCount = "N/A";
     String price = "0.00";
+    String dueAmount = "0.00"; // <-- NEW: Due amount variable
+
+    List<String> attachments = [];
 
     if (orderData is Lead) {
       title = orderData.service ?? AppStrings.assignmentDetails;
@@ -47,6 +50,12 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       wordCount = orderData.wordCount ?? "N/A";
       price = orderData.price ?? "0.00";
 
+      // Leads ke liye koi payment nahi hui hoti, isliye price = dueAmount
+      dueAmount = price;
+
+      attachments.addAll(orderData.files ?? []);
+      attachments.addAll(orderData.images ?? []);
+
     } else if (orderData is ConfirmedOrder) {
       title = orderData.title ?? AppStrings.assignmentDetails;
       orderId = orderData.orderId?.toString() ?? "#0000";
@@ -59,21 +68,41 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       customerName = orderData.moduleCode ?? "N/A";
       workType = orderData.type ?? "N/A";
       price = orderData.amount ?? "0.00";
+
+      // NEW: due_amount ko round karke nikaalna
+      if (orderData.dueAmount != null) {
+        dueAmount = orderData.dueAmount!.toStringAsFixed(2);
+      }
+
+      attachments.addAll(orderData.files ?? []);
+      attachments.addAll(orderData.images ?? []);
     }
-    bool isPaymentPending = (status == "Pending");
+
+    // Status can be something else, but if dueAmount is greater than 0, payment is pending
+    bool isPaymentPending = (double.tryParse(dueAmount) ?? 0.0) > 0;
 
     // --- AUTO-OPEN PAYMENT DETAILS IF PENDING ---
     if (isPaymentPending) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showPaymentDetailsSheet(context, price, orderId);
+        _showPaymentDetailsSheet(context, dueAmount, orderId); // Passed dueAmount here
       });
     }
 
     return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
-      appBar: const CustomAppBar(
+      appBar: CustomAppBar(
         title: 'Order Details',
         showBackButton: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit_outlined, color: AppColors.primaryPurple),
+            tooltip: 'Edit Order',
+            onPressed: () {
+              Get.toNamed(Routes.ADD_ORDER, arguments: orderData);
+            },
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
@@ -83,7 +112,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
             BoxShadow(
               color: AppColors.lightShadow,
               blurRadius: 10,
-              offset: Offset(0, -4),
+              offset: const Offset(0, -4),
             ),
           ],
         ),
@@ -94,7 +123,9 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                 child: SizedBox(
                   height: 44,
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.toNamed(Routes.CHAT);
+                    },
                     icon: const Icon(Icons.chat_bubble_outline, size: 18),
                     label: Text("Live Chat", style: AppTextStyles.button.copyWith(color: AppColors.primary, fontSize: AppFontSize.s14)),
                     style: OutlinedButton.styleFrom(
@@ -110,11 +141,13 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                 child: SizedBox(
                   height: 44,
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      controller.makeCall();
+                    },
                     icon: const Icon(Icons.phone, size: 18, color: AppColors.white),
                     label: Text("Call Us", style: AppTextStyles.button.copyWith(fontSize: AppFontSize.s14)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
+                      backgroundColor: AppColors.primaryPurple,
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
@@ -125,85 +158,162 @@ class OrderDetailsView extends GetView<AssignmentsController> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTopCard(title, orderId, deadline, status, statusColor, progress, progressText),
-            const SizedBox(height: 12),
-
-            _buildSectionTitle("Customer Details"),
-            _buildPremiumBox([
-              _buildIconDetailRow(Icons.person_outline, "Name", customerName),
-               Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
-              _buildIconDetailRow(Icons.email_outlined, "Email", customerEmail),
-               Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
-              _buildIconDetailRow(Icons.phone_outlined, "Mobile", customerMobile),
-            ]),
-            const SizedBox(height: 12),
-
-            _buildSectionTitle("Order Specifications"),
-            _buildPremiumBox([
-              _buildIconDetailRow(Icons.work_outline, AppStrings.workType, workType),
-               Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
-              _buildIconDetailRow(Icons.format_list_numbered, AppStrings.pages, wordCount),
-               Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
-              _buildIconDetailRow(Icons.monetization_on_outlined, AppStrings.total, "£$price", valueColor: AppColors.primary, isValueBold: true),
-            ]),
-            const SizedBox(height: 12),
-
-            _buildSectionTitle("Instructions"),
-            _buildPremiumBox([
-              Text(instructions, style: AppTextStyles.bodySmall.copyWith(height: 1.4)),
-            ]),
-            const SizedBox(height: 12),
-
-            _buildSectionTitle("Uploaded Files"),
-            _buildFileRow("Assignment_Brief.pdf", "1.2 MB"),
-            const SizedBox(height: 6),
-            _buildFileRow("Reference_Notes.docx", "845 KB"),
-            const SizedBox(height: 12),
-
-            _buildPaymentStatusBox(context, isPaymentPending, price, orderId),
-            const SizedBox(height: 12),
-
-            _buildSectionTitle("Help & Feedback"),
-            Row(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _buildActionCard(
-                    context,
-                    icon: Icons.star_border_rounded,
-                    title: "Rate Order",
-                    subtitle: "Give Feedback",
-                    iconColor: AppColors.warning,
-                    onTap: () => _showFeedbackDialog(context, orderId),
+                _buildTopCard(title, orderId, deadline, status, statusColor, progress, progressText),
+                const SizedBox(height: 12),
+
+                _buildSectionTitle("Customer Details"),
+                _buildPremiumBox([
+                  _buildIconDetailRow(Icons.person_outline, "Name", customerName),
+                  Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
+                  _buildIconDetailRow(Icons.email_outlined, "Email", customerEmail),
+                  Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
+                  _buildIconDetailRow(Icons.phone_outlined, "Mobile", customerMobile),
+                ]),
+                const SizedBox(height: 12),
+
+                _buildSectionTitle("Order Specifications"),
+                _buildPremiumBox([
+                  _buildIconDetailRow(Icons.work_outline, AppStrings.workType, workType),
+                  Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
+                  _buildIconDetailRow(Icons.format_list_numbered, AppStrings.pages, wordCount),
+                  Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
+                  _buildIconDetailRow(Icons.monetization_on_outlined, AppStrings.total, "£$price", valueColor: AppColors.textPrimary, isValueBold: true),
+
+                  // --- NEW: DUE AMOUNT ROW ---
+                  if (isPaymentPending) ...[
+                    Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
+                    _buildIconDetailRow(
+                        Icons.account_balance_wallet_outlined,
+                        "Due Amount",
+                        "£$dueAmount",
+                        valueColor: AppColors.error,
+                        isValueBold: true
+                    ),
+                  ],
+                ]),
+                const SizedBox(height: 12),
+
+                _buildSectionTitle("Instructions"),
+                _buildPremiumBox([
+                  Text(instructions, style: AppTextStyles.bodySmall.copyWith(height: 1.4)),
+                ]),
+                const SizedBox(height: 12),
+
+                // --- DYNAMIC UPLOADED FILES SECTION ---
+                _buildSectionTitle("Uploaded Files"),
+
+                if (attachments.isNotEmpty)
+                  ...attachments.map((fileUrl) {
+                    String fileName = fileUrl.split('/').last;
+                    String extension = fileName.split('.').last.toLowerCase();
+
+                    bool isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(extension);
+
+                    if (isImage) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: AppColors.bgLight,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.lightDivider, width: 1),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.lightShadow,
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              )
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              fileUrl,
+                              height: 180,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const SizedBox(
+                                  height: 180,
+                                  child: Center(child: CircularProgressIndicator()),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return _buildFileRow(fileName, "Image failed to load");
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 6.0),
+                      child: _buildFileRow(fileName, "Attachment"),
+                    );
+                  })
+                else
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
+                    child: Text(
+                        "No files or images uploaded.",
+                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)
+                    ),
                   ),
+
+                const SizedBox(height: 12),
+
+                // Pass dueAmount to PaymentStatusBox instead of full price
+                _buildPaymentStatusBox(context, isPaymentPending, dueAmount, orderId),
+                const SizedBox(height: 12),
+
+                _buildSectionTitle("Help & Feedback"),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildActionCard(
+                        context,
+                        icon: Icons.star_border_rounded,
+                        title: "Rate Order",
+                        subtitle: "Give Feedback",
+                        iconColor: AppColors.warning,
+                        onTap: () => _showFeedbackDialog(context, orderId),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildActionCard(
+                        context,
+                        icon: Icons.support_agent_rounded,
+                        title: "Issue?",
+                        subtitle: "Raise Ticket",
+                        iconColor: AppColors.error,
+                        onTap: () => _showRaiseTicketDialog(context, orderId),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildActionCard(
-                    context,
-                    icon: Icons.support_agent_rounded,
-                    title: "Issue?",
-                    subtitle: "Raise Ticket",
-                    iconColor: AppColors.error,
-                    onTap: () => _showRaiseTicketDialog(context, orderId),
-                  ),
-                ),
+                const SizedBox(height: 80),
               ],
             ),
-            const SizedBox(height: 20),
-          ],
-        ),
+          ),
+          const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+        ],
       ),
     ));
   }
 
   // ==========================================
-  // PAYMENT BOTTOM SHEETS (Country-wise Tab Bar)
+  // PAYMENT BOTTOM SHEETS
   // ==========================================
 
   void _showPaymentDetailsSheet(BuildContext context, String amountDue, String orderId) {
@@ -294,34 +404,34 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                     isBottomSheet: true,
                   ),
 
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: AppButton(
-                        title: "I Have Paid",
-                        onTap: () {
-                          Get.back();
-                          _showUploadScreenshotSheet(context, orderId);
-                        },
-                      ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: AppButton(
+                      title: "I Have Paid",
+                      onTap: () {
+                        Get.back();
+                        _showUploadScreenshotSheet(context, orderId);
+                      },
                     ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        onPressed: () => Get.back(),
-                        child: Text("Pay Later", style: AppTextStyles.subtitle.copyWith(color: AppColors.textSecondary)),
-                      ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () => Get.back(),
+                      child: Text("Pay Later", style: AppTextStyles.subtitle.copyWith(color: AppColors.textSecondary)),
                     ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              );
-            }),
-          );
-        },
-      );
-    }
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
 
   void _showUploadScreenshotSheet(BuildContext context, String orderId) {
     final Rx<File?> selectedFile = Rx<File?>(null);
@@ -462,7 +572,86 @@ class OrderDetailsView extends GetView<AssignmentsController> {
   // UI BUILDER WIDGETS
   // ==========================================
 
-  Widget _buildPaymentStatusBox(BuildContext context, bool isPending, String price, String orderId) {
+  Widget _buildFileRow(String fileName, String fileSize) {
+    String extension = fileName.split('.').last.toLowerCase();
+
+    bool isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(extension);
+    bool isPdf = extension == 'pdf';
+    bool isWord = ['doc', 'docx'].contains(extension);
+
+    IconData fileIcon;
+    Color iconColor;
+
+    if (isImage) {
+      fileIcon = Icons.image_outlined;
+      iconColor = AppColors.primary;
+    } else if (isPdf) {
+      fileIcon = Icons.picture_as_pdf;
+      iconColor = AppColors.error;
+    } else if (isWord) {
+      fileIcon = Icons.description_outlined;
+      iconColor = Colors.blue;
+    } else {
+      fileIcon = Icons.insert_drive_file_outlined;
+      iconColor = AppColors.textSecondary;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+          color: AppColors.bgLight,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.lightDivider, width: 1)
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6)
+            ),
+            child: Icon(fileIcon, color: iconColor, size: 16),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  fileName,
+                  style: AppTextStyles.subtitle.copyWith(fontSize: AppFontSize.s12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(fileSize, style: AppTextStyles.caption.copyWith(fontSize: AppFontSize.s10)),
+              ],
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              // Add actual download logic here
+            },
+            borderRadius: BorderRadius.circular(6),
+            child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                    color: AppColors.priceBg,
+                    borderRadius: BorderRadius.circular(6)
+                ),
+                child: Text(
+                    "Download",
+                    style: AppTextStyles.stepBadge.copyWith(color: AppColors.primary, fontSize: AppFontSize.s10)
+                )
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentStatusBox(BuildContext context, bool isPending, String amount, String orderId) {
     Color bgColor = isPending ? AppColors.error.withValues(alpha:0.05) : AppColors.success.withValues(alpha:0.05);
     Color borderColor = isPending ? AppColors.error.withValues(alpha:0.2) : AppColors.success.withValues(alpha:0.2);
     Color textColor = isPending ? AppColors.error : AppColors.success;
@@ -503,7 +692,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
             width: double.infinity,
             child: AppButton(
               title: "Complete Payment",
-              onTap: () => _showPaymentDetailsSheet(context, price, orderId),
+              onTap: () => _showPaymentDetailsSheet(context, amount, orderId), // Using exact passed amount here
             ),
           )
         ]
@@ -523,7 +712,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.lightDivider, width: 1),
-            boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))],
+            boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: const Offset(0, 1))],
           ),
           child: Column(
             children: [
@@ -548,7 +737,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       decoration: BoxDecoration(
         color: AppColors.bgLight,
         borderRadius: BorderRadius.circular(12),
-        boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 8, offset: Offset(0, 2))],
+        boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
         children: [
@@ -598,14 +787,14 @@ class OrderDetailsView extends GetView<AssignmentsController> {
               ],
             ),
           ),
-           Divider(height: 1, color: AppColors.lightDivider),
+          Divider(height: 1, color: AppColors.lightDivider),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration:  BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.vertical(bottom: Radius.circular(12))),
+            decoration:  BoxDecoration(color: AppColors.background, borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12))),
             child: Row(
               children: [
-                 Icon(Icons.info_outline, size: 14, color: AppColors.textSecondary),
+                Icon(Icons.info_outline, size: 14, color: AppColors.textSecondary),
                 const SizedBox(width: 6),
                 Text("Estimated completion: Tomorrow", style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: AppFontSize.s11)),
               ],
@@ -635,7 +824,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
   Widget _buildPremiumBox(List<Widget> children) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.bgLight, borderRadius: BorderRadius.circular(10), boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: Offset(0, 1))]),
+      decoration: BoxDecoration(color: AppColors.bgLight, borderRadius: BorderRadius.circular(10), boxShadow:  [BoxShadow(color: AppColors.lightShadow, blurRadius: 4, offset: const Offset(0, 1))]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
     );
   }
@@ -656,34 +845,6 @@ class OrderDetailsView extends GetView<AssignmentsController> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildFileRow(String fileName, String fileSize) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(color: AppColors.bgLight, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.lightDivider, width: 1)),
-      child: Row(
-        children: [
-          Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: AppColors.error.withValues(alpha:0.1), borderRadius: BorderRadius.circular(6)), child: const Icon(Icons.picture_as_pdf, color: AppColors.error, size: 16)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(fileName, style: AppTextStyles.subtitle.copyWith(fontSize: AppFontSize.s12)),
-                const SizedBox(height: 2),
-                Text(fileSize, style: AppTextStyles.caption.copyWith(fontSize: AppFontSize.s10)),
-              ],
-            ),
-          ),
-          InkWell(
-            onTap: () {},
-            borderRadius: BorderRadius.circular(6),
-            child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: AppColors.priceBg, borderRadius: BorderRadius.circular(6)), child: Text("Download", style: AppTextStyles.stepBadge.copyWith(color: AppColors.primary, fontSize: AppFontSize.s10))),
-          ),
-        ],
-      ),
     );
   }
 

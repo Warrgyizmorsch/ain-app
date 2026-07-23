@@ -16,7 +16,7 @@ class ResourcesView extends StatelessWidget {
       backgroundColor: AppColors.appBackground,
       appBar: CustomAppBar(
         title: 'Resources & Tools',
-        showBackButton: false,
+        showBackButton: true,
         actions: [
           IconButton(
             icon: Icon(Icons.notifications_none, color: AppColors.textPrimary, size: 26),
@@ -27,9 +27,11 @@ class ResourcesView extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -214,12 +216,14 @@ class ResourcesView extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 80),
             ],
           ),
         ),
       ),
-    ));
+      const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+    ],
+  )));
   }
 }
 

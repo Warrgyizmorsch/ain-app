@@ -60,156 +60,161 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Total Spent Card
-            _buildTotalSpentCard(),
-            const SizedBox(height: 24),
-
-            // 2. Quick Actions Row
-            _buildQuickActionsRow(),
-            const SizedBox(height: 32),
-
-            // 3. Transaction History Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  AppStrings.transactionHistory,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.bgLight,
-                    border: Border.all(color: AppColors.lightDivider),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.filter_alt_outlined, size: 16, color: AppColors.textPrimary),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Filter',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                // 1. Total Spent Card
+                _buildTotalSpentCard(),
+                const SizedBox(height: 24),
+
+                // 2. Quick Actions Row
+                _buildQuickActionsRow(),
+                const SizedBox(height: 32),
+
+                // 3. Transaction History Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppStrings.transactionHistory,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
                       ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.textSecondary),
-                    ],
-                  ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.bgLight,
+                        border: Border.all(color: AppColors.lightDivider),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.filter_alt_outlined, size: 16, color: AppColors.textPrimary),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Filter',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.textSecondary),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 16),
+
+                // 4. Dynamic Transaction List (Confirmed, Processing, Cancelled)
+                Obx(() {
+                  final confirmedOrders = controller.orderResponse.value?.data?.confirmedOrders ?? [];
+
+                  if (controller.isLoading.value) {
+                    return Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
+                    );
+                  }
+
+                  if (confirmedOrders.isEmpty) {
+                    return Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.bgLight,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.lightDivider),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(Icons.receipt_long_outlined, size: 48, color: AppColors.textSecondary),
+                          const SizedBox(height: 12),
+                          Text(
+                            'No transaction history found',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Your completed or confirmed payments will appear here.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    children: confirmedOrders.map((order) => _buildConfirmedTransactionTile(order)).toList(),
+                  );
+                }),
+                const SizedBox(height: 32),
+
+                // 5. Bank Transfer Details (Same as Order Now Step 2)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Bank Transfer Details',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryPurple.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Bank Transfer',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (isLoadingBanks)
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
+                  )
+                else if (banksList.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Center(child: Text("No bank details found.")),
+                  )
+                else
+                  BankTransferDetailsWidget(
+                    banksList: banksList,
+                    tabViewHeight: 250,
+                  ),
+                const SizedBox(height: 32),
+
+                // 6. Support Banner
+                const _SupportBanner(),
+                const SizedBox(height: 80),
               ],
             ),
-            const SizedBox(height: 16),
-
-            // 4. Dynamic Transaction List (Confirmed, Processing, Cancelled)
-            Obx(() {
-              final confirmedOrders = controller.orderResponse.value?.data?.confirmedOrders ?? [];
-
-              if (controller.isLoading.value) {
-                return Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
-                );
-              }
-
-              if (confirmedOrders.isEmpty) {
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: AppColors.bgLight,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.lightDivider),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.receipt_long_outlined, size: 48, color: AppColors.textSecondary),
-                      const SizedBox(height: 12),
-                      Text(
-                        'No transaction history found',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Your completed or confirmed payments will appear here.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return Column(
-                children: confirmedOrders.map((order) => _buildConfirmedTransactionTile(order)).toList(),
-              );
-            }),
-            const SizedBox(height: 32),
-
-            // 5. Bank Transfer Details (Same as Order Now Step 2)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Bank Transfer Details',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryPurple.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    'Bank Transfer',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (isLoadingBanks)
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
-              )
-            else if (banksList.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(20.0),
-                child: Center(child: Text("No bank details found.")),
-              )
-            else
-              BankTransferDetailsWidget(
-                banksList: banksList,
-                tabViewHeight: 250,
-              ),
-            const SizedBox(height: 32),
-
-            // 6. Support Banner
-            const _SupportBanner(),
-            const SizedBox(height: 24),
-          ],
-        ),
+          ),
+          const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+        ],
       ),
     ));
   }

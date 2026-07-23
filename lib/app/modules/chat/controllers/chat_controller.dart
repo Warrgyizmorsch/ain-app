@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -13,6 +14,10 @@ class ChatController extends GetxController {
   final RxList<MessageModel> messages = <MessageModel>[].obs;
   final RxBool isTyping = false.obs;
 
+  // Typewriter & Queue State
+  final RxBool isBotTypingText = false.obs;
+  final List<String> _messageQueue = [];
+
   // WebSocket variables
   WebSocketChannel? _channel;
   late String sessionId;
@@ -24,13 +29,8 @@ class ChatController extends GetxController {
 
     _connectWebSocket();
 
-    messages.add(
-        MessageModel(
-            content: "Hi there! 👋 I'm Daniel. How can I help you today?",
-            time: _getCurrentTime(),
-            isMe: false
-        )
-    );
+    _messageQueue.add("Hi there! 👋 I'm Daniel. How can I help you today?");
+    _processBotQueue();
   }
 
   void _connectWebSocket() {
@@ -65,15 +65,52 @@ class ChatController extends GetxController {
       }
     } catch (e) {
       isTyping.value = false;
-      messages.add(
-        MessageModel(
-          content: messageData.toString().trim(),
+      _messageQueue.add(messageData.toString().trim());
+      _processBotQueue();
+    }
+  }
+
+
+  void _processBotQueue() {
+    // Prevent overlapping typing if already processing a message or queue is empty
+    if (isBotTypingText.value || _messageQueue.isEmpty) return;
+
+    isBotTypingText.value = true;
+    String rawText = _messageQueue.removeAt(0);
+    String currentText = "";
+    int charIndex = 0;
+
+    final messageIndex = messages.length;
+    messages.add(
+      MessageModel(
+        content: "",
+        time: _getCurrentTime(),
+        isMe: false,
+      ),
+    );
+
+
+    Timer.periodic(const Duration(milliseconds: 80), (timer) {
+      if (charIndex < rawText.length) {
+        currentText += rawText[charIndex];
+
+        messages[messageIndex] = MessageModel(
+          content: currentText,
           time: _getCurrentTime(),
           isMe: false,
-        ),
-      );
-      _scrollToBottom();
-    }
+        );
+
+        charIndex++;
+        _scrollToBottom();
+      } else {
+        // Finished typing the current message
+        timer.cancel();
+        isBotTypingText.value = false;
+
+        // Check if there are more messages waiting in the queue
+        _processBotQueue();
+      }
+    });
   }
 
   void sendMessage() {
@@ -107,11 +144,11 @@ class ChatController extends GetxController {
   }
 
   void _scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 50), () {
       if (scrollController.hasClients) {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 150),
           curve: Curves.easeOut,
         );
       }

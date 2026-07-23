@@ -46,7 +46,7 @@ class PlaceOrderApi {
           'finalPrice': request.finalPrice ,
           'source_page': request.sourcePage ,
         },
-        // files: multipartFiles,
+        files: multipartFiles,
       );
 
       return PlaceOrderResponse.fromJson(response);

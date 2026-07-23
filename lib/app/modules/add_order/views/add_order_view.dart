@@ -34,9 +34,14 @@ class AddOrderView extends GetView<AddOrderController> {
           )
               : null,
         ),
-        body: controller.currentStep.value == 1
-            ? AssignmentDetailsStep()
-            : RequirementsAndPaymentStep(),
+        body: Stack(
+          children: [
+            controller.currentStep.value == 1
+                ? AssignmentDetailsStep()
+                : RequirementsAndPaymentStep(),
+            const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+          ],
+        ),
       ),
     ));
   }

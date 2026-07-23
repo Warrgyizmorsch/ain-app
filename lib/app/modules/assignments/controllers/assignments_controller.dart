@@ -1,6 +1,9 @@
 // ignore_for_file: unnecessary_null_comparison
 
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../common/constant/app_imports.dart';
 import '../../../core/models/order_now_model/feedback_request_model.dart';
@@ -13,70 +16,86 @@ import '../../../core/utils/api/order_now_api/raise_ticket_api.dart';
 import '../../../core/utils/api/payment_api/add_payment_sc_api.dart';
 import '../../../core/utils/api/payment_api/bank_list_api.dart';
 import '../../../core/utils/helper/device_helper.dart';
+
 enum OrderFilter { all, completed, inProgress, pending }
+
 class AssignmentsController extends GetxController {
+  // ==========================================
+  // STATE OBSERVABLES
+  // ==========================================
   final isLoading = false.obs;
   final isLoadingPayment = false.obs;
   final isLoadingTicket = false.obs;
   final isLoadingFeedback = false.obs;
+  final isBankLoading = false.obs;
+
   final orderResponse = Rxn<OrderListResponse>();
   final RxList<BankDetail> banksList = <BankDetail>[].obs;
-  final isBankLoading = false.obs;
+  final selectedFilter = OrderFilter.all.obs;
+
+  // Upgraded to RxList so it updates the UI automatically when changed
+  final RxList<String> attachments = <String>[].obs;
+
+  final String phoneNumber = '+44 7300640066';
+
+  // ==========================================
+  // GETTERS (COMPUTED PROPERTIES)
+  // ==========================================
+  List<Lead> get nonConfirmedLeads =>
+      orderResponse.value?.data?.nonConfirmedLeads ?? [];
 
   List<dynamic> get allAssignments => [
     ...nonConfirmedLeads,
     ...(orderResponse.value?.data?.confirmedOrders ?? [])
   ];
 
-  List<Lead> get nonConfirmedLeads =>
-      orderResponse.value?.data?.nonConfirmedLeads ?? [];
-
-  // 3. Completed (Jo Confirm ho gaye hain AUR Deliver ho gaye hain)
+  // Completed (Confirmed AND Delivered)
   List<ConfirmedOrder> get completedOrders {
     final allConfirmed = orderResponse.value?.data?.confirmedOrders ?? [];
 
     return allConfirmed.where((order) {
       final isConfirmed = order.confirmedStatus?.toLowerCase() == 'confirmed';
       final isDelivered = order.deliveryDate != null && order.deliveryDate!.toString().trim().isNotEmpty;
-
       return isConfirmed && isDelivered;
     }).toList();
   }
 
+  // Active (Confirmed but NOT Delivered)
   List<dynamic> get activeAssignments {
     final allConfirmed = orderResponse.value?.data?.confirmedOrders ?? [];
 
     final activeConfirmed = allConfirmed.where((order) {
       final isConfirmed = order.confirmedStatus?.toLowerCase() == 'confirmed';
       final isNotDelivered = order.deliveryDate == null || order.deliveryDate!.toString().trim().isEmpty;
-
       return isConfirmed && isNotDelivered;
     }).toList();
 
     return [...nonConfirmedLeads, ...activeConfirmed];
   }
-  final selectedFilter = OrderFilter.all.obs;
 
   List<dynamic> get filteredAssignments {
     final all = allAssignments;
 
     switch (selectedFilter.value) {
       case OrderFilter.completed:
-        return all.where((item) => item is ConfirmedOrder &&
-            item.deliveryDate != null && item.deliveryDate!.trim().isNotEmpty).toList();
+        return all.where((item) =>
+        item is ConfirmedOrder &&
+            item.deliveryDate != null &&
+            item.deliveryDate!.trim().isNotEmpty).toList();
       case OrderFilter.inProgress:
-        return all.where((item) => item is ConfirmedOrder &&
+        return all.where((item) =>
+        item is ConfirmedOrder &&
             (item.deliveryDate == null || item.deliveryDate!.trim().isEmpty)).toList();
       case OrderFilter.pending:
         return all.whereType<Lead>().toList();
       case OrderFilter.all:
-      return all;
+        return all;
     }
   }
 
-  void updateFilter(OrderFilter filter) {
-    selectedFilter.value = filter;
-  }
+  // ==========================================
+  // LIFECYCLE & HELPERS
+  // ==========================================
   @override
   void onInit() {
     super.onInit();
@@ -84,11 +103,46 @@ class AssignmentsController extends GetxController {
     bankList();
   }
 
+  void updateFilter(OrderFilter filter) {
+    selectedFilter.value = filter;
+  }
+
+  /// Extracts attachments dynamically based on the current order
+  /// Call this when opening the OrderDetailsView
+  void extractAttachments(dynamic orderData) {
+    attachments.clear();
+
+    if (orderData is Lead) {
+      attachments.addAll(orderData.files ?? []);
+      attachments.addAll(orderData.images ?? []);
+    } else if (orderData is ConfirmedOrder) {
+      attachments.addAll(orderData.files ?? []);
+      attachments.addAll(orderData.images ?? []);
+    }
+  }
+
+  Future<void> makeCall() async {
+    final Uri uri = Uri(scheme: 'tel', path: phoneNumber);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      Get.snackbar(
+        'Error',
+        'Unable to make a phone call.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  // ==========================================
+  // API CALLS
+  // ==========================================
   Future<void> getOrderList() async {
     try {
       isLoading.value = true;
-
       final response = await OrderListApi.getOrderList();
+
       if (response != null) {
         orderResponse.value = response;
       }
@@ -98,10 +152,10 @@ class AssignmentsController extends GetxController {
       isLoading.value = false;
     }
   }
+
   Future<void> bankList() async {
     try {
       isBankLoading.value = true;
-
       final response = await BankListApi.getBankList();
 
       if (response.success == true && response.data != null) {
@@ -134,7 +188,6 @@ class AssignmentsController extends GetxController {
   }) async {
     try {
       isLoadingTicket.value = true;
-
       final response = await RaiseTicketApi.addRaiseTicket(
         orderId: orderId,
         comment: comment,
@@ -142,10 +195,7 @@ class AssignmentsController extends GetxController {
 
       if (response.success == true) {
         Get.back(); // Close dialog
-        UDeviceHelper.showToast(
-          response.message ?? "Ticket raised successfully!",
-        );
-
+        UDeviceHelper.showToast(response.message ?? "Ticket raised successfully!");
         debugPrint("Ticket Number: ${response.data?.feedbackTicket}");
       } else {
         Get.snackbar(
@@ -168,6 +218,7 @@ class AssignmentsController extends GetxController {
       isLoadingTicket.value = false;
     }
   }
+
   Future<void> submitPaymentProof({
     required String orderId,
     required String amount,
@@ -178,7 +229,6 @@ class AssignmentsController extends GetxController {
   }) async {
     try {
       isLoadingPayment.value = true;
-
       final requestModel = AddPaymentRequestModel(
         orderId: orderId,
         paidAmount: amount,
@@ -220,22 +270,20 @@ class AssignmentsController extends GetxController {
       isLoadingPayment.value = false;
     }
   }
+
   Future<void> submitFeedback({
     required FeedbackRequest request,
     required BuildContext context,
   }) async {
     try {
       isLoadingFeedback.value = true;
-
       final response = await FeedbackApi.addFeedBack(
         request: request,
       );
 
       if (response.success == true) {
         Get.back();
-        UDeviceHelper.showToast(
-         response.message ?? "Feedback submitted successfully!",
-        );
+        UDeviceHelper.showToast(response.message ?? "Feedback submitted successfully!");
         debugPrint("Feedback submitted for Order: ${request.orderId}");
       } else {
         Get.snackbar(
@@ -258,6 +306,4 @@ class AssignmentsController extends GetxController {
       isLoadingFeedback.value = false;
     }
   }
-
-
 }

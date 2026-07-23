@@ -24,63 +24,68 @@ class MyOrdersWidget extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // --- Tabs ---
-          _buildTabs(),
+          Column(
+            children: [
+              // --- Tabs ---
+              _buildTabs(),
 
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // --- Orders List ---
-                  Obx(() {
-                    if (controller.isLoading.value) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: CircularProgressIndicator(color: AppColors.primary),
-                        ),
-                      );
-                    }
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // --- Orders List ---
+                      Obx(() {
+                        if (controller.isLoading.value) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32.0),
+                              child: CircularProgressIndicator(color: AppColors.primary),
+                            ),
+                          );
+                        }
 
-                    final assignments = controller.filteredAssignments;
-                    if (assignments.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Text(
-                            'No recent orders found.',
-                            style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
-                          ),
-                        ),
-                      );
-                    }
+                        final assignments = controller.filteredAssignments;
+                        if (assignments.isEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32.0),
+                              child: Text(
+                                'No recent orders found.',
+                                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                              ),
+                            ),
+                          );
+                        }
 
-                    return ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: assignments.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 16),
-                      itemBuilder: (context, index) {
-                        final item = assignments[index];
-                        return _buildDynamicOrderTile(item);
-                      },
-                    );
-                  }),
+                        return ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: assignments.length,
+                          separatorBuilder: (context, index) => const SizedBox(height: 16),
+                          itemBuilder: (context, index) {
+                            final item = assignments[index];
+                            return _buildDynamicOrderTile(item);
+                          },
+                        );
+                      }),
 
-                  const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                  // --- Support Banner ---
-                  const _SupportBanner(),
-                  const SizedBox(height: 24),
-                ],
+                      // --- Support Banner ---
+                      const _SupportBanner(),
+                      const SizedBox(height: 80),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
+          const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
         ],
       ),
     ));
