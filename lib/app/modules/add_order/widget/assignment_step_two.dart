@@ -447,10 +447,10 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
           const SizedBox(height: 32),
 
           // --- Bottom Action ---
-          Obx(() => AppButton(
+        AppButton(
             title: controller.editingOrderData != null ? 'Update Order' : 'Place Order',
             onTap: controller.addToCart,
-          )),
+          ),
           const SizedBox(height: 24),
         ],
       ),

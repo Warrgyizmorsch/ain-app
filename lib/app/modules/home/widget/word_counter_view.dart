@@ -9,9 +9,9 @@ class WordCounterView extends GetView<HomeController> {
     // Ensure controller is initialized
     Get.put(HomeController());
 
-    // Local toggles for the options checkboxes
-    final RxBool excludeQuotes = false.obs;
-    final RxBool excludeNumbers = false.obs;
+    // // Local toggles for the options checkboxes
+    // final RxBool excludeQuotes = false.obs;
+    // final RxBool excludeNumbers = false.obs;
 
     return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
@@ -478,105 +478,105 @@ class WordCounterView extends GetView<HomeController> {
       color: AppColors.lightDivider,
     );
   }
-
-  Widget _buildOptionToggle(String label, IconData icon, bool isActive, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.primaryPurple.withValues(alpha: 0.15) : AppColors.bgLight,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isActive ? AppColors.primaryPurple : AppColors.lightDivider,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                  color: AppColors.primaryPurple.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6)
-              ),
-              child: Icon(icon, size: 14, color: AppColors.primaryPurple),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              isActive ? Icons.check_box : Icons.check_box_outline_blank,
-              size: 18,
-              color: isActive ? AppColors.primaryPurple : AppColors.lightDisabled,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentCountCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.bgLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.lightDivider),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.primaryPurple.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.description_outlined, color: AppColors.primaryPurple, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'My Essay on AI',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'May 10, 2024 • 3:15 PM',
-                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '1,245',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'Words',
-                style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          const SizedBox(width: 8),
-          Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20),
-        ],
-      ),
-    );
-  }
+  //
+  // Widget _buildOptionToggle(String label, IconData icon, bool isActive, VoidCallback onTap) {
+  //   return InkWell(
+  //     onTap: onTap,
+  //     borderRadius: BorderRadius.circular(10),
+  //     child: Container(
+  //       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+  //       decoration: BoxDecoration(
+  //         color: isActive ? AppColors.primaryPurple.withValues(alpha: 0.15) : AppColors.bgLight,
+  //         borderRadius: BorderRadius.circular(10),
+  //         border: Border.all(
+  //           color: isActive ? AppColors.primaryPurple : AppColors.lightDivider,
+  //         ),
+  //       ),
+  //       child: Row(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           Container(
+  //             padding: const EdgeInsets.all(4),
+  //             decoration: BoxDecoration(
+  //                 color: AppColors.primaryPurple.withValues(alpha: 0.15),
+  //                 borderRadius: BorderRadius.circular(6)
+  //             ),
+  //             child: Icon(icon, size: 14, color: AppColors.primaryPurple),
+  //           ),
+  //           const SizedBox(width: 8),
+  //           Text(
+  //             label,
+  //             style: TextStyle(
+  //               fontSize: 11,
+  //               fontWeight: FontWeight.w500,
+  //               color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
+  //             ),
+  //           ),
+  //           const SizedBox(width: 8),
+  //           Icon(
+  //             isActive ? Icons.check_box : Icons.check_box_outline_blank,
+  //             size: 18,
+  //             color: isActive ? AppColors.primaryPurple : AppColors.lightDisabled,
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+  //
+  // Widget _buildRecentCountCard() {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+  //     decoration: BoxDecoration(
+  //       color: AppColors.bgLight,
+  //       borderRadius: BorderRadius.circular(16),
+  //       border: Border.all(color: AppColors.lightDivider),
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         Container(
+  //           padding: const EdgeInsets.all(10),
+  //           decoration: BoxDecoration(
+  //             color: AppColors.primaryPurple.withValues(alpha: 0.15),
+  //             borderRadius: BorderRadius.circular(12),
+  //           ),
+  //           child: Icon(Icons.description_outlined, color: AppColors.primaryPurple, size: 22),
+  //         ),
+  //         const SizedBox(width: 12),
+  //         Expanded(
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Text(
+  //                 'My Essay on AI',
+  //                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+  //               ),
+  //               const SizedBox(height: 4),
+  //               Text(
+  //                 'May 10, 2024 • 3:15 PM',
+  //                 style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         Column(
+  //           crossAxisAlignment: CrossAxisAlignment.end,
+  //           children: [
+  //             Text(
+  //               '1,245',
+  //               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
+  //             ),
+  //             const SizedBox(height: 2),
+  //             Text(
+  //               'Words',
+  //               style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+  //             ),
+  //           ],
+  //         ),
+  //         const SizedBox(width: 8),
+  //         Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
