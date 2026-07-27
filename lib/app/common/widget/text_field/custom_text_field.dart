@@ -1,9 +1,7 @@
-
 import 'package:ain/app/common/constant/app_fonts_size.dart';
 import 'package:ain/app/common/constant/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 
 import '../../constant/app_colors.dart';
 import '../../constant/font_family.dart';
@@ -41,6 +39,7 @@ class TextFieldCustom extends StatelessWidget {
   final bool? enabled;
   final FocusNode? focusNode;
   final Function(String)? onSubmitted;
+  final TextAlign? textAlign; // Added textAlign property
 
   const TextFieldCustom({
     super.key,
@@ -76,6 +75,7 @@ class TextFieldCustom extends StatelessWidget {
     this.enabled,
     this.focusNode,
     this.onSubmitted,
+    this.textAlign, // Added to constructor
   });
 
   @override
@@ -89,6 +89,7 @@ class TextFieldCustom extends StatelessWidget {
       width: width,
       height: height,
       child: TextFormField(
+        textAlign: textAlign ?? TextAlign.start, // Applied here with a default
         autovalidateMode: autoValidateMode,
         onTap: onTap,
         controller: controller,

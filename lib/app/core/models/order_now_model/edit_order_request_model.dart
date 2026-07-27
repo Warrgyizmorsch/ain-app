@@ -9,6 +9,10 @@ class EditOrderRequest {
   String requirements;
   String finalPrice;
   String sourcePage;
+  String? expertId;
+  String? expertName;
+  bool? useWallet;
+  String? walletAmount;
 
   EditOrderRequest({
     required this.orderId,
@@ -21,10 +25,14 @@ class EditOrderRequest {
     required this.requirements,
     required this.finalPrice,
     required this.sourcePage,
+    this.expertId,
+    this.expertName,
+    this.useWallet,
+    this.walletAmount,
   });
 
   Map<String, String> toFields() {
-    return {
+    final fields = <String, String>{
       'order_id': orderId,
       'service': service,
       'workType': workType,
@@ -36,5 +44,18 @@ class EditOrderRequest {
       'finalPrice': finalPrice,
       'source_page': sourcePage,
     };
+    if (expertId != null && expertId!.isNotEmpty) {
+      fields['expert_id'] = expertId!;
+      fields['writer_id'] = expertId!;
+    }
+    if (expertName != null && expertName!.isNotEmpty) {
+      fields['expert_name'] = expertName!;
+      fields['writer_name'] = expertName!;
+    }
+    if (useWallet == true) {
+      fields['use_wallet'] = '1';
+      fields['wallet_amount'] = walletAmount ?? '0';
+    }
+    return fields;
   }
 }

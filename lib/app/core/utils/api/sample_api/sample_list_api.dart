@@ -5,12 +5,22 @@ import '../../../models/sample_model/samples_list_model.dart';
 import '../../../network/network_api_service.dart';
 
 class SampleListApi {
-  static Future<SampleResponseModel> samplesList({int? categoryId}) async {
+  static Future<SampleResponseModel> samplesList({
+    int? categoryId,
+    int? page,
+  }) async {
     try {
       String urlString = '${ApiConstant.BASE_URL}${ApiConstant.samplesList}';
+      List<String> queryParams = [];
 
       if (categoryId != null && categoryId != 0) {
-        urlString += '?category=$categoryId';
+        queryParams.add('category=$categoryId');
+      }
+      if (page != null && page > 0) {
+        queryParams.add('page=$page');
+      }
+      if (queryParams.isNotEmpty) {
+        urlString += '?${queryParams.join('&')}';
       }
 
       final url = Uri.parse(urlString);

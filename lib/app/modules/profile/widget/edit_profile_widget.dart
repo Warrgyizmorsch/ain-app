@@ -227,34 +227,7 @@ class EditProfileWidget extends GetView<ProfileController> {
               ),
               const SizedBox(height: 16),
 
-              _buildFieldRow(
-                icon: Icons.calendar_today_outlined,
-                label: 'Date of Birth',
-                child: _buildTextField(
-                  controller: controller.dobController,
-                  hint: '12 May 1998',
-                  isReadOnly: true,
-                  onTap: () => controller.selectDOBDate(context),
-                  suffixIcon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.calendar_month_outlined,
-                        color: AppColors.textSecondary,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        color: AppColors.textSecondary,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 12),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
+
 
               _buildFieldRow(
                 icon: Icons.public_outlined,
@@ -508,14 +481,21 @@ class EditProfileWidget extends GetView<ProfileController> {
     required String hint,
     bool isReadOnly = false,
     Widget? suffixIcon,
+    Widget? prefixIcon, // Added for the minus button
     VoidCallback? onTap,
     TextInputType keyboardType = TextInputType.text,
+    TextAlign textAlign = TextAlign.start, // Added to center the number
+    Function(String)? onChanged, // Added to update GetX state
+    List<TextInputFormatter>? inputFormatters, // Added to force numbers only
   }) {
     return TextFormField(
       controller: controller,
       readOnly: isReadOnly,
       onTap: onTap,
       keyboardType: keyboardType,
+      textAlign: textAlign, // Applied here
+      onChanged: onChanged, // Applied here
+      inputFormatters: inputFormatters, // Applied here
       style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
@@ -525,10 +505,15 @@ class EditProfileWidget extends GetView<ProfileController> {
         hintText: hint,
         hintStyle: TextStyle(fontSize: 14, color: AppColors.lightTextHint),
         filled: true,
-        fillColor: isReadOnly ? AppColors.appBackground : AppColors.bgLight,
+        fillColor: AppColors.bgLight,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
+        ),
+        prefixIcon: prefixIcon, // Applied here
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 40,
+          minHeight: 40,
         ),
         suffixIcon: suffixIcon,
         suffixIconConstraints: const BoxConstraints(

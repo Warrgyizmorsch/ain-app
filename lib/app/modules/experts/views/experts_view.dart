@@ -9,40 +9,74 @@ class ExpertsView extends GetView<ExpertsController> {
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
-      appBar: const CustomAppBar(title: 'Our Experts', showBackButton: true),
+      appBar: CustomAppBar(
+        title: 'Our Experts',
+        showBackButton: true,
+        actions: [
+          IconButton(
+            icon: Obx(
+              () => Icon(
+                controller.isSearching.value ? Icons.close : Icons.search,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            onPressed: controller.toggleSearch,
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.bgLight,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.lightDivider),
-                  ),
-                  child: TextField(
-                    style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
-                    decoration: InputDecoration(
-                      hintText: 'Search experts...',
-                      hintStyle: AppTextStyles.hintText.copyWith(
-                        color: AppColors.lightTextHint,
-                        fontSize: 15,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: AppColors.lightTextHint,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 14,
+              Obx(() {
+                if (!controller.isSearching.value) {
+                  return const SizedBox.shrink();
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.bgLight,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.lightDivider),
+                    ),
+                    child: TextField(
+                      controller: controller.searchController,
+                      onChanged: controller.updateSearchQuery,
+                      style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
+                      decoration: InputDecoration(
+                        hintText: 'Search experts...',
+                        hintStyle: AppTextStyles.hintText.copyWith(
+                          color: AppColors.lightTextHint,
+                          fontSize: 15,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: AppColors.lightTextHint,
+                        ),
+                        suffixIcon: Obx(
+                          () => controller.searchQuery.value.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.clear,
+                                    color: AppColors.lightTextHint,
+                                    size: 20,
+                                  ),
+                                  onPressed: controller.clearSearch,
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 14,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              }),
 
               const SizedBox(height: 8),
 
@@ -118,12 +152,19 @@ class ExpertsView extends GetView<ExpertsController> {
                   final experts = controller.filteredExperts;
 
                   if (experts.isEmpty) {
+                    final isSearching = controller.searchQuery.value.isNotEmpty;
                     return Center(
-                      child: Text(
-                        'No experts found in this category.',
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          color: AppColors.textSecondary,
-                          fontSize: 16,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text(
+                          isSearching
+                              ? 'No experts found matching "${controller.searchQuery.value}".'
+                              : 'No experts found in this category.',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            color: AppColors.textSecondary,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     );

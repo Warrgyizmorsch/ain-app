@@ -17,20 +17,76 @@ class SavedSamplesView extends GetView<ProfileController> {
         showBackButton: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.search, color: AppColors.textPrimary),
-            onPressed: () {
-              // Add Search Logic
-            },
+            icon: Obx(
+              () => Icon(
+                controller.isSampleSearching.value ? Icons.close : Icons.search,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            onPressed: controller.toggleSampleSearch,
           ),
         ],
       ),
       body: Stack(
         children: [
           SingleChildScrollView(
+            controller: controller.sampleScrollController,
             physics: const BouncingScrollPhysics(),
             child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // --- Search Bar (Displayed on search tap) ---
+            Obx(() {
+              if (!controller.isSampleSearching.value) {
+                return const SizedBox.shrink();
+              }
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.bgLight,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.lightDivider),
+                  ),
+                  child: TextField(
+                    controller: controller.sampleSearchController,
+                    onChanged: controller.updateSampleSearchQuery,
+                    style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText: 'Search saved samples...',
+                      hintStyle: AppTextStyles.hintText.copyWith(
+                        color: AppColors.lightTextHint,
+                        fontSize: 15,
+                      ),
+
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: AppColors.lightTextHint,
+                      ),
+                      suffixIcon: Obx(
+                        () => controller.sampleSearchQuery.value.isNotEmpty
+                            ? IconButton(
+                                icon: Icon(
+                                  Icons.clear,
+                                  color: AppColors.lightTextHint,
+                                  size: 20,
+                                ),
+                                onPressed: controller.clearSampleSearch,
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+
             // --- 1. Top Banner ---
             Container(
               margin: const EdgeInsets.all(16),
@@ -205,13 +261,19 @@ class SavedSamplesView extends GetView<ProfileController> {
                 );
               }
 
-              final samples = controller.sampleList;
+              final samples = controller.filteredSamples;
 
               if (samples.isEmpty) {
+                final isSearching = controller.sampleSearchQuery.value.isNotEmpty;
                 return CustomNoDataWidget(
-                  title: 'No Samples Found',
-                  subtitle: 'Try adjusting your search or selecting a different category.',
-                  onRetry: () => controller.changeCategory('All'),
+                  title: isSearching ? 'No Matching Samples' : 'No Samples Found',
+                  subtitle: isSearching
+                      ? 'No samples matched "${controller.sampleSearchQuery.value}".'
+                      : 'Try adjusting your search or selecting a different category.',
+                  onRetry: () {
+                    controller.clearSampleSearch();
+                    controller.changeCategory('All');
+                  },
                 );
               }
 
@@ -232,6 +294,18 @@ class SavedSamplesView extends GetView<ProfileController> {
                   );
                 },
               );
+            }),
+
+            Obx(() {
+              if (controller.isMoreSamplesLoading.value) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.primaryPurple),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
             }),
 
             const SizedBox(height: 16),

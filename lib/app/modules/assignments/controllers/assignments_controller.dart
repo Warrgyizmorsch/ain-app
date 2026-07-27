@@ -1,9 +1,5 @@
-// ignore_for_file: unnecessary_null_comparison
-
 import 'dart:io';
-
 import 'package:url_launcher/url_launcher.dart';
-
 import '../../../common/constant/app_imports.dart';
 import '../../../core/models/order_now_model/feedback_request_model.dart';
 import '../../../core/models/order_now_model/order_list_model.dart';
@@ -19,9 +15,7 @@ import '../../../core/utils/helper/device_helper.dart';
 enum OrderFilter { all, completed, inProgress, pending }
 
 class AssignmentsController extends GetxController {
-  // ==========================================
-  // STATE OBSERVABLES
-  // ==========================================
+
   final isLoading = false.obs;
   final isLoadingPayment = false.obs;
   final isLoadingTicket = false.obs;
@@ -31,15 +25,13 @@ class AssignmentsController extends GetxController {
   final orderResponse = Rxn<OrderListResponse>();
   final RxList<BankDetail> banksList = <BankDetail>[].obs;
   final selectedFilter = OrderFilter.all.obs;
+  final selectedTabIndex = 0.obs;
 
-  // Upgraded to RxList so it updates the UI automatically when changed
   final RxList<String> attachments = <String>[].obs;
 
   final String phoneNumber = '+44 7300640066';
 
-  // ==========================================
-  // GETTERS (COMPUTED PROPERTIES)
-  // ==========================================
+
   List<Lead> get nonConfirmedLeads =>
       orderResponse.value?.data?.nonConfirmedLeads ?? [];
 
@@ -48,7 +40,6 @@ class AssignmentsController extends GetxController {
     ...(orderResponse.value?.data?.confirmedOrders ?? [])
   ];
 
-  // Completed (Confirmed AND Delivered)
   List<ConfirmedOrder> get completedOrders {
     final allConfirmed = orderResponse.value?.data?.confirmedOrders ?? [];
 
@@ -59,7 +50,6 @@ class AssignmentsController extends GetxController {
     }).toList();
   }
 
-  // Active (Confirmed but NOT Delivered)
   List<dynamic> get activeAssignments {
     final allConfirmed = orderResponse.value?.data?.confirmedOrders ?? [];
 
@@ -92,9 +82,7 @@ class AssignmentsController extends GetxController {
     }
   }
 
-  // ==========================================
-  // LIFECYCLE & HELPERS
-  // ==========================================
+
   @override
   void onInit() {
     super.onInit();
@@ -106,8 +94,7 @@ class AssignmentsController extends GetxController {
     selectedFilter.value = filter;
   }
 
-  /// Extracts attachments dynamically based on the current order
-  /// Call this when opening the OrderDetailsView
+
   void extractAttachments(dynamic orderData) {
     attachments.clear();
 
@@ -134,9 +121,7 @@ class AssignmentsController extends GetxController {
     }
   }
 
-  // ==========================================
-  // API CALLS
-  // ==========================================
+
   Future<void> getOrderList() async {
     try {
       isLoading.value = true;

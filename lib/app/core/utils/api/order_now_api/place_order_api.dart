@@ -27,25 +27,35 @@ class PlaceOrderApi {
         );
       }
 
+      final fields = <String, String>{
+        'service': request.service,
+        'workType': request.workType,
+        'subject': request.subject,
+        'urgency': request.urgency,
+        'wordCount': request.wordCount.toString(),
+        'topic': request.topic,
+        'requirements': request.requirements,
+        'finalPrice': request.finalPrice,
+        'source_page': request.sourcePage,
+      };
+
+      if (request.expertId != null && request.expertId!.isNotEmpty) {
+        fields['expert_id'] = request.expertId!;
+        fields['writer_id'] = request.expertId!;
+      }
+      if (request.expertName != null && request.expertName!.isNotEmpty) {
+        fields['expert_name'] = request.expertName!;
+        fields['writer_name'] = request.expertName!;
+      }
+
+        fields['wallet'] = request.useWallet.toString();
+
+
+
       final response = await ApiClient.multipartRequest(
         'POST',
         url,
-        fields: {
-          // 'name': request.name ?? '',
-          // 'email': request.email ?? '',
-          // 'country': request.country ,
-          // 'countrycode': request.countryCode ?? '',
-          // 'mobile': request.mobile ?? '',
-          'service': request.service ,
-          'workType': request.workType ,
-          'subject': request.subject ,
-          'urgency': request.urgency ,
-          'wordCount': request.wordCount.toString() ,
-          'topic': request.topic,
-          'requirements': request.requirements ,
-          'finalPrice': request.finalPrice ,
-          'source_page': request.sourcePage ,
-        },
+        fields: fields,
         files: multipartFiles,
       );
 

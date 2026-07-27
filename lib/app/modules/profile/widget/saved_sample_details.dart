@@ -243,35 +243,35 @@ class SampleDetailsView extends GetView<ProfileController> {
       ],
     ),
 
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          padding:   EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          decoration:   BoxDecoration(
-            color: AppColors.bgLight,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.lightShadow,
-                spreadRadius: 1,
-                blurRadius: 10,
-                offset: Offset(0, -4),
-              ),
-            ],
-          ),
-          child: ElevatedButton.icon(
-            onPressed: () {},
-            icon:   Icon(Icons.download_outlined, color: AppColors.white),
-            label:   Text('Download Sample', style: AppTextStyles.button),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryPurple,
-              padding:   EdgeInsets.symmetric(vertical: 16),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          ),
-        ),
-      ),
+      // bottomNavigationBar: SafeArea(
+      //   child: Container(
+      //     padding:   EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      //     decoration:   BoxDecoration(
+      //       color: AppColors.bgLight,
+      //       boxShadow: [
+      //         BoxShadow(
+      //           color: AppColors.lightShadow,
+      //           spreadRadius: 1,
+      //           blurRadius: 10,
+      //           offset: Offset(0, -4),
+      //         ),
+      //       ],
+      //     ),
+      //     child: ElevatedButton.icon(
+      //       onPressed: () {},
+      //       icon:   Icon(Icons.download_outlined, color: AppColors.white),
+      //       label:   Text('Download Sample', style: AppTextStyles.button),
+      //       style: ElevatedButton.styleFrom(
+      //         backgroundColor: AppColors.primaryPurple,
+      //         padding:   EdgeInsets.symmetric(vertical: 16),
+      //         elevation: 0,
+      //         shape: RoundedRectangleBorder(
+      //           borderRadius: BorderRadius.circular(16),
+      //         ),
+      //       ),
+      //     ),
+      //   ),
+      // ),
     ));
   }
 

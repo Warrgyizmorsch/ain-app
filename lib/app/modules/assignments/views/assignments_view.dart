@@ -1,18 +1,18 @@
-
 import '../../../common/constant/app_imports.dart';
 import '../../../core/models/order_now_model/order_list_model.dart';
 import '../controllers/assignments_controller.dart';
 import '../widget/order_details_view.dart';
 
-class AssignmentsView extends GetView<AssignmentsController> {
+class AssignmentsView extends StatelessWidget {
   const AssignmentsView({super.key});
+
+  AssignmentsController get controller => Get.isRegistered<AssignmentsController>()
+      ? Get.find<AssignmentsController>()
+      : Get.put(AssignmentsController());
 
   @override
   Widget build(BuildContext context) {
-    // Local observable to track the active tab index
-    final RxInt selectedTabIndex = 0.obs;
-
-    return Obx(() => Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: const CustomAppBar(
         title: AppStrings.myAssignments,
@@ -29,55 +29,53 @@ class AssignmentsView extends GetView<AssignmentsController> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Obx(() => Expanded(
-                    child: Center(
+                  Expanded(
+                    child: Obx(() => Center(
                       child: _TabItem(
                         title: 'All',
-                        isActive: selectedTabIndex.value == 0,
-                        onTap: () => selectedTabIndex.value = 0,
+                        isActive: controller.selectedTabIndex.value == 0,
+                        onTap: () => controller.selectedTabIndex.value = 0,
                       ),
-                    ),
-                  )),
-                  Obx(() => Expanded(
-                    child: Center(
+                    )),
+                  ),
+                  Expanded(
+                    child: Obx(() => Center(
                       child: _TabItem(
                         title: 'Active',
-                        isActive: selectedTabIndex.value == 1,
-                        onTap: () => selectedTabIndex.value = 1,
+                        isActive: controller.selectedTabIndex.value == 1,
+                        onTap: () => controller.selectedTabIndex.value = 1,
                       ),
-                    ),
-                  )),
-                  Obx(() => Expanded(
-                    child: Center(
+                    )),
+                  ),
+                  Expanded(
+                    child: Obx(() => Center(
                       child: _TabItem(
                         title: 'Completed',
-                        isActive: selectedTabIndex.value == 2,
-                        onTap: () => selectedTabIndex.value = 2,
+                        isActive: controller.selectedTabIndex.value == 2,
+                        onTap: () => controller.selectedTabIndex.value = 2,
                       ),
-                    ),
-                  )),
-                  Obx(() => Expanded(
-                    child: Center(
+                    )),
+                  ),
+                  Expanded(
+                    child: Obx(() => Center(
                       child: _TabItem(
                         title: 'Drafts',
-                        isActive: selectedTabIndex.value == 3,
-                        onTap: () => selectedTabIndex.value = 3,
+                        isActive: controller.selectedTabIndex.value == 3,
+                        onTap: () => controller.selectedTabIndex.value = 3,
                       ),
-                    ),
-                  )),
+                    )),
+                  ),
                 ],
               ),
             ),
 
-            // --- TAB CONTENT VIEW ---
             Expanded(
               child: Obx(() {
                 if (controller.isLoading.value) {
-                  return  Center(child: CircularProgressIndicator(color: AppColors.buttonPrimary));
+                  return Center(child: CircularProgressIndicator(color: AppColors.buttonPrimary));
                 }
 
-                // Switching lists based on the selected tab index
-                switch (selectedTabIndex.value) {
+                switch (controller.selectedTabIndex.value) {
                   case 0:
                     return _allList();
                   case 1:
@@ -94,10 +92,9 @@ class AssignmentsView extends GetView<AssignmentsController> {
           ],
         ),
       ),
-    ));
+    );
   }
 
-  // --- 1. All Data List ---
   Widget _allList() {
     final list = controller.allAssignments;
     if (list.isEmpty) {
@@ -120,7 +117,6 @@ class AssignmentsView extends GetView<AssignmentsController> {
     );
   }
 
-  // --- 2. Active List (Unconfirmed + In-Progress Confirmed) ---
   Widget _activeList() {
     final list = controller.activeAssignments;
     if (list.isEmpty) {
@@ -143,7 +139,6 @@ class AssignmentsView extends GetView<AssignmentsController> {
     );
   }
 
-  // --- 3. Delivered / Confirmed List (Completed Only) ---
   Widget _deliveredList() {
     final list = controller.completedOrders;
     if (list.isEmpty) {
@@ -158,7 +153,6 @@ class AssignmentsView extends GetView<AssignmentsController> {
     );
   }
 
-  // --- 4. Drafts (Unconfirmed) List ---
   Widget _draftsList() {
     final list = controller.nonConfirmedLeads;
     if (list.isEmpty) {
@@ -173,15 +167,12 @@ class AssignmentsView extends GetView<AssignmentsController> {
     );
   }
 
-  // ==========================================
-  // WIDGET HELPERS FOR REUSABILITY
-  // ==========================================
+
 
   Widget _buildLeadItem(Lead lead, int index) {
     bool showProgress = index % 2 == 0;
     String statusText = showProgress ? "Pending" : "Processing";
 
-    // Convert status string to enum
     OrderStatus currentStatus = statusText == "Pending"
         ? OrderStatus.pending
         : OrderStatus.inProgress;
@@ -189,12 +180,13 @@ class AssignmentsView extends GetView<AssignmentsController> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: _OrderTile(
-        orderId: lead.orderId?.toString() ?? "0000",
-        serviceName: lead.service ?? "Assignment",
-        subtitle: lead.subject ?? "General subject",
+        orderId: lead.orderId?.toString() ?? "-",
+        serviceName: lead.service ?? "-",
+        subtitle: lead.subject ?? "-",
         date: lead.deadline ?? "-",
-        price: "£${lead.price ?? "0.00"}",
+        price: "£${lead.price ?? "-"}",
         status: currentStatus,
+        writerName: lead.writer?.writerName,
         onTap: () {
           Get.to(() => const OrderDetailsView(), arguments: lead);
         },
@@ -205,7 +197,6 @@ class AssignmentsView extends GetView<AssignmentsController> {
   Widget _buildConfirmedOrderItem(ConfirmedOrder order, int index) {
     final bool isDelivered = order.deliveryDate != null && order.deliveryDate!.toString().trim().isNotEmpty;
 
-    // Determine the status enum
     OrderStatus currentStatus = isDelivered
         ? OrderStatus.completed
         : OrderStatus.inProgress;
@@ -213,18 +204,21 @@ class AssignmentsView extends GetView<AssignmentsController> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: _OrderTile(
-        orderId: order.orderId?.toString() ?? "0000",
-        serviceName: order.title ?? order.subject ?? "Assignment",
+        orderId: order.orderId?.toString() ?? "-",
+        serviceName: order.title ?? order.subject ?? "-",
         subtitle: order.moduleCode ?? (isDelivered ? "Module Complete" : "Expert Working"),
         date: order.deliveryDate ?? order.createdAt ?? "-",
-        price: "£${order.amount ?? "0.00"}",
+        price: "£${order.amount ?? "-"}",
         status: currentStatus,
+        writerName: order.writer?.writerName,
         onTap: () {
           Get.to(() => const OrderDetailsView(), arguments: order);
         },
       ),
     );
   }
+
+
 
   Widget _emptyState(IconData icon, String title, String subtitle) {
     return Center(
@@ -255,13 +249,9 @@ class AssignmentsView extends GetView<AssignmentsController> {
   }
 }
 
-// ==========================================
-// CUSTOM COMPONENTS
-// ==========================================
-
 enum OrderStatus { completed, inProgress, cancelled, pending }
 
-// 1. The Order Tile Component
+
 class _OrderTile extends StatelessWidget {
   final String orderId;
   final String serviceName;
@@ -269,6 +259,7 @@ class _OrderTile extends StatelessWidget {
   final String date;
   final String price;
   final OrderStatus status;
+  final String? writerName; // <--- Added optional parameter
   final VoidCallback onTap;
 
   const _OrderTile({
@@ -278,6 +269,7 @@ class _OrderTile extends StatelessWidget {
     required this.date,
     required this.price,
     required this.status,
+    this.writerName, // <--- Added to constructor
     required this.onTap,
   });
 
@@ -304,7 +296,7 @@ class _OrderTile extends StatelessWidget {
         statusBgColor = AppColors.primaryPurple.withValues(alpha: 0.15);
         iconColor = AppColors.primaryPurple;
         iconBgColor = AppColors.primaryPurple.withValues(alpha: 0.15);
-        statusText = 'Processing';
+        statusText = 'Not Completed';
         leadingIcon = Icons.assignment_outlined;
         break;
       case OrderStatus.cancelled:
@@ -354,7 +346,7 @@ class _OrderTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Order #$orderId',
+                        'Order $orderId',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -433,6 +425,28 @@ class _OrderTile extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      // --- CONDITIONAL WRITER DISPLAY ---
+                      if (writerName != null && writerName!.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(Icons.person_pin_outlined, size: 14, color: AppColors.primaryPurple),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                "Expert: $writerName",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.primaryPurple,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -511,7 +525,6 @@ class _OrderTile extends StatelessWidget {
   }
 }
 
-// 2. The User Provided Custom Tab Item
 class _TabItem extends StatelessWidget {
   final String title;
   final bool isActive;
@@ -527,7 +540,7 @@ class _TabItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque, // Ensures the entire expanded area is clickable
+      behavior: HitTestBehavior.opaque,
       child: Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -542,7 +555,7 @@ class _TabItem extends StatelessWidget {
         child: Text(
           title,
           style: TextStyle(
-            fontSize: 13, // Slightly adjusted for better readability
+            fontSize: 13,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             color: isActive ? AppColors.primaryPurple : AppColors.textSecondary,
           ),
@@ -552,7 +565,6 @@ class _TabItem extends StatelessWidget {
   }
 }
 
-// 3. Custom Dashed Divider
 class CustomDashedDivider extends StatelessWidget {
   const CustomDashedDivider({super.key});
 

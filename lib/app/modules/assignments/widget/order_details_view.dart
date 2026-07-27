@@ -22,15 +22,17 @@ class OrderDetailsView extends GetView<AssignmentsController> {
     String progressText = "0%";
     String instructions = "No specific instructions provided.";
 
-    String customerName = "N/A";
-    String customerEmail = "N/A";
     String customerMobile = "N/A";
     String workType = "N/A";
     String wordCount = "N/A";
     String price = "0.00";
-    String dueAmount = "0.00"; // <-- NEW: Due amount variable
+    String dueAmount = "0.00";
+
+    Writer? assignedWriter; // <--- ADDED FULL WRITER OBJECT
 
     List<String> attachments = [];
+
+    bool isCompletedOrder = false;
 
     if (orderData is Lead) {
       title = orderData.service ?? AppStrings.assignmentDetails;
@@ -42,15 +44,14 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       progressText = "30%";
       instructions = orderData.requirements ?? instructions;
 
-      customerName = orderData.name ?? "N/A";
-      customerEmail = orderData.email ?? "N/A";
       customerMobile = "${orderData.countrycode ?? ''} ${orderData.mobile ?? ''}".trim();
       if (customerMobile.isEmpty) customerMobile = "N/A";
       workType = orderData.workType ?? "N/A";
       wordCount = orderData.wordCount ?? "N/A";
       price = orderData.price ?? "0.00";
 
-      // Leads ke liye koi payment nahi hui hoti, isliye price = dueAmount
+      assignedWriter = orderData.writer; // <--- EXTRACT FROM LEAD
+
       dueAmount = price;
 
       attachments.addAll(orderData.files ?? []);
@@ -65,43 +66,62 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       progress = 1.0;
       progressText = "100%";
 
-      customerName = orderData.moduleCode ?? "N/A";
       workType = orderData.type ?? "N/A";
       price = orderData.amount ?? "0.00";
 
-      // NEW: due_amount ko round karke nikaalna
-      if (orderData.dueAmount != null) {
-        dueAmount = orderData.dueAmount!.toStringAsFixed(2);
+      assignedWriter = orderData.writer; // <--- EXTRACT FROM CONFIRMED ORDER
+
+      final String s = (orderData.status ?? '').toLowerCase().trim();
+      final String cs = (orderData.confirmedStatus ?? '').toLowerCase().trim();
+      final String dd = (orderData.deliveryDate ?? '').toLowerCase().trim();
+
+      if (s == 'completed' || s == 'delivered' || s == 'done' || s == 'finish' || s == 'finished' ||
+          cs == 'completed' || cs == 'delivered' ||
+          (dd.isNotEmpty && dd != 'n/a')) {
+        isCompletedOrder = true;
+      }
+
+      if (isCompletedOrder) {
+        dueAmount = "0.00";
+      } else if (orderData.dueAmount != null) {
+        if (orderData.dueAmount is num) {
+          dueAmount = (orderData.dueAmount as num).toStringAsFixed(2);
+        } else {
+          dueAmount = orderData.dueAmount.toString();
+        }
       }
 
       attachments.addAll(orderData.files ?? []);
       attachments.addAll(orderData.images ?? []);
     }
 
-    // Status can be something else, but if dueAmount is greater than 0, payment is pending
-    bool isPaymentPending = (double.tryParse(dueAmount) ?? 0.0) > 0;
+    // Payment is pending ONLY IF order is NOT completed AND dueAmount > 0
+    double parsedDue = double.tryParse(dueAmount) ?? 0.0;
+    bool isPaymentPending = !isCompletedOrder && (parsedDue > 0);
 
     // --- AUTO-OPEN PAYMENT DETAILS IF PENDING ---
     if (isPaymentPending) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showPaymentDetailsSheet(context, dueAmount, orderId); // Passed dueAmount here
+        _showPaymentDetailsSheet(context, dueAmount, orderId);
       });
     }
 
-    return Obx(() => Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: CustomAppBar(
         title: 'Order Details',
         showBackButton: true,
         actions: [
-          IconButton(
-            icon: Icon(Icons.edit_outlined, color: AppColors.primaryPurple),
-            tooltip: 'Edit Order',
-            onPressed: () {
-              Get.toNamed(Routes.ADD_ORDER, arguments: orderData);
-            },
-          ),
-          const SizedBox(width: 4),
+          if (!isCompletedOrder) ...[
+            IconButton(
+              icon: Icon(Icons.edit_outlined, color: AppColors.primaryPurple),
+              tooltip: 'Edit Order',
+              onPressed: () {
+                Get.toNamed(Routes.ADD_ORDER, arguments: orderData);
+              },
+            ),
+            const SizedBox(width: 4),
+          ],
         ],
       ),
       bottomNavigationBar: Container(
@@ -169,15 +189,12 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                 _buildTopCard(title, orderId, deadline, status, statusColor, progress, progressText),
                 const SizedBox(height: 12),
 
-                _buildSectionTitle("Customer Details"),
-                _buildPremiumBox([
-                  _buildIconDetailRow(Icons.person_outline, "Name", customerName),
-                  Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
-                  _buildIconDetailRow(Icons.email_outlined, "Email", customerEmail),
-                  Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
-                  _buildIconDetailRow(Icons.phone_outlined, "Mobile", customerMobile),
-                ]),
-                const SizedBox(height: 12),
+                // --- NEW: FULL EXPERT DETAILS SECTION ---
+                if (assignedWriter != null) ...[
+                  _buildSectionTitle("Assigned Expert"),
+                  _buildExpertCard(assignedWriter),
+                  const SizedBox(height: 12),
+                ],
 
                 _buildSectionTitle("Order Specifications"),
                 _buildPremiumBox([
@@ -187,7 +204,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                   Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
                   _buildIconDetailRow(Icons.monetization_on_outlined, AppStrings.total, "£$price", valueColor: AppColors.textPrimary, isValueBold: true),
 
-                  // --- NEW: DUE AMOUNT ROW ---
+                  // --- DUE AMOUNT ROW ---
                   if (isPaymentPending) ...[
                     Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
                     _buildIconDetailRow(
@@ -309,7 +326,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
           const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
         ],
       ),
-    ));
+    );
   }
 
   // ==========================================
@@ -572,6 +589,82 @@ class OrderDetailsView extends GetView<AssignmentsController> {
   // UI BUILDER WIDGETS
   // ==========================================
 
+  Widget _buildExpertCard(Writer writer) {
+    // Formulate a proper Image URL for the network image fallback
+    String imageUrl = "";
+    if (writer.image != null && writer.image!.isNotEmpty) {
+      if (writer.image!.startsWith("http")) {
+        imageUrl = writer.image!;
+      } else {
+        // Appending the base URL if it's just a relative path
+        imageUrl = "https://ain.warrgyizmorsch.com/${writer.image}";
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.bgLight,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: AppColors.lightShadow, blurRadius: 6, offset: const Offset(0, 2))],
+        border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 54, width: 54,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.priceBg,
+                  border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.3), width: 1.5),
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: imageUrl.isNotEmpty
+                    ? Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Icon(Icons.person, color: AppColors.primaryPurple, size: 28),
+                )
+                    : Icon(Icons.person, color: AppColors.primaryPurple, size: 28),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                        writer.writerName ?? "Expert Assigned",
+                        style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.bold, fontSize: AppFontSize.s15, color: AppColors.textPrimary)
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                        "@${writer.slug ?? 'expert'}",
+                        style: AppTextStyles.caption.copyWith(color: AppColors.primaryPurple, fontWeight: FontWeight.w600)
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Divider(height: 1, color: AppColors.lightDivider),
+          const SizedBox(height: 14),
+
+          _buildIconDetailRow(Icons.badge_outlined, "Expert ID", "#${writer.id ?? '-'}"),
+          Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1, color: AppColors.lightDivider)),
+
+          _buildIconDetailRow(Icons.menu_book_outlined, "Subject", writer.subject ?? "-"),
+          Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1, color: AppColors.lightDivider)),
+
+          _buildIconDetailRow(Icons.design_services_outlined, "Service", writer.service ?? "-"),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFileRow(String fileName, String fileSize) {
     String extension = fileName.split('.').last.toLowerCase();
 
@@ -816,7 +909,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6, left: 2),
+      padding: const EdgeInsets.only(bottom: 6, left: 2, top: 4),
       child: Text(title, style: AppTextStyles.sectionHeading.copyWith(fontSize: AppFontSize.s14)),
     );
   }
@@ -834,7 +927,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: AppColors.priceBg, borderRadius: BorderRadius.circular(6)), child: Icon(icon, size: 14, color: AppColors.primary)),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Expanded(flex: 2, child: Text(label, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary))),
         Expanded(
           flex: 3,

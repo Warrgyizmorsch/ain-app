@@ -4,7 +4,9 @@ import 'dart:io';
 import 'package:ain/app/core/models/order_now_model/place_order_request_model.dart';
 import 'package:ain/app/core/utils/api/order_now_api/place_order_api.dart';
 import '../../../common/constant/app_imports.dart';
-import '../../../common/widget/file_picker/app_file_picker.dart'; // Ensure path points to your Custom File Helper
+import '../../../common/widget/file_picker/app_file_picker.dart';
+import '../../../core/utils/api/wallet_api/wallet_api_endpoint.dart';
+import '../../../core/models/experts_model/experts_list_response_model.dart';
 import '../../../core/models/order_now_model/countries_master_model.dart';
 import '../../../core/models/order_now_model/services_master_model.dart';
 import '../../../core/models/order_now_model/subjects_master_model.dart';
@@ -26,6 +28,14 @@ class AddOrderController extends GetxController {
   final RxList<File> pickedFiles = <File>[].obs;
   final RxList<BankDetail> banksList = <BankDetail>[].obs;
   final isBankLoading = false.obs;
+  final selectedExpert = Rxn<ExpertData>();
+
+  // Wallet State
+  final walletBalance = 0.0.obs;
+  final walletCurrency = '£'.obs;
+  final useWallet = false.obs;
+  final isWalletLoading = false.obs;
+
   // Text Form Controllers
   final topicController = TextEditingController();
   final deadlineController = TextEditingController();
@@ -48,12 +58,12 @@ class AddOrderController extends GetxController {
   final workTypeError = RxString('');
   final urgencyError = RxString('');
   final wordCountError = RxString('');
-
+  final wordCountTextController = TextEditingController(text: '250');
   // Mobile Verification Hooks
   final selectedDialCode = '+1'.obs;
   final isMobileValid = true.obs;
 
-  // Form Dropdown Selections (Using ValueNotifier to map natively with CustomDropdown)
+  // Form Dropdown Selections
   final selectedSubject = ValueNotifier<SubjectData?>(null);
   final selectedService = ValueNotifier<GetServiceModel?>(null);
   final selectedUrgency = ValueNotifier<UrgencyData?>(null);
@@ -61,7 +71,7 @@ class AddOrderController extends GetxController {
   final selectedCountry = ValueNotifier<CountryData?>(null);
   final selectedWorkType = ValueNotifier<String?>(null);
 
-  // Global Calculation Constants (Populated dynamically via Word Count master API)
+  // Global Calculation Constants
   final basePricePerWord = 0.0.obs;
   final globalDiscountPercentage = 0.obs;
 
@@ -79,17 +89,57 @@ class AddOrderController extends GetxController {
   ];
 
   dynamic editingOrderData;
+  final currentWordCount = 250.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // Connect custom listeners to capture underlying ValueNotifier state adjustments
     _attachCalculationListeners();
-    // Concurrently download app configuration layers
+    updateWordCountConfig();
     fetchAllMasterData();
-    populateFormFromArguments();
   }
 
+  void updateWordCountConfig() {
+    final int count = currentWordCount.value;
+
+    // Ensure word count never drops below 250 on the UI side
+    final int validCount = count < 250 ? 250 : count;
+    final int pages = validCount ~/ 250;
+    final pageText = pages == 1 ? 'Page' : 'Pages';
+
+    // Multiplier defaults to 1.0 since it is handled directly in baseCost via getWordCountMultiplier
+    selectedPageConfig.value = WordCountData(
+      id: validCount,
+      name: '$pages $pageText / $validCount Words',
+      value: validCount,
+      multiplier: 1.0,
+    );
+
+    wordCountError.value = '';
+    update();
+  }
+
+  void incrementWordCount() {
+    currentWordCount.value += 250;
+    wordCountTextController.text = currentWordCount.value.toString();
+    updateWordCountConfig();
+  }
+
+  void decrementWordCount() {
+    if (currentWordCount.value > 250) {
+      currentWordCount.value -= 250;
+      wordCountTextController.text = currentWordCount.value.toString();
+      updateWordCountConfig();
+    }
+  }
+
+  void setWordCount(int count) {
+    // Only clamp to 250 if it's triggered by chips, allow free typing otherwise
+    if (count < 250) count = 250;
+    currentWordCount.value = count;
+    wordCountTextController.text = currentWordCount.value.toString();
+    updateWordCountConfig();
+  }
   @override
   void onReady() {
     super.onReady();
@@ -124,29 +174,16 @@ class AddOrderController extends GetxController {
     }
   }
 
-  /// Verifies every mandatory checkout node before allowing user step advancement
   bool validateStep1() {
-    // 1. Fire absolute evaluations across inline text inputs
-    // validateFullName(nameController.text);
-    // validateEmail(emailController.text);
-    // validateMobileNumber(mobileController.text);
     validateTopic(topicController.text);
 
-    // 2. Fire evaluations on dropdown items
-    // countryError.value = selectedCountry.value == null ? "Please select your country" : "";
     subjectError.value = selectedSubject.value == null ? "Please select a subject area" : "";
     serviceError.value = selectedService.value == null ? "Please select a service type" : "";
     workTypeError.value = selectedWorkType.value == null ? "Please select a work type status tier" : "";
     urgencyError.value = selectedUrgency.value == null ? "Please select an urgency timeline" : "";
     wordCountError.value = selectedPageConfig.value == null ? "Please select a word count configuration level" : "";
 
-    // 3. Complete verification if all error paths run clean
-    return
-      // fullNameError.value.isEmpty &&
-      //   emailError.value.isEmpty &&
-      //   mobileError.value.isEmpty &&
-        topicError.value.isEmpty &&
-        // countryError.value.isEmpty &&
+    return topicError.value.isEmpty &&
         subjectError.value.isEmpty &&
         serviceError.value.isEmpty &&
         workTypeError.value.isEmpty &&
@@ -178,7 +215,6 @@ class AddOrderController extends GetxController {
     isAccepted.value = !isAccepted.value;
   }
 
-  /// Pipes external model selections to the GetX update lifecycle loop
   void _attachCalculationListeners() {
     selectedPageConfig.addListener(() => update());
     selectedService.addListener(() => update());
@@ -188,24 +224,41 @@ class AddOrderController extends GetxController {
 
   // ─── DYNAMIC PRICING SYSTEM ENGINE ────────────────────────────────────────
 
+  /// Retrieves the specific word-count multiplier based on the pricing table.
+  double getWordCountMultiplier(int wordCount) {
+    if (wordCount >= 250 && wordCount <= 499) return 2.67;
+    if (wordCount >= 500 && wordCount <= 999) return 2.22;
+    if (wordCount >= 1000 && wordCount <= 1999) return 1.94;
+    if (wordCount >= 2000 && wordCount <= 2999) return 1.67;
+    if (wordCount >= 3000 && wordCount <= 3999) return 1.30;
+    if (wordCount >= 4000 && wordCount <= 4999) return 1.13;
+    if (wordCount >= 5000) return 1.17;
+
+    // Fallback for anything strictly under 250 (though it should be clamped to 250)
+    return 2.67;
+  }
+
   double get baseCost {
-    if (selectedPageConfig.value == null) {
-      _logCalculationDebug("Base Cost calculation skipped: No Word Count configuration selected yet.");
-      return 0.0;
-    }
+    if (selectedPageConfig.value == null) return 0.0;
 
     final int totalWords = selectedPageConfig.value!.value;
-    final double pageTierMultiplier = selectedPageConfig.value!.multiplier;
-    final double currentBasePrice = basePricePerWord.value;
 
-    final double computedBase = (currentBasePrice * totalWords) * pageTierMultiplier;
+    // Formula rule: max(Word Count, 250)
+    final int validWords = totalWords < 250 ? 250 : totalWords;
+    final double ratePerWord = basePricePerWord.value;
+
+    // 1. Get the exact multiplier from the bracket table
+    final double pageTierMultiplier = getWordCountMultiplier(validWords);
+
+    // 2. Calculate the base cost including the bracket multiplier
+    final double computedBase = (validWords * ratePerWord) * pageTierMultiplier;
 
     _logCalculationDebug(
-        "📐 STEP 1: [Base Cost Calculation]\n"
-            "   • Words: $totalWords\n"
-            "   • Base Price Per Word: $currentBasePrice\n"
-            "   • Page Tier Multiplier: $pageTierMultiplier\n"
-            "   • Resulting Base Cost: £${computedBase.toStringAsFixed(2)}"
+        "Base Cost Calculation:\n"
+            "Words: $validWords\n"
+            "Rate: £$ratePerWord\n"
+            "Tier Multiplier: $pageTierMultiplier\n"
+            "Result: £${computedBase.toStringAsFixed(2)}"
     );
 
     return computedBase;
@@ -214,56 +267,61 @@ class AddOrderController extends GetxController {
   double get estimatedPrice {
     if (selectedPageConfig.value == null) return 0.0;
 
-    final double currentBaseCost = baseCost;
+    final double currentBaseCost = baseCost; // Includes the word-tier multiplier
+
     final double serviceMultiplier = selectedService.value?.multiplier ?? 1.0;
     final double urgencyMultiplier = selectedUrgency.value?.multiplier ?? 1.0;
 
-    // Fixed: Matches 'First Class Work' dropdown item perfectly
+    // Explicit configuration values for work type
     final double typeMultiplier = (selectedWorkType.value == 'First Class Work') ? 1.3 : 1.0;
 
-    final double computedEstimated = currentBaseCost * serviceMultiplier * typeMultiplier * urgencyMultiplier;
-
-    _logCalculationDebug(
-        "⚙️ STEP 2: [Estimated Price Multipliers]\n"
-            "   • Running Base Cost Context: £${currentBaseCost.toStringAsFixed(2)}\n"
-            "   • Service Multiplier: $serviceMultiplier (${selectedService.value?.name ?? 'None'})\n"
-            "   • Work Type Multiplier: $typeMultiplier (${selectedWorkType.value ?? 'None'})\n"
-            "   • Urgency Multiplier: $urgencyMultiplier (${selectedUrgency.value?.name ?? 'None'})\n"
-            "   • Total Estimated Sum: £${computedEstimated.toStringAsFixed(2)}"
-    );
-
-    return computedEstimated;
+    // Formula rule: Base Price x Service Multiplier x Work-Type Multiplier x Urgency Multiplier
+    return currentBaseCost * serviceMultiplier * typeMultiplier * urgencyMultiplier;
   }
 
   double get finalPrice {
     final double currentEstimated = estimatedPrice;
     if (currentEstimated == 0.0) return 0.0;
 
-    final int currentDiscountPercent = globalDiscountPercentage.value;
-    final double discountFactor = (100 - currentDiscountPercent) / 100;
-    final double computedFinal = currentEstimated * discountFactor;
+    // Formula rule: round(Estimated Price x (1 - Discount Rate), 2)
+    final double discountRate = globalDiscountPercentage.value / 100.0;
+    final double computedFinal = currentEstimated * (1 - discountRate);
 
-    _logCalculationDebug(
-        "💰 STEP 3: [Final Discount Application]\n"
-            "   • Subtotal Estimated: £${currentEstimated.toStringAsFixed(2)}\n"
-            "   • System Markdown: $currentDiscountPercent%\n"
-            "   • Total Final Balance: £${computedFinal.toStringAsFixed(2)}\n"
-            "===================================================="
-    );
-
-    return computedFinal;
+    // Rounding is strictly applied to the final monetary result to two decimal places
+    return double.parse(computedFinal.toStringAsFixed(2));
   }
 
-  /// 4. Evaluates total user financial markdown discount amounts
   double get savingsAmount {
-    final double discountFraction = globalDiscountPercentage.value / 100;
-    return estimatedPrice * discountFraction;
+    // Calculates the exact amount saved for the UI
+    final double discountRate = globalDiscountPercentage.value / 100.0;
+    return estimatedPrice * discountRate;
+  }
+
+  // ─── WALLET DEDUCTION CALCULATIONS ────────────────────────────────────────
+
+  double get walletDeduction {
+    if (!useWallet.value) return 0.0;
+    final currentFinal = finalPrice;
+    final balance = walletBalance.value;
+    return balance >= currentFinal ? currentFinal : balance;
+  }
+
+  double get netPayablePrice {
+    final net = finalPrice - walletDeduction;
+    return net < 0 ? 0.0 : net;
   }
 
   // ─── STRING FINESSE UI FORMATTERS ──────────────────────────────────────────
   String get formattedEstimatedPrice => '£${estimatedPrice.toStringAsFixed(2)}';
   String get formattedDiscount       => '${globalDiscountPercentage.value}% OFF (£${savingsAmount.toStringAsFixed(2)})';
   String get formattedFinalPrice     => '£${finalPrice.toStringAsFixed(2)}';
+  String get formattedWalletDeduction => '- ${walletCurrency.value}${walletDeduction.toStringAsFixed(2)}';
+  String get formattedNetPayablePrice => '${walletCurrency.value}${netPayablePrice.toStringAsFixed(2)}';
+
+  void toggleUseWallet() {
+    useWallet.value = !useWallet.value;
+    update();
+  }
 
   void _logCalculationDebug(String message) {
     if (Get.isLogEnable) {
@@ -284,6 +342,7 @@ class AddOrderController extends GetxController {
         getUrgencies(),
         getSubjects(),
         bankList(),
+        fetchWalletAmount(),
       ]);
 
       populateFormFromArguments();
@@ -291,6 +350,33 @@ class AddOrderController extends GetxController {
       Get.snackbar('Error', 'Error pairing network drop configurations: $e');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  String getCurrencySymbol(String currencyCode) {
+    switch (currencyCode.toUpperCase()) {
+      case 'GBP':
+      case 'USD':
+        return '£';
+      case 'EUR':
+        return '€';
+      default:
+        return currencyCode.isEmpty ? '£' : currencyCode;
+    }
+  }
+
+  Future<void> fetchWalletAmount() async {
+    try {
+      isWalletLoading.value = true;
+      final response = await WalletApiEndpoint.getWalletAmount();
+      if (response.success) {
+        walletBalance.value = response.data.walletAmount.toDouble();
+        walletCurrency.value = getCurrencySymbol(response.data.currency);
+      }
+    } catch (e) {
+      debugPrint('Wallet fetch error in AddOrderController: $e');
+    } finally {
+      isWalletLoading.value = false;
     }
   }
 
@@ -313,11 +399,7 @@ class AddOrderController extends GetxController {
         globalDiscountPercentage.value = (response.discountPercentage as num?)?.toInt() ?? 40;
 
         wordCount.assignAll(response.data);
-
-        // Pre-selects first dictionary node layout item to solve initial empty 0 computations
-        if (wordCount.isNotEmpty && selectedPageConfig.value == null) {
-          selectedPageConfig.value = wordCount.first;
-        }
+        updateWordCountConfig();
       }
     } catch (e) {
       debugPrint('Word Count tiers lookup crash fallback: $e');
@@ -371,34 +453,85 @@ class AddOrderController extends GetxController {
     return null;
   }
 
+  bool get isEditingOrder {
+    if (editingOrderData == null) return false;
+    if (editingOrderData is Lead || editingOrderData is ConfirmedOrder) return true;
+    if (editingOrderData is Map) {
+      final map = editingOrderData as Map;
+      return (map['orderId'] != null || map['order_id'] != null) && map['expert'] == null;
+    }
+    return false;
+  }
+
   void populateFormFromArguments() {
     final arg = Get.arguments;
     if (arg == null) return;
     editingOrderData = arg;
 
-    if (arg is Lead) {
+    ExpertData? expert;
+    bool selectExpertOnly = false;
+
+    if (arg is ExpertData) {
+      expert = arg;
+    } else if (arg is Map) {
+      if (arg['expert'] is ExpertData) {
+        expert = arg['expert'] as ExpertData;
+      }
+      selectExpertOnly = arg['selectExpertOnly'] == true || arg['expertOnly'] == true;
+    }
+
+    if (expert != null) {
+      selectedExpert.value = expert;
+
+      if (!selectExpertOnly) {
+        if (expert.service != null && expert.service!.isNotEmpty && services.isNotEmpty) {
+          try {
+            final target = expert.service!.toLowerCase().trim();
+            final matched = services.firstWhere(
+                  (s) => s.name.toLowerCase().trim() == target,
+              orElse: () => services.firstWhere(
+                    (s) => s.name.toLowerCase().contains(target) || target.contains(s.name.toLowerCase()),
+                orElse: () => services.first,
+              ),
+            );
+            selectedService.value = matched;
+          } catch (_) {}
+        }
+
+        if (expert.subject != null && expert.subject!.isNotEmpty && subjects.isNotEmpty) {
+          try {
+            final target = expert.subject!.toLowerCase().trim();
+            final matched = subjects.firstWhere(
+                  (sub) => sub.name.toLowerCase().trim() == target,
+              orElse: () => subjects.firstWhere(
+                    (sub) => sub.name.toLowerCase().contains(target) || target.contains(sub.name.toLowerCase()),
+                orElse: () => subjects.first,
+              ),
+            );
+            selectedSubject.value = matched;
+          } catch (_) {}
+        }
+      }
+    } else if (arg is Lead) {
       final lead = arg;
 
-      // 1. Topic / Title
       if (lead.name != null && lead.name!.isNotEmpty) {
         topicController.text = lead.name!;
       } else if (lead.orderId != null && lead.orderId!.isNotEmpty) {
         topicController.text = 'Order #${lead.orderId}';
       }
 
-      // 2. Requirements
       if (lead.requirements != null && lead.requirements!.isNotEmpty) {
         requirementsController.text = lead.requirements!;
       }
 
-      // 3. Services
       if (lead.service != null && lead.service!.isNotEmpty && services.isNotEmpty) {
         try {
           final target = lead.service!.toLowerCase().trim();
           final matched = services.firstWhere(
-            (s) => s.name.toLowerCase().trim() == target,
+                (s) => s.name.toLowerCase().trim() == target,
             orElse: () => services.firstWhere(
-              (s) => s.name.toLowerCase().contains(target) || target.contains(s.name.toLowerCase()),
+                  (s) => s.name.toLowerCase().contains(target) || target.contains(s.name.toLowerCase()),
               orElse: () => services.first,
             ),
           );
@@ -406,14 +539,13 @@ class AddOrderController extends GetxController {
         } catch (_) {}
       }
 
-      // 4. Subject
       if (lead.subject != null && lead.subject!.isNotEmpty && subjects.isNotEmpty) {
         try {
           final target = lead.subject!.toLowerCase().trim();
           final matched = subjects.firstWhere(
-            (sub) => sub.name.toLowerCase().trim() == target,
+                (sub) => sub.name.toLowerCase().trim() == target,
             orElse: () => subjects.firstWhere(
-              (sub) => sub.name.toLowerCase().contains(target) || target.contains(sub.name.toLowerCase()),
+                  (sub) => sub.name.toLowerCase().contains(target) || target.contains(sub.name.toLowerCase()),
               orElse: () => subjects.first,
             ),
           );
@@ -421,14 +553,13 @@ class AddOrderController extends GetxController {
         } catch (_) {}
       }
 
-      // 5. Work Type
       if (lead.workType != null && lead.workType!.isNotEmpty) {
         try {
           final target = lead.workType!.toLowerCase().trim();
           final matchedWorkType = workTypes.firstWhere(
-            (wt) => wt.toLowerCase().trim() == target,
+                (wt) => wt.toLowerCase().trim() == target,
             orElse: () => workTypes.firstWhere(
-              (wt) => target.contains(wt.toLowerCase()) || wt.toLowerCase().contains(target),
+                  (wt) => target.contains(wt.toLowerCase()) || wt.toLowerCase().contains(target),
               orElse: () => workTypes.first,
             ),
           );
@@ -436,14 +567,13 @@ class AddOrderController extends GetxController {
         } catch (_) {}
       }
 
-      // 6. Urgency / Deadline
       if (lead.deadline != null && lead.deadline!.isNotEmpty && urgencies.isNotEmpty) {
         try {
           final target = lead.deadline!.toLowerCase().trim();
           final matchedUrgency = urgencies.firstWhere(
-            (u) => u.name.toLowerCase().trim() == target,
+                (u) => u.name.toLowerCase().trim() == target,
             orElse: () => urgencies.firstWhere(
-              (u) => u.name.toLowerCase().contains(target) || target.contains(u.name.toLowerCase()),
+                  (u) => u.name.toLowerCase().contains(target) || target.contains(u.name.toLowerCase()),
               orElse: () => urgencies.first,
             ),
           );
@@ -451,7 +581,6 @@ class AddOrderController extends GetxController {
         } catch (_) {}
       }
 
-      // 7. Word Count
       if (lead.wordCount != null && lead.wordCount!.isNotEmpty && wordCount.isNotEmpty) {
         try {
           final cleanWordCount = lead.wordCount!.replaceAll(RegExp(r'[^0-9]'), '');
@@ -459,32 +588,25 @@ class AddOrderController extends GetxController {
             final parsedCount = int.tryParse(cleanWordCount);
             if (parsedCount != null) {
               final matchedWord = wordCount.firstWhere(
-                (w) => w.value == parsedCount,
+                    (w) => w.value == parsedCount,
                 orElse: () => wordCount.firstWhere(
-                  (w) => w.name.toLowerCase().contains(lead.wordCount!.toLowerCase()) || lead.wordCount!.toLowerCase().contains(w.name.toLowerCase()),
+                      (w) => w.name.toLowerCase().contains(lead.wordCount!.toLowerCase()) || lead.wordCount!.toLowerCase().contains(w.name.toLowerCase()),
                   orElse: () => wordCount.first,
                 ),
               );
               selectedPageConfig.value = matchedWord;
             }
-          } else {
-            final matchedWord = wordCount.firstWhere(
-              (w) => w.name.toLowerCase().contains(lead.wordCount!.toLowerCase()) || lead.wordCount!.toLowerCase().contains(w.name.toLowerCase()),
-              orElse: () => wordCount.first,
-            );
-            selectedPageConfig.value = matchedWord;
           }
         } catch (_) {}
       }
 
-      // 8. Country
       if (lead.countrycode != null && lead.countrycode!.isNotEmpty && countries.isNotEmpty) {
         try {
           final target = lead.countrycode!.toLowerCase().trim();
           final matchedCountry = countries.firstWhere(
-            (c) => c.name.toLowerCase().trim() == target,
+                (c) => c.name.toLowerCase().trim() == target,
             orElse: () => countries.firstWhere(
-              (c) => c.name.toLowerCase().contains(target) || target.contains(c.name.toLowerCase()),
+                  (c) => c.name.toLowerCase().contains(target) || target.contains(c.name.toLowerCase()),
               orElse: () => countries.first,
             ),
           );
@@ -501,7 +623,7 @@ class AddOrderController extends GetxController {
         try {
           final target = order.subject!.toLowerCase().trim();
           final matched = subjects.firstWhere(
-            (sub) => sub.name.toLowerCase().trim() == target,
+                (sub) => sub.name.toLowerCase().trim() == target,
             orElse: () => subjects.first,
           );
           selectedSubject.value = matched;
@@ -529,7 +651,7 @@ class AddOrderController extends GetxController {
         try {
           final target = arg['service'].toString().toLowerCase().trim();
           final matched = services.firstWhere(
-            (s) => s.name.toLowerCase().trim() == target,
+                (s) => s.name.toLowerCase().trim() == target,
             orElse: () => services.first,
           );
           selectedService.value = matched;
@@ -540,7 +662,7 @@ class AddOrderController extends GetxController {
         try {
           final target = arg['subject'].toString().toLowerCase().trim();
           final matched = subjects.firstWhere(
-            (sub) => sub.name.toLowerCase().trim() == target,
+                (sub) => sub.name.toLowerCase().trim() == target,
             orElse: () => subjects.first,
           );
           selectedSubject.value = matched;
@@ -551,7 +673,7 @@ class AddOrderController extends GetxController {
         try {
           final target = arg['workType'].toString().toLowerCase().trim();
           final matchedWorkType = workTypes.firstWhere(
-            (wt) => wt.toLowerCase().trim() == target,
+                (wt) => wt.toLowerCase().trim() == target,
             orElse: () => workTypes.first,
           );
           selectedWorkType.value = matchedWorkType;
@@ -562,7 +684,7 @@ class AddOrderController extends GetxController {
         try {
           final target = arg['urgency'].toString().toLowerCase().trim();
           final matchedUrgency = urgencies.firstWhere(
-            (u) => u.name.toLowerCase().trim() == target,
+                (u) => u.name.toLowerCase().trim() == target,
             orElse: () => urgencies.first,
           );
           selectedUrgency.value = matchedUrgency;
@@ -589,7 +711,6 @@ class AddOrderController extends GetxController {
   Future<void> pickFile() async {
     try {
       isLoading.value = true;
-      // Triggers multi-format extraction via decoupled Helper module class safely
       final List<File> selectedFiles = await AppFilePickerHelper.pickMultipleFiles();
 
       if (selectedFiles.isNotEmpty) {
@@ -607,10 +728,10 @@ class AddOrderController extends GetxController {
       pickedFiles.removeAt(index);
     }
   }
+
   Future<void> bankList() async {
     try {
       isBankLoading.value = true;
-
       final response = await BankListApi.getBankList();
 
       if (response.success == true && response.data != null) {
@@ -635,26 +756,25 @@ class AddOrderController extends GetxController {
       isBankLoading.value = false;
     }
   }
+
   Future<void> addToCart() async {
-    // 1. Terms and Conditions validation check
     if (!isAccepted.value) {
       Get.snackbar(
         'Terms Required',
         'Please check the terms and conditions policy checkbox before routing order details.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amberAccent.withValues(alpha:0.1),
+        backgroundColor: Colors.amberAccent.withValues(alpha: 0.1),
         colorText: Colors.black87,
       );
       return;
     }
 
-    // 2. Final security check to ensure no empty or invalid data slips through
     if (!validateStep1()) {
       Get.snackbar(
         'Validation Failed',
         'Please complete all highlighted input fields and dropdown selections.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withValues(alpha:0.1),
+        backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
         colorText: Colors.red,
       );
       return;
@@ -663,23 +783,7 @@ class AddOrderController extends GetxController {
     try {
       isLoading.value = true;
 
-      String cleanMobile = mobileController.text.trim().replaceAll(RegExp(r'[^\d]'), '');
-      String cleanDialCode = selectedDialCode.value.replaceAll('+', '').trim();
-
-      if (cleanMobile.startsWith(cleanDialCode) && cleanMobile.length > 10) {
-        cleanMobile = cleanMobile.substring(cleanDialCode.length);
-      }
-
-      if (cleanMobile.startsWith('0') && cleanMobile.length > 10) {
-        cleanMobile = cleanMobile.substring(1);
-      }
-
       PlaceOrderRequest request = PlaceOrderRequest(
-        // name: nameController.text.trim(),
-        // email: emailController.text.trim(),
-        // country: selectedCountry.value?.name ?? "",
-        // countryCode: cleanDialCode,
-        // mobile: cleanMobile,
         service: selectedService.value?.name ?? "",
         workType: selectedWorkType.value ?? "Standard",
         subject: selectedSubject.value?.name ?? "",
@@ -687,11 +791,13 @@ class AddOrderController extends GetxController {
         wordCount: selectedPageConfig.value?.value ?? 0,
         topic: topicController.text.trim(),
         requirements: requirementsController.text.trim(),
+        sourcePage: selectedExpert.value != null ? "Expert Profile" : "Mobile App",
+        expertId: selectedExpert.value?.id?.toString(),
+        expertName: selectedExpert.value?.name,
+        useWallet: useWallet.value,
         finalPrice: finalPrice.toStringAsFixed(2),
-        sourcePage: "Mobile App",
       );
 
-      // Check if updating an existing order or creating a new order
       final existingOrderId = _getEditingOrderId();
       if (existingOrderId != null && existingOrderId.isNotEmpty) {
         EditOrderRequest editRequest = EditOrderRequest(
@@ -703,8 +809,12 @@ class AddOrderController extends GetxController {
           wordCount: selectedPageConfig.value?.value ?? 0,
           topic: topicController.text.trim(),
           requirements: requirementsController.text.trim(),
-          finalPrice: finalPrice.toStringAsFixed(2),
           sourcePage: "Mobile App",
+          expertId: selectedExpert.value?.id?.toString(),
+          expertName: selectedExpert.value?.name,
+          useWallet: useWallet.value,
+          walletAmount: walletDeduction.toStringAsFixed(2),
+          finalPrice: netPayablePrice.toStringAsFixed(2),
         );
 
         final response = await EditOrderApi.editOrder(
@@ -713,79 +823,46 @@ class AddOrderController extends GetxController {
         );
 
         if (response != null && response.success == true) {
-          Get.snackbar(
-            'Order Updated',
-            response.message ?? 'Order updated successfully!',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green.withValues(alpha:0.1),
-            colorText: Colors.green,
-          );
-
-          if (Get.isRegistered<AssignmentsController>()) {
-            Get.find<AssignmentsController>().getOrderList();
-          }
-
-          if (Get.isRegistered<BottomNavController>()) {
-            Get.find<BottomNavController>().changeTab(2);
-          }
-
-          Get.offAllNamed(
-            Routes.BOTTOM_NAV_BAR,
-            arguments: {'index': 2},
-          );
           clearAllFields();
+
+          double pending = netPayablePrice - (useWallet.value ? walletDeduction : 0);
+
+          await _showSuccessDialogAndRoute(
+            orderId: existingOrderId,
+            walletDeductedAmount: useWallet.value ? walletDeduction : 0,
+            dueAmount: pending > 0 ? pending : 0,
+          );
           return;
         } else {
           Get.snackbar(
             'Update Error',
             response.message ?? 'Failed to update order. Try again.',
             snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.redAccent.withValues(alpha:0.1),
+            backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
             colorText: Colors.red,
           );
           return;
         }
       }
 
-      // 5. Place New Order Network boundary execute karna
       final response = await PlaceOrderApi.placeOrder(
         request: request,
         files: pickedFiles,
       );
 
-      // 6. Response standard verification logic
       if (response != null && response.success == true) {
-        Get.snackbar(
-          'Order Placed',
-          response.message ?? 'Your assignment order has been submitted successfully!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withValues(alpha:0.1),
-          colorText: Colors.green,
-        );
-
-        // Optional: Reset fields after successful submission
-
-
-        // Target navigation stack cleanup routing
-        if (Get.isRegistered<AssignmentsController>()) {
-          Get.find<AssignmentsController>().getOrderList();
-        }
-
-        if (Get.isRegistered<BottomNavController>()) {
-          Get.find<BottomNavController>().changeTab(2);
-        }
-
-        Get.offAllNamed(
-          Routes.BOTTOM_NAV_BAR,
-          arguments: {'index': 2},
-        );
         clearAllFields();
+        await _showSuccessDialogAndRoute(
+          orderId: response.orderId?.toString() ?? "N/A",
+          walletDeductedAmount: response.walletDeducted,
+          dueAmount: response.dueAmount,
+        );
       } else {
         Get.snackbar(
           'Submission Error',
           response.message ?? 'Failed to complete order submission. Try again.',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent.withValues(alpha:0.1),
+          backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
           colorText: Colors.red,
         );
       }
@@ -795,16 +872,120 @@ class AddOrderController extends GetxController {
         'Network Error',
         'Something went wrong while transmitting data layer: $e',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withValues(alpha:0.1),
+        backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
         colorText: Colors.red,
       );
     } finally {
-      // 7. Reset loader configuration footprint
       isLoading.value = false;
     }
   }
 
-  /// Helper utility to scrub memory maps clean post successful execution checkout
+  Future<void> _showSuccessDialogAndRoute({
+    required String orderId,
+    dynamic walletDeductedAmount,
+    dynamic dueAmount,
+  }) async {
+
+    double deductedAmount = 0.0;
+    if (walletDeductedAmount != null) {
+      deductedAmount = double.tryParse(walletDeductedAmount.toString()) ?? 0.0;
+    }
+
+    // Parse the due amount safely
+    double pendingAmount = 0.0;
+    if (dueAmount != null) {
+      pendingAmount = double.tryParse(dueAmount.toString()) ?? 0.0;
+    }
+
+    // 1. Show the dialog
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check_circle_rounded, color: Colors.green, size: 60),
+              const SizedBox(height: 16),
+              const Text(
+                'Success!',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Order ID: $orderId',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black54),
+              ),
+
+              const SizedBox(height: 16),
+
+              // 2. Conditionally show wallet amount if it was used
+              if (deductedAmount > 0) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8)
+                  ),
+                  child: Text(
+                    'Wallet Deducted: £${deductedAmount.toStringAsFixed(2)}',
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.blue),
+                  ),
+                ),
+              ],
+
+              // 3. Conditionally show Pending or Complete status
+              if (pendingAmount > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8)
+                  ),
+                  child: Text(
+                    'Payment Pending: £${pendingAmount.toStringAsFixed(2)}',
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.orange),
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8)
+                  ),
+                  child: const Text(
+                    'Payment Complete',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.green),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
+    // 4. Wait for 2 seconds
+    await Future.delayed(const Duration(seconds: 2));
+
+    final assignmentsCtrl = Get.isRegistered<AssignmentsController>()
+        ? Get.find<AssignmentsController>()
+        : Get.put(AssignmentsController());
+    assignmentsCtrl.getOrderList();
+
+    if (Get.isRegistered<BottomNavController>()) {
+      Get.find<BottomNavController>().changeTab(2);
+    }
+
+    Get.offAllNamed(
+      Routes.BOTTOM_NAV_BAR,
+      arguments: {'index': 2},
+    );
+  }
   void clearAllFields() {
     nameController.clear();
     emailController.clear();
@@ -818,12 +999,15 @@ class AddOrderController extends GetxController {
     selectedUrgency.value = null;
     selectedCountry.value = null;
     selectedWorkType.value = null;
+    selectedExpert.value = null;
+    useWallet.value = false;
     isAccepted.value = false;
+    currentWordCount.value = 250;
+    updateWordCountConfig();
   }
 
   @override
   void onClose() {
-    // Release Text Form memory footprints
     topicController.dispose();
     deadlineController.dispose();
     pagesController.dispose();
@@ -831,8 +1015,7 @@ class AddOrderController extends GetxController {
     mobileController.dispose();
     nameController.dispose();
     emailController.dispose();
-
-    // Release tracking hooks structures cleanly
+    wordCountTextController.dispose();
     selectedSubject.dispose();
     selectedService.dispose();
     selectedUrgency.dispose();

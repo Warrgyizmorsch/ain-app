@@ -13,7 +13,6 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- Header Section ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -64,7 +63,7 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
             children: [
               TextFormFieldCustom(
                 title: 'REQUIREMENTS',
-                isRequired: true,
+
                 method: TextFormField(
                   controller: controller.requirementsController,
                   maxLines: 4,
@@ -268,6 +267,11 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
 
                 return Column(
                   children: [
+                    if (controller.selectedExpert.value != null)
+                      _buildSummaryDetailRow(
+                        'Assigned Expert',
+                        '${controller.selectedExpert.value!.name ?? "Expert"} (ID: #${controller.selectedExpert.value!.id ?? "N/A"})',
+                      ),
                     if (controller.selectedService.value != null)
                       _buildSummaryDetailRow('Service', controller.selectedService.value!.name),
                     if (controller.selectedWorkType.value != null)
@@ -318,10 +322,139 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
           ),
           const SizedBox(height: 20),
 
+          // --- Section 3.5: Wallet Payment Option ---
+          _buildSectionCard(
+            title: "Wallet Payment",
+            icon: Icons.account_balance_wallet_outlined,
+            children: [
+              Obx(() {
+                final balance = controller.walletBalance.value;
+                final isSelected = controller.useWallet.value;
+                final currency = controller.walletCurrency.value;
+                final isLoading = controller.isWalletLoading.value;
+
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.primaryPurple.withValues(alpha: 0.08)
+                        : AppColors.bgLight,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.primaryPurple
+                          : AppColors.lightDivider,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryPurple.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.wallet,
+                          color: AppColors.primaryPurple,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Available Wallet Balance',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            isLoading
+                                ? const SizedBox(
+                                    height: 16,
+                                    width: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : Text(
+                                    '$currency${balance.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                          ],
+                        ),
+                      ),
+                      // Checkbox for Use Wallet
+                      GestureDetector(
+                        onTap: () {
+                          if (balance > 0) {
+                            controller.toggleUseWallet();
+                          } else {
+                            Get.snackbar(
+                              'Insufficient Wallet Balance',
+                              'Your wallet balance is £0.00. Please top up your wallet.',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.amberAccent.withValues(alpha: 0.2),
+                              colorText: Colors.black87,
+                            );
+                          }
+                        },
+                        behavior: HitTestBehavior.opaque,
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: isSelected,
+                              activeColor: AppColors.primaryPurple,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              onChanged: (val) {
+                                if (balance > 0) {
+                                  controller.toggleUseWallet();
+                                } else {
+                                  Get.snackbar(
+                                    'Insufficient Wallet Balance',
+                                    'Your wallet balance is £0.00. Please top up your wallet.',
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    backgroundColor: Colors.amberAccent.withValues(alpha: 0.2),
+                                    colorText: Colors.black87,
+                                  );
+                                }
+                              },
+                            ),
+                            Text(
+                              'Use Wallet',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: balance > 0
+                                    ? AppColors.textPrimary
+                                    : AppColors.lightTextDisabled,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+          const SizedBox(height: 20),
+
           // --- Section 4: Payment & Terms ---
           _buildSectionCard(
             title: "Price & Terms",
-            icon: Icons.account_balance_wallet_outlined,
+            icon: Icons.receipt_outlined,
             children: [
               // Reactive Real-Time Pricing Summary
               Obx(() {
@@ -372,16 +505,45 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
                           ),
                         ],
                       ),
-                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Divider(height: 1, color: AppColors.priceDivider),
                       ),
 
                       _PriceRow(
                         label: AppStrings.total,
                         value: controller.formattedFinalPrice,
-                        isTotal: true,
+                        isTotal: !controller.useWallet.value,
                       ),
+
+                      if (controller.useWallet.value) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Text('Wallet Amount Applied', style: AppTextStyles.priceLabel),
+                                const SizedBox(width: 6),
+                                Icon(Icons.account_balance_wallet, size: 14, color: AppColors.success),
+                              ],
+                            ),
+                            Text(
+                              controller.formattedWalletDeduction,
+                              style: AppTextStyles.discountValue.copyWith(color: AppColors.success),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Divider(height: 1, color: AppColors.priceDivider),
+                        ),
+                        _PriceRow(
+                          label: 'Net Payable Amount',
+                          value: controller.formattedNetPayablePrice,
+                          isTotal: true,
+                        ),
+                      ],
                     ],
                   ),
                 );
@@ -447,8 +609,8 @@ class RequirementsAndPaymentStep extends GetView<AddOrderController> {
           const SizedBox(height: 32),
 
           // --- Bottom Action ---
-        AppButton(
-            title: controller.editingOrderData != null ? 'Update Order' : 'Place Order',
+          AppButton(
+            title: controller.isEditingOrder ? 'Update Order' : 'Add Order',
             onTap: controller.addToCart,
           ),
           const SizedBox(height: 24),

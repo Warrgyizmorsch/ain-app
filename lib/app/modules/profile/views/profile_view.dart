@@ -178,14 +178,6 @@ class ProfileView extends GetView<ProfileController> {
                   )),
                   _Divider(),
                   _ProfileMenuTile(
-                    icon: Icons.help_outline,
-                    title: AppStrings.supportCenter,
-                    onTap: () {
-                      controller.openLiveChat();
-                    },
-                  ),
-                  _Divider(),
-                  _ProfileMenuTile(
                     icon: Icons.manage_accounts_outlined,
                     title: AppStrings.editProfile,
                     onTap: () {
@@ -200,6 +192,15 @@ class ProfileView extends GetView<ProfileController> {
                       Get.to(  ChangePasswordWidget());
                     },
                   ),
+                  _Divider(),
+                  _ProfileMenuTile(
+                    icon: Icons.help_outline,
+                    title: AppStrings.privacyPolicy,
+                    onTap: () {
+                      controller.openLiveChat();
+                    },
+                  ),
+
                 ],
               ),
             ),

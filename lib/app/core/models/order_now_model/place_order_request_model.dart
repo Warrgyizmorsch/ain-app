@@ -1,11 +1,4 @@
-
-
 class PlaceOrderRequest {
-  // String name;
-  // String email;
-  // String country;
-  // String countryCode;
-  // String mobile;
   String service;
   String workType;
   String subject;
@@ -15,12 +8,11 @@ class PlaceOrderRequest {
   String requirements;
   String finalPrice;
   String sourcePage;
+  String? expertId;
+  String? expertName;
+  bool? useWallet;
+
   PlaceOrderRequest({
-    // required this.name,
-    // required this.email,
-    // required this.country,
-    // required this.countryCode,
-    // required this.mobile,
     required this.service,
     required this.workType,
     required this.subject,
@@ -30,15 +22,13 @@ class PlaceOrderRequest {
     required this.requirements,
     required this.finalPrice,
     required this.sourcePage,
+    this.expertId,
+    this.expertName,
+    this.useWallet,
   });
 
   Map<String, dynamic> toJson() {
-    return {
-      // 'name': name,
-      // 'email': email,
-      // 'country': country,
-      // 'countrycode': countryCode,
-      // 'mobile': mobile,
+    final Map<String, dynamic> data = {
       'service': service,
       'workType': workType,
       'subject': subject,
@@ -49,5 +39,17 @@ class PlaceOrderRequest {
       'finalPrice': finalPrice,
       'source_page': sourcePage,
     };
+    if (expertId != null && expertId!.isNotEmpty) {
+      data['expert_id'] = expertId;
+      data['writer_id'] = expertId;
+    }
+    if (expertName != null && expertName!.isNotEmpty) {
+      data['expert_name'] = expertName;
+      data['writer_name'] = expertName;
+    }
+
+    data['wallet'] = useWallet;
+
+    return data;
   }
 }

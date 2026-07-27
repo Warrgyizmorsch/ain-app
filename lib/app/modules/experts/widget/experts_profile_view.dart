@@ -20,7 +20,10 @@ class ExpertsProfileView extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton(
             onPressed: () {
-              Get.toNamed(Routes.ADD_ORDER);
+              Get.toNamed(Routes.ADD_ORDER, arguments: {
+                'expert': expert,
+                'selectExpertOnly': true,
+              });
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryPurple,

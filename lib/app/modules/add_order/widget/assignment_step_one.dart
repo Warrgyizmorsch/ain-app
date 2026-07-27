@@ -2,7 +2,6 @@ import '../../../common/constant/app_imports.dart';
 import '../../../core/models/order_now_model/services_master_model.dart';
 import '../../../core/models/order_now_model/subjects_master_model.dart';
 import '../../../core/models/order_now_model/urgencies_master_model.dart';
-import '../../../core/models/order_now_model/word_count_master_model.dart';
 import '../controllers/add_order_controller.dart';
 
 class AssignmentDetailsStep extends GetView<AddOrderController> {
@@ -11,7 +10,7 @@ class AssignmentDetailsStep extends GetView<AddOrderController> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(), // Smoother scrolling
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,6 +85,98 @@ class AssignmentDetailsStep extends GetView<AddOrderController> {
             //   )),
             //   _buildError(controller.countryError),
             //   const SizedBox(height: 16),
+
+              // Hired Expert / Writer Info Card
+              Obx(() {
+                final expert = controller.selectedExpert.value;
+                if (expert == null) return const SizedBox.shrink();
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryPurple.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.primaryPurple.withValues(alpha: 0.3),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: AppColors.primaryPurple.withValues(alpha: 0.15),
+                        backgroundImage: expert.image != null && expert.image!.isNotEmpty
+                            ? NetworkImage(expert.image!)
+                            : null,
+                        child: expert.image == null || expert.image!.isEmpty
+                            ? Icon(Icons.person, color: AppColors.primaryPurple, size: 28)
+                            : null,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryPurple,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text(
+                                    'HIRED EXPERT',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                                if (expert.id != null) ...[
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'ID: #${expert.id}',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              expert.name ?? 'Expert Writer',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            if (expert.subject != null && expert.subject!.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                expert.subject!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.primaryPurple,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                  ),
+                );
+              }),
 
               // Enter Topic Input
               Obx(() {
@@ -215,25 +306,153 @@ class AssignmentDetailsStep extends GetView<AddOrderController> {
               _buildError(controller.urgencyError),
               const SizedBox(height: 16),
 
-              // Word Count Dropdown
-              Obx(() => TextFormFieldCustom(
-                title: 'WORD COUNT / PAGES',
-                isRequired: true,
-                method: CustomDropdown<WordCountData>(
-                  valueListenable: controller.selectedPageConfig,
-                  items: controller.wordCount,
-                  label: (s) => s.name,
-                  hint: controller.isLoading.value ? 'Loading...' : 'Select Pages',
-                  onChanged: (v) {
-                    controller.selectedPageConfig.value = v;
-                    controller.wordCountError.value = '';
-                  },
-                  showBorder: false,
-                ),
-                borderColor: controller.wordCountError.isNotEmpty ? AppColors.error : AppColors.lightDivider,
-                borderWidth: 1.5,
-                height: 44,
-              )),
+              // Word Count / Pages Counter Widget
+              Obx(() {
+                final count = controller.currentWordCount.value;
+                final pages = count ~/ 250;
+                final hasError = controller.wordCountError.isNotEmpty;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // --- Header ---
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                              letterSpacing: 0.5,
+                            ),
+                            children: const [
+                              TextSpan(text: 'WORD COUNT / PAGES '),
+                              TextSpan(
+                                text: '*',
+                                style: TextStyle(color: AppColors.error),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '$pages ${pages == 1 ? 'Page' : 'Pages'} approx.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryPurple,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    // --- TextField with Prefix (-) and Suffix (+) ---
+                    TextFieldCustom(
+                      controller: controller.wordCountTextController,
+                      textInputType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      borderColor: hasError ? AppColors.error : AppColors.lightDivider,
+                      borderWidth: 1.5,
+                      hintTextSize: 18,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                      textAlign: TextAlign.center,
+                      // DECREMENT (-) BUTTON
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
+                        child: Material(
+                          color: count <= 250
+                              ? AppColors.lightDivider.withValues(alpha: 0.4)
+                              : AppColors.primaryPurple.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: count <= 250 ? null : () => controller.decrementWordCount(),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: Icon(
+                                Icons.remove,
+                                size: 22,
+                                color: count <= 250
+                                    ? AppColors.lightTextDisabled
+                                    : AppColors.primaryPurple,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // INCREMENT (+) BUTTON
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
+                        child: Material(
+                          color: AppColors.primaryPurple.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () => controller.incrementWordCount(),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: Icon(
+                                Icons.add,
+                                size: 22,
+                                color: AppColors.primaryPurple,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Update GetX state when typing
+                      onChanged: (val) {
+                        final parsedCount = int.tryParse(val ?? '') ?? 0;
+                        controller.currentWordCount.value = parsedCount;
+                        controller.updateWordCountConfig();
+                        return null;
+                      },
+                    ),
+
+                    // --- Quick Preset Chips ---
+                    const SizedBox(height: 16),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [250, 500, 1000, 1500, 2500, 5000].map((preset) {
+                          final isSelected = count == preset;
+                          final presetPages = preset ~/ 250;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ChoiceChip(
+                              label: Text('$preset W ($presetPages pgs)'),
+                              selected: isSelected,
+                              onSelected: (_) => controller.setWordCount(preset),
+                              selectedColor: AppColors.primaryPurple,
+                              backgroundColor: AppColors.bgLight,
+                              showCheckmark: false,
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                              labelStyle: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected ? Colors.white : AppColors.textSecondary,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side: BorderSide(
+                                  color: isSelected
+                                      ? AppColors.primaryPurple
+                                      : AppColors.lightDivider,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                );
+              }),
               _buildError(controller.wordCountError),
             ],
           ),

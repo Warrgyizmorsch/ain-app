@@ -9,11 +9,11 @@ import '../controllers/bottom_nav_bar_controller.dart';
 class BottomNavBarBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<BottomNavController>(() => BottomNavController());
+    Get.lazyPut<BottomNavController>(() => BottomNavController(), fenix: true);
 
-    Get.lazyPut<HomeController>(() => HomeController());
-    Get.lazyPut<ContactUsController>(() => ContactUsController());
-    Get.lazyPut<AssignmentsController>(() => AssignmentsController());
-    Get.lazyPut<ProfileController>(() => ProfileController());
+    Get.lazyPut<HomeController>(() => HomeController(), fenix: true);
+    Get.lazyPut<ContactUsController>(() => ContactUsController(), fenix: true);
+    Get.lazyPut<AssignmentsController>(() => AssignmentsController(), fenix: true);
+    Get.lazyPut<ProfileController>(() => ProfileController(), fenix: true);
   }
 }

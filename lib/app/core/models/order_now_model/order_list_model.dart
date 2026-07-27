@@ -66,9 +66,11 @@ class ConfirmedOrder {
   final String? wordCount;
   final String? amount;
   final String? receivedAmount;
-  final dynamic dueAmount; // Using dynamic or num since it returns 0 (int) or string
+  final dynamic dueAmount;
   final String? createdAt;
-  final List<String>? images; // Upgraded to List<String>
+  final int? writerId;
+  final Writer? writer;
+  final List<String>? images;
   final List<String>? files;
 
   ConfirmedOrder({
@@ -88,6 +90,8 @@ class ConfirmedOrder {
     this.receivedAmount,
     this.dueAmount,
     this.createdAt,
+    this.writerId,
+    this.writer,
     this.images,
     this.files,
   });
@@ -110,6 +114,8 @@ class ConfirmedOrder {
       receivedAmount: json['received_amount']?.toString(),
       dueAmount: json['due_amount'],
       createdAt: json['created_at'],
+      writerId: json['writer_id'],
+      writer: json['writer'] != null ? Writer.fromJson(json['writer']) : null,
       images: json['images'] != null
           ? List<String>.from(json['images'].map((x) => x.toString()))
           : [],
@@ -136,6 +142,8 @@ class ConfirmedOrder {
     'received_amount': receivedAmount,
     'due_amount': dueAmount,
     'created_at': createdAt,
+    'writer_id': writerId,
+    'writer': writer?.toJson(),
     'images': images,
     'files': files,
   };
@@ -162,6 +170,8 @@ class Lead {
   final dynamic convertedAt;
   final String? createdAt;
   final String? subject;
+  final int? writerId;
+  final Writer? writer;
   final List<String>? images;
   final List<String>? files;
 
@@ -186,6 +196,8 @@ class Lead {
     this.convertedAt,
     this.createdAt,
     this.subject,
+    this.writerId,
+    this.writer,
     this.images,
     this.files,
   });
@@ -212,6 +224,8 @@ class Lead {
       convertedAt: json['converted_at'],
       createdAt: json['created_at'],
       subject: json['subject'],
+      writerId: json['writer_id'],
+      writer: json['writer'] != null ? Writer.fromJson(json['writer']) : null,
       images: json['images'] != null
           ? List<String>.from(json['images'].map((x) => x.toString()))
           : [],
@@ -243,8 +257,50 @@ class Lead {
       'converted_at': convertedAt,
       'created_at': createdAt,
       'subject': subject,
+      'writer_id': writerId,
+      'writer': writer?.toJson(),
       'images': images,
       'files': files,
+    };
+  }
+}
+
+class Writer {
+  final int? id;
+  final String? writerName;
+  final String? image;
+  final String? subject;
+  final String? service;
+  final String? slug;
+
+  Writer({
+    this.id,
+    this.writerName,
+    this.image,
+    this.subject,
+    this.service,
+    this.slug,
+  });
+
+  factory Writer.fromJson(Map<String, dynamic> json) {
+    return Writer(
+      id: json['id'],
+      writerName: json['writer_name'],
+      image: json['image'],
+      subject: json['subject'],
+      service: json['service'],
+      slug: json['slug'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'writer_name': writerName,
+      'image': image,
+      'subject': subject,
+      'service': service,
+      'slug': slug,
     };
   }
 }

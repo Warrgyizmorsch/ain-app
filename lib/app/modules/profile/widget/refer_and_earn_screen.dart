@@ -1,18 +1,24 @@
 import '../../../common/constant/app_imports.dart';
+import '../controllers/profile_controller.dart';
 
 class ReferAndEarnScreen extends StatelessWidget {
   const ReferAndEarnScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Scaffold(
+    final ProfileController controller = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController());
+
+    return Scaffold(
       backgroundColor: AppColors.appBackground,
       appBar: CustomAppBar(
         title: AppStrings.referAndEarn,
         actions: [
           IconButton(
             icon: Icon(Icons.card_giftcard, color: AppColors.textPrimary),
-            onPressed: () {},
+            onPressed: () => controller.showRewardsBottomSheet(context),
+            tooltip: 'Rewards & Earnings',
           ),
         ],
       ),
@@ -22,137 +28,140 @@ class ReferAndEarnScreen extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.all(16.0),
             child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const HeroSection(),
-            const SizedBox(height: 24),
-            const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: ReferralCodeCard(
-                    title: 'Your Referral Code',
-                    value: 'AIN25',
-                  ),
+                HeroSection(controller: controller),
+                const SizedBox(height: 24),
+                Obx(() => Row(
+                      children: [
+                        Expanded(
+                          child: ReferralCodeCard(
+                            title: 'Your Referral Code',
+                            value: controller.referralCode.value,
+                            onTap: controller.copyReferralCode,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ReferralCodeCard(
+                            title: 'Your Referral Link',
+                            value: controller.referralLink.value,
+                            onTap: controller.copyReferralLink,
+                          ),
+                        ),
+                      ],
+                    )),
+                const SizedBox(height: 16),
+
+                const EarningHighlightSection(),
+                const SizedBox(height: 24),
+
+                Text('More Ways to Earn 🎉', style: AppTextStyles.h1),
+                const SizedBox(height: 12),
+                Obx(() => SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: controller.bonusMilestones.map((milestone) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 12.0),
+                            child: BonusCard(
+                              tag: milestone['tag'] ?? '',
+                              title: milestone['title'] ?? '',
+                              subtitle: milestone['subtitle'] ?? '',
+                              bgColor: milestone['bgColor'] ?? AppColors.tagBg,
+                              current: milestone['current'] ?? 0,
+                              target: milestone['target'] ?? 5,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    )),
+                const SizedBox(height: 24),
+
+                // How it works
+                Text('How it works', style: AppTextStyles.h1),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const HowItWorksStep(
+                      step: 1,
+                      title: 'Invite Friends',
+                      desc: 'Share your code or link',
+                    ),
+                    Icon(Icons.arrow_right_alt, color: AppColors.lightDisabled),
+                    const HowItWorksStep(
+                      step: 2,
+                      title: 'Friend Places Order',
+                      desc: 'They get 20% OFF',
+                    ),
+                    Icon(Icons.arrow_right_alt, color: AppColors.lightDisabled),
+                    const HowItWorksStep(
+                      step: 3,
+                      title: 'You Earn £10',
+                      desc: 'After order completed',
+                    ),
+                  ],
                 ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: ReferralCodeCard(
-                    title: 'Your Referral Link',
-                    value: 'ain.co.uk/ref/...',
-                  ),
+                const SizedBox(height: 24),
+
+                // Share Icons
+                Text('Share your link', style: AppTextStyles.h1),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SocialShareIcon(
+                      icon: Icons.chat,
+                      color: AppColors.success,
+                      label: 'WhatsApp',
+                      onTap: controller.shareToWhatsApp,
+                    ),
+                    SocialShareIcon(
+                      icon: Icons.send,
+                      color: Colors.blue,
+                      label: 'Telegram',
+                      onTap: controller.shareToTelegram,
+                    ),
+                    SocialShareIcon(
+                      icon: Icons.camera_alt,
+                      color: Colors.pink,
+                      label: 'Instagram',
+                      onTap: controller.shareToInstagram,
+                    ),
+                    SocialShareIcon(
+                      icon: Icons.message,
+                      color: Colors.blueAccent,
+                      label: 'Messenger',
+                      onTap: controller.shareToMessenger,
+                    ),
+                    SocialShareIcon(
+                      icon: Icons.more_horiz,
+                      color: AppColors.lightDivider,
+                      label: 'More',
+                      isIconDark: true,
+                      onTap: controller.shareNative,
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 24),
+
+                // Bottom Banner
+                BottomBannerSection(onInvite: controller.shareNative),
+                const SizedBox(height: 80),
               ],
             ),
-            const SizedBox(height: 16),
-
-            const EarningHighlightSection(),
-            const SizedBox(height: 24),
-
-            Text('More Ways to Earn 🎉', style: AppTextStyles.h1),
-            const SizedBox(height: 12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  BonusCard(
-                    tag: 'EXTRA BONUS',
-                    title: 'Invite 5 Friends',
-                    subtitle: 'Earn £20 Bonus',
-                    bgColor: AppColors.tagBg,
-                    current: 3,
-                    target: 5,
-                  ),
-                  const SizedBox(width: 12),
-                  BonusCard(
-                    tag: 'MEGA BONUS',
-                    title: 'Invite 10 Friends',
-                    subtitle: 'Earn £50 Bonus',
-                    bgColor: AppColors.priceBg,
-                    current: 3,
-                    target: 10,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // How it works
-            Text('How it works', style: AppTextStyles.h1),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const HowItWorksStep(
-                  step: 1,
-                  title: 'Invite Friends',
-                  desc: 'Share your code or link',
-                ),
-                Icon(Icons.arrow_right_alt, color: AppColors.lightDisabled),
-                const HowItWorksStep(
-                  step: 2,
-                  title: 'Friend Places Order',
-                  desc: 'They get 20% OFF',
-                ),
-                Icon(Icons.arrow_right_alt, color: AppColors.lightDisabled),
-                const HowItWorksStep(
-                  step: 3,
-                  title: 'You Earn £10',
-                  desc: 'After order completed',
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Share Icons
-            Text('Share your link', style: AppTextStyles.h1),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                const SocialShareIcon(
-                  icon: Icons.chat,
-                  color: AppColors.success,
-                  label: 'WhatsApp',
-                ),
-                const SocialShareIcon(
-                  icon: Icons.send,
-                  color: Colors.blue,
-                  label: 'Telegram',
-                ),
-                const SocialShareIcon(
-                  icon: Icons.camera_alt,
-                  color: Colors.pink,
-                  label: 'Instagram',
-                ),
-                const SocialShareIcon(
-                  icon: Icons.message,
-                  color: Colors.blueAccent,
-                  label: 'Messenger',
-                ),
-                SocialShareIcon(
-                  icon: Icons.more_horiz,
-                  color: AppColors.lightDivider,
-                  label: 'More',
-                  isIconDark: true,
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Bottom Banner
-            const BottomBannerSection(),
-            const SizedBox(height: 80),
-          ],
-        ),
+          ),
+          const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
+        ],
       ),
-      const GlobalChatWidget(bottomMargin: 16.0, rightMargin: 16.0),
-    ],
-  )));
+    );
   }
 }
 
 class HeroSection extends StatelessWidget {
-  const HeroSection({super.key});
+  final ProfileController controller;
+  const HeroSection({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -173,7 +182,7 @@ class HeroSection extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: controller.shareNative,
                 icon: const Icon(Icons.share, color: AppColors.white),
                 label: Text(
                   'Invite Friends',
@@ -190,16 +199,68 @@ class HeroSection extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(width: 12),
         Expanded(
           flex: 2,
           child: Container(
             height: 150,
             decoration: BoxDecoration(
-              color: AppColors.bgLight,
-              borderRadius: BorderRadius.circular(12),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF673AB7), Color(0xFF512DA8)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryPurple.withValues(alpha: 0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            alignment: Alignment.center,
-            child: Text('3D Image', style: AppTextStyles.bodyMedium),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned(
+                  right: -10,
+                  top: -10,
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: const BoxDecoration(
+                      color: Colors.white10,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.card_giftcard,
+                      size: 48,
+                      color: Colors.amberAccent,
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.amber,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'GET £10',
+                        style: AppTextStyles.caption.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -210,40 +271,50 @@ class HeroSection extends StatelessWidget {
 class ReferralCodeCard extends StatelessWidget {
   final String title;
   final String value;
+  final VoidCallback onTap;
 
-  const ReferralCodeCard({super.key, required this.title, required this.value});
+  const ReferralCodeCard({
+    super.key,
+    required this.title,
+    required this.value,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.lightDivider),
-        borderRadius: BorderRadius.circular(8),
-        color: AppColors.bgLight,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: AppTextStyles.caption),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  value,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryPurple,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.lightDivider),
+          borderRadius: BorderRadius.circular(8),
+          color: AppColors.bgLight,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: AppTextStyles.caption),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    value,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryPurple,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Icon(Icons.copy, size: 16, color: AppColors.primaryPurple),
-            ],
-          ),
-        ],
+                Icon(Icons.copy, size: 16, color: AppColors.primaryPurple),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -313,6 +384,8 @@ class BonusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double progress = (target > 0) ? (current / target).clamp(0.0, 1.0) : 0.0;
+
     return Container(
       width: 160,
       padding: const EdgeInsets.all(12),
@@ -332,11 +405,15 @@ class BonusCard extends StatelessWidget {
             style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: current / target,
-            backgroundColor: AppColors.bgLight,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              AppColors.primaryPurple,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: AppColors.bgLight,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColors.primaryPurple,
+              ),
+              minHeight: 6,
             ),
           ),
         ],
@@ -396,36 +473,43 @@ class SocialShareIcon extends StatelessWidget {
   final Color color;
   final String label;
   final bool isIconDark;
+  final VoidCallback onTap;
 
   const SocialShareIcon({
     super.key,
     required this.icon,
     required this.color,
     required this.label,
+    required this.onTap,
     this.isIconDark = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 24,
-          backgroundColor: color,
-          child: Icon(
-            icon,
-            color: isIconDark ? AppColors.textPrimary : AppColors.white,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(30),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: color,
+            child: Icon(
+              icon,
+              color: isIconDark ? AppColors.textPrimary : AppColors.white,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: AppTextStyles.overline),
-      ],
+          const SizedBox(height: 8),
+          Text(label, style: AppTextStyles.overline),
+        ],
+      ),
     );
   }
 }
 
 class BottomBannerSection extends StatelessWidget {
-  const BottomBannerSection({super.key});
+  final VoidCallback onInvite;
+  const BottomBannerSection({super.key, required this.onInvite});
 
   @override
   Widget build(BuildContext context) {
@@ -459,7 +543,7 @@ class BottomBannerSection extends StatelessWidget {
             ),
           ),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: onInvite,
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.white),
             child: Text(
               'Invite Now',
