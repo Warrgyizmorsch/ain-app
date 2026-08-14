@@ -1,13 +1,12 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../common/constant/app_imports.dart';
-import '../../../core/models/accdemic_tools/assessment_model.dart';
+import '../../../core/models/academic_tools/assessment_model.dart';
 import '../../../core/models/login_model/login_response_model.dart';
 import '../../../core/models/notifications_model/get_notifications_model.dart';
 import '../../../services/storage_services.dart';
-
 
 class HomeController extends GetxController {
   RxString username = ''.obs;
@@ -31,8 +30,6 @@ class HomeController extends GetxController {
 
   final RxString selectedUrgency = 'Standard'.obs;
   final RxString selectedContact = 'Chat'.obs;
-
-
 
   void pickFile() async {
     try {
@@ -86,12 +83,20 @@ class HomeController extends GetxController {
   void submitBrief() {
     // Handle submission logic here
     if (uploadedFileName.value.isEmpty) {
-      Get.snackbar('Error', 'Please upload a brief file',
-          backgroundColor: Colors.red.shade100, colorText: Colors.red.shade900);
+      Get.snackbar(
+        'Error',
+        'Please upload a brief file',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
       return;
     }
-    Get.snackbar('Success', 'Assignment brief submitted successfully!',
-        backgroundColor: Colors.green.shade100, colorText: Colors.green.shade900);
+    Get.snackbar(
+      'Success',
+      'Assignment brief submitted successfully!',
+      backgroundColor: Colors.green.shade100,
+      colorText: Colors.green.shade900,
+    );
   }
 
   void closeDrawer() {
@@ -102,6 +107,14 @@ class HomeController extends GetxController {
 
   void openDrawer() {
     scaffoldKey.currentState?.openDrawer();
+  }
+
+  Future<void> openLiveChat() async {
+    final Uri uri = Uri.parse('https://assignmentinneed.co.uk/contact');
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
   // ==========================================
   // 1. DISSERTATION PLANNER PARAMETERS
@@ -119,11 +132,36 @@ class HomeController extends GetxController {
   final plannerDeadlineDay = 'Friday'.obs;
 
   final chapterProgressList = [
-    {'chapter': 'Chapter 1', 'title': 'Introduction', 'progress': 1.0, 'status': 'completed'},
-    {'chapter': 'Chapter 2', 'title': 'Literature Review', 'progress': 1.0, 'status': 'completed'},
-    {'chapter': 'Chapter 3', 'title': 'Methodology', 'progress': 0.6, 'status': 'in_progress'},
-    {'chapter': 'Chapter 4', 'title': 'Data Analysis', 'progress': 0.2, 'status': 'starting'},
-    {'chapter': 'Chapter 5', 'title': 'Discussion', 'progress': 0.0, 'status': 'pending'},
+    {
+      'chapter': 'Chapter 1',
+      'title': 'Introduction',
+      'progress': 1.0,
+      'status': 'completed',
+    },
+    {
+      'chapter': 'Chapter 2',
+      'title': 'Literature Review',
+      'progress': 1.0,
+      'status': 'completed',
+    },
+    {
+      'chapter': 'Chapter 3',
+      'title': 'Methodology',
+      'progress': 0.6,
+      'status': 'in_progress',
+    },
+    {
+      'chapter': 'Chapter 4',
+      'title': 'Data Analysis',
+      'progress': 0.2,
+      'status': 'starting',
+    },
+    {
+      'chapter': 'Chapter 5',
+      'title': 'Discussion',
+      'progress': 0.0,
+      'status': 'pending',
+    },
   ].obs;
 
   final upcomingTasksList = [
@@ -181,7 +219,12 @@ class HomeController extends GetxController {
 
   void generateApaCitation() {
     if (apaTitleCtrl.text.isEmpty || apaUrlCtrl.text.isEmpty) {
-      Get.snackbar('Missing Fields', 'Please fill in all required fields (*)', backgroundColor: AppColors.error, colorText: AppColors.white);
+      Get.snackbar(
+        'Missing Fields',
+        'Please fill in all required fields (*)',
+        backgroundColor: AppColors.error,
+        colorText: AppColors.white,
+      );
       return;
     }
 
@@ -193,7 +236,12 @@ class HomeController extends GetxController {
       'url': apaUrlCtrl.text.trim(),
     };
 
-    Get.snackbar('Success', 'APA Citation generated successfully!', backgroundColor: AppColors.statusGreen, colorText: AppColors.white);
+    Get.snackbar(
+      'Success',
+      'APA Citation generated successfully!',
+      backgroundColor: AppColors.statusGreen,
+      colorText: AppColors.white,
+    );
   }
 
   // ==========================================
@@ -215,8 +263,16 @@ class HomeController extends GetxController {
   final refCitationParts = <String, String>{}.obs;
 
   void generateReference() {
-    if (refTitleCtrl.text.isEmpty || refAuthorCtrl.text.isEmpty || refJournalCtrl.text.isEmpty || refYearCtrl.text.isEmpty) {
-      Get.snackbar('Missing Fields', 'Please fill in all required fields (*)', backgroundColor: AppColors.error, colorText: AppColors.white);
+    if (refTitleCtrl.text.isEmpty ||
+        refAuthorCtrl.text.isEmpty ||
+        refJournalCtrl.text.isEmpty ||
+        refYearCtrl.text.isEmpty) {
+      Get.snackbar(
+        'Missing Fields',
+        'Please fill in all required fields (*)',
+        backgroundColor: AppColors.error,
+        colorText: AppColors.white,
+      );
       return;
     }
 
@@ -232,7 +288,12 @@ class HomeController extends GetxController {
       'doi': refDoiCtrl.text.trim(),
     };
 
-    Get.snackbar('Success', 'Reference generated successfully!', backgroundColor: AppColors.statusGreen, colorText: AppColors.white);
+    Get.snackbar(
+      'Success',
+      'Reference generated successfully!',
+      backgroundColor: AppColors.statusGreen,
+      colorText: AppColors.white,
+    );
   }
 
   // ==========================================
@@ -254,7 +315,7 @@ class HomeController extends GetxController {
     try {
       FilePickerResult? result = await FilePicker.pickFiles(
         allowMultiple: false, // <-- ONLY ALLOW SINGLE FILE
-        type: FileType.any,   // <-- ALLOW ALL FILE TYPES (PNG, JPG, PDF, etc.)
+        type: FileType.any, // <-- ALLOW ALL FILE TYPES (PNG, JPG, PDF, etc.)
       );
 
       if (result != null && result.files.single.path != null) {
@@ -262,7 +323,8 @@ class HomeController extends GetxController {
 
         // Update Plagiarism specific variables
         plagiarismSelectedFileName.value = result.files.single.name;
-        plagiarismSelectedFileSize.value = '${(file.lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB';
+        plagiarismSelectedFileSize.value =
+            '${(file.lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB';
 
         Get.snackbar(
           'File Selected',
@@ -275,10 +337,10 @@ class HomeController extends GetxController {
     } catch (e) {
       debugPrint("Error picking file: $e");
       Get.snackbar(
-          'Error',
-          'Could not select file.',
-          backgroundColor: AppColors.error,
-          colorText: AppColors.white
+        'Error',
+        'Could not select file.',
+        backgroundColor: AppColors.error,
+        colorText: AppColors.white,
       );
     }
   }
@@ -295,7 +357,7 @@ class HomeController extends GetxController {
   final assessments = <Assessment>[].obs;
   final targetGradePercentage = 85.0.obs;
 
-// ==========================================
+  // ==========================================
   // 5. GRADE CALCULATOR (RAPIDTABLES STYLE)
   // ==========================================
 
@@ -304,7 +366,9 @@ class HomeController extends GetxController {
   final targetGradeCtrl = TextEditingController(text: '85'); // What-If input
 
   void addGradeRow() {
-    gradeRows.add(AssessmentRowData(id: DateTime.now().millisecondsSinceEpoch.toString()));
+    gradeRows.add(
+      AssessmentRowData(id: DateTime.now().millisecondsSinceEpoch.toString()),
+    );
   }
 
   void removeGradeRow(String id) {
@@ -330,7 +394,10 @@ class HomeController extends GetxController {
 
   // Total entered weight
   double get totalWeight {
-    return gradeRows.fold(0.0, (sum, row) => sum + (double.tryParse(row.weightCtrl.text) ?? 0.0));
+    return gradeRows.fold(
+      0.0,
+      (sum, row) => sum + (double.tryParse(row.weightCtrl.text) ?? 0.0),
+    );
   }
 
   // Sum of (Grade * Weight)
@@ -374,6 +441,7 @@ class HomeController extends GetxController {
 
     return neededPercentage > 0 ? neededPercentage : 0.0;
   }
+
   // ==========================================
   // WORD COUNTER PARAMETERS
   // ==========================================
@@ -413,23 +481,24 @@ class HomeController extends GetxController {
 
         wordCounterSelectedFile.value = file;
         wordCounterSelectedFileName.value = result.files.single.name;
-        wordCounterSelectedFileSize.value = '${(file.lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB';
+        wordCounterSelectedFileSize.value =
+            '${(file.lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB';
 
         Get.snackbar(
-            'Processing',
-            'Extracting text from file...',
-            backgroundColor: AppColors.statusOrange,
-            colorText: AppColors.white
+          'Processing',
+          'Extracting text from file...',
+          backgroundColor: AppColors.statusOrange,
+          colorText: AppColors.white,
         );
 
         await processWordCount(); // Automatically process after upload
       }
     } catch (e) {
       Get.snackbar(
-          'Error',
-          'Could not select file.',
-          backgroundColor: AppColors.error,
-          colorText: AppColors.white
+        'Error',
+        'Could not select file.',
+        backgroundColor: AppColors.error,
+        colorText: AppColors.white,
       );
     }
   }
@@ -450,39 +519,66 @@ class HomeController extends GetxController {
     // TEXT
     if (type == 'Text') {
       if (wordCounterTextController.text.trim().isEmpty) {
-        Get.snackbar("Empty", "Please enter some text to count.", backgroundColor: AppColors.warning, colorText: AppColors.white);
+        Get.snackbar(
+          "Empty",
+          "Please enter some text to count.",
+          backgroundColor: AppColors.warning,
+          colorText: AppColors.white,
+        );
         return;
       }
       activeTextForCounting.value = wordCounterTextController.text;
-      Get.snackbar('Success', 'Text analysis complete!', backgroundColor: AppColors.primaryPurple, colorText: AppColors.white);
+      Get.snackbar(
+        'Success',
+        'Text analysis complete!',
+        backgroundColor: AppColors.primaryPurple,
+        colorText: AppColors.white,
+      );
     }
     // FILE
     else if (type == 'File Upload') {
       if (wordCounterSelectedFileName.value.isEmpty) {
-        Get.snackbar("Empty", "Please upload a document.", backgroundColor: AppColors.warning, colorText: AppColors.white);
+        Get.snackbar(
+          "Empty",
+          "Please upload a document.",
+          backgroundColor: AppColors.warning,
+          colorText: AppColors.white,
+        );
         return;
       }
       isWordCounterProcessing.value = true;
       try {
-        String fileExt = wordCounterSelectedFileName.value.split('.').last.toLowerCase();
+        String fileExt = wordCounterSelectedFileName.value
+            .split('.')
+            .last
+            .toLowerCase();
         String extractedText = '';
         if (fileExt == 'txt' && wordCounterSelectedFile.value != null) {
           extractedText = await wordCounterSelectedFile.value!.readAsString();
         } else {
           await Future.delayed(const Duration(seconds: 2));
-          extractedText = "This is a simulated extraction of your $fileExt file.\n\nIn a real app, external packages parse DOCX/PDF files.";
+          extractedText =
+              "This is a simulated extraction of your $fileExt file.\n\nIn a real app, external packages parse DOCX/PDF files.";
         }
         fileExtractedText.value = extractedText;
         activeTextForCounting.value = extractedText;
-        Get.snackbar('Success', 'File text extracted and counted!', backgroundColor: AppColors.statusGreen, colorText: AppColors.white);
+        Get.snackbar(
+          'Success',
+          'File text extracted and counted!',
+          backgroundColor: AppColors.statusGreen,
+          colorText: AppColors.white,
+        );
       } catch (e) {
-        Get.snackbar('Error', 'Failed to read the file.', backgroundColor: AppColors.error, colorText: AppColors.white);
+        Get.snackbar(
+          'Error',
+          'Failed to read the file.',
+          backgroundColor: AppColors.error,
+          colorText: AppColors.white,
+        );
       }
       isWordCounterProcessing.value = false;
     }
   }
-
-
 
   // ==========================================
   // INITIALIZATION & LISTENERS
@@ -494,9 +590,30 @@ class HomeController extends GetxController {
     getData();
 
     assessments.addAll([
-      Assessment(id: '1', title: 'Assignment 1', type: 'Homework', score: 88, outOf: 100, weight: 20),
-      Assessment(id: '2', title: 'Midterm Exam', type: 'Exam', score: 76, outOf: 100, weight: 30),
-      Assessment(id: '3', title: 'Final Project', type: 'Project', score: 92, outOf: 100, weight: 50),
+      Assessment(
+        id: '1',
+        title: 'Assignment 1',
+        type: 'Homework',
+        score: 88,
+        outOf: 100,
+        weight: 20,
+      ),
+      Assessment(
+        id: '2',
+        title: 'Midterm Exam',
+        type: 'Exam',
+        score: 76,
+        outOf: 100,
+        weight: 30,
+      ),
+      Assessment(
+        id: '3',
+        title: 'Final Project',
+        type: 'Project',
+        score: 92,
+        outOf: 100,
+        weight: 50,
+      ),
     ]);
 
     // 1. Plagiarism Real-Time Count Listener
@@ -625,7 +742,6 @@ class HomeController extends GetxController {
     selectedFilterIndex.value = index;
   }
 
-
   void addAssessment(Assessment newAssessment) {
     if (totalWeight + newAssessment.weight > 100) {
       Get.snackbar('Error', 'Total weight cannot exceed 100%');
@@ -649,10 +765,14 @@ class AssessmentRowData {
   final TextEditingController gradeCtrl;
   final TextEditingController weightCtrl;
 
-  AssessmentRowData({required this.id, String name = '', String grade = '', String weight = ''})
-      : nameCtrl = TextEditingController(text: name),
-        gradeCtrl = TextEditingController(text: grade),
-        weightCtrl = TextEditingController(text: weight);
+  AssessmentRowData({
+    required this.id,
+    String name = '',
+    String grade = '',
+    String weight = '',
+  }) : nameCtrl = TextEditingController(text: name),
+       gradeCtrl = TextEditingController(text: grade),
+       weightCtrl = TextEditingController(text: weight);
 
   void dispose() {
     nameCtrl.dispose();

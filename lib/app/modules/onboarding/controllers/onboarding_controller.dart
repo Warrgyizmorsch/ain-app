@@ -44,8 +44,7 @@ class OnboardingController extends GetxController {
   }
 
   void skipOnboarding() {
-    // Navigate to home or login
-    // Get.offAllNamed(AppRoutes.login);
+    Get.offAllNamed(Routes.LOGIN_ONBOARDING);
   }
 
   @override

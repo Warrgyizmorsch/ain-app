@@ -116,7 +116,7 @@ class GradeCalculatorView extends GetView<HomeController> {
                       const SizedBox(height: 16),
                       _buildResultsGrid(),
                       const SizedBox(height: 24),
-                      _buildWhatIfCard(),
+                      // _buildWhatIfCard(),
                     ],
                   );
                 }),

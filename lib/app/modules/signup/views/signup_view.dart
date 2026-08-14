@@ -307,6 +307,7 @@ class SignupView extends GetView<SignupController> {
                       children: [
                         SocialButton(
                           imagePath: ImageConstant.googleIcon,
+                          isLoading: controller.isLoading.value,
                           onTap: () async {
                             await controller.loginWithGoogle();
                           },
