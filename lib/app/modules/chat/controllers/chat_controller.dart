@@ -4,7 +4,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:http/http.dart' as http;
+
 import '../../../core/models/chats_model/chat_message_model.dart';
+import '../../../services/storage_services.dart';
 
 class ChatController extends GetxController {
   final TextEditingController textController = TextEditingController();
@@ -25,13 +28,91 @@ class ChatController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    sessionId = "user_${Random().nextInt(999999999)}";
+    _initChat();
+  }
+
+  // ==========================================
+  // INITIALIZATION & HISTORY
+  // ==========================================
+
+  Future<void> _initChat() async {
+    // Fetch existing session from StorageService
+    final savedSession = StorageService.to.getChatSession();
+
+    if (savedSession != null && savedSession.isNotEmpty) {
+      sessionId = savedSession;
+      await _loadHistory();
+    } else {
+      _createNewSession();
+    }
 
     _connectWebSocket();
+  }
+
+  void _createNewSession() {
+    sessionId = "user_${Random().nextInt(999999999)}";
+
+    // Save to local storage using your centralized service
+    StorageService.to.saveChatSession(sessionId);
 
     _messageQueue.add("Hi there! 👋 I'm Daniel. How can I help you today?");
     _processBotQueue();
   }
+
+  Future<void> _loadHistory() async {
+    try {
+      final url = Uri.parse('https://love14-ain-chatbot.hf.space/api/admin/chats/$sessionId');
+      final res = await http.get(url);
+
+      if (res.statusCode == 200) {
+        final List<dynamic> history = jsonDecode(res.body);
+
+        if (history.isNotEmpty) {
+          messages.clear();
+          for (var m in history) {
+            final isUser = m['sender'].toString().toLowerCase().contains('user');
+            messages.add(
+                MessageModel(
+                  content: m['message'] ?? '',
+                  time: _getCurrentTime(),
+                  isMe: isUser,
+                )
+            );
+          }
+          _scrollToBottom();
+        } else {
+          // If session exists locally but server history is empty, treat as new
+          _createNewSession();
+        }
+      } else {
+        debugPrint("Failed to load history. Status Code: ${res.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("Error loading history: $e");
+    }
+  }
+
+  Future<void> resetChat() async {
+    // Clear old session from storage
+    await StorageService.to.clearChatSession();
+
+    // Reset local UI state
+    messages.clear();
+    _messageQueue.clear();
+    isBotTypingText.value = false;
+    isTyping.value = false;
+
+    // Create new session & trigger welcome message
+    _createNewSession();
+
+    // Reconnect WebSocket with the new session ID
+    _channel?.sink.close();
+    _connectWebSocket();
+  }
+
+  // ==========================================
+  // WEBSOCKET LOGIC
+  // ==========================================
 
   void _connectWebSocket() {
     final wsUrl = Uri.parse('wss://love14-ain-chatbot.hf.space/api/ws/chat/$sessionId');
@@ -64,15 +145,18 @@ class ChatController extends GetxController {
         return;
       }
     } catch (e) {
+      // If it's not JSON, it's a standard text message from the bot
       isTyping.value = false;
       _messageQueue.add(messageData.toString().trim());
       _processBotQueue();
     }
   }
 
+  // ==========================================
+  // BOT TYPEWRITER ANIMATION
+  // ==========================================
 
   void _processBotQueue() {
-    // Prevent overlapping typing if already processing a message or queue is empty
     if (isBotTypingText.value || _messageQueue.isEmpty) return;
 
     isBotTypingText.value = true;
@@ -89,8 +173,7 @@ class ChatController extends GetxController {
       ),
     );
 
-
-    Timer.periodic(const Duration(milliseconds: 80), (timer) {
+    Timer.periodic(const Duration(milliseconds: 30), (timer) { // Adjust ms for typing speed
       if (charIndex < rawText.length) {
         currentText += rawText[charIndex];
 
@@ -103,35 +186,43 @@ class ChatController extends GetxController {
         charIndex++;
         _scrollToBottom();
       } else {
-        // Finished typing the current message
         timer.cancel();
         isBotTypingText.value = false;
-
-        // Check if there are more messages waiting in the queue
-        _processBotQueue();
+        _processBotQueue(); // Check if more messages are in queue
       }
     });
   }
+
+  // ==========================================
+  // USER ACTIONS
+  // ==========================================
 
   void sendMessage() {
     final text = textController.text.trim();
     if (text.isEmpty) return;
 
+    // Add user message to UI
     messages.add(
       MessageModel(content: text, time: _getCurrentTime(), isMe: true),
     );
     textController.clear();
     _scrollToBottom();
 
+    // Show remote typing indicator optimistically
     isTyping.value = true;
     _scrollToBottom();
 
+    // Send through WebSocket
     if (_channel != null) {
       _channel!.sink.add(text);
     } else {
       isTyping.value = false;
-      Get.snackbar("Connection Error", "Reconnecting to server... Please try again.",
-          backgroundColor: Colors.red.shade100, colorText: Colors.red.shade900);
+      Get.snackbar(
+          "Connection Error",
+          "Reconnecting to server... Please try again.",
+          backgroundColor: Colors.red.shade100,
+          colorText: Colors.red.shade900
+      );
       _connectWebSocket();
     }
   }
@@ -142,6 +233,10 @@ class ChatController extends GetxController {
       _channel!.sink.add(typingEvent);
     }
   }
+
+  // ==========================================
+  // UTILS & CLEANUP
+  // ==========================================
 
   void _scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 50), () {

@@ -29,6 +29,7 @@ class EditProfileWidget extends GetView<ProfileController> {
                   : Text(
                       AppStrings.save,
                       style: TextStyle(
+                        fontFamily: FontFamily.regular,
                         color: AppColors.primary, // Dynamic Purple
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -131,6 +132,7 @@ class EditProfileWidget extends GetView<ProfileController> {
                                 ? controller.nameController.text
                                 : 'User Name',
                             style: const TextStyle(
+                              fontFamily: FontFamily.regular,
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -140,6 +142,7 @@ class EditProfileWidget extends GetView<ProfileController> {
                           Text(
                             controller.emailController.text,
                             style: TextStyle(
+                              fontFamily: FontFamily.regular,
                               color: Colors.white.withValues(alpha: 0.8),
                               fontSize: 13,
                             ),
@@ -166,6 +169,7 @@ class EditProfileWidget extends GetView<ProfileController> {
                                 Text(
                                   'Premium Member',
                                   style: TextStyle(
+                                    fontFamily: FontFamily.regular,
                                     color: Colors.white,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -186,6 +190,7 @@ class EditProfileWidget extends GetView<ProfileController> {
               Text(
                 'Personal Information',
                 style: TextStyle(
+                  fontFamily: FontFamily.regular,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -390,38 +395,38 @@ class EditProfileWidget extends GetView<ProfileController> {
                 ],
               ),
               const SizedBox(height: 40),
-
-              // --- 5. Delete Account Button ---
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.delete_outline,
-                    color: AppColors.error,
-                    size: 20,
-                  ),
-                  label: Text(
-                    'Delete Account',
-                    style: TextStyle(
-                      color: AppColors.error,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: AppColors.error.withValues(alpha: 0.5),
-                      width: 1.5,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    backgroundColor: AppColors.error.withValues(alpha: 0.1),
-                  ),
-                ),
-              ),
+              //
+              // // --- 5. Delete Account Button ---
+              // SizedBox(
+              //   width: double.infinity,
+              //   height: 52,
+              //   child: OutlinedButton.icon(
+              //     onPressed: () {},
+              //     icon: Icon(
+              //       Icons.delete_outline,
+              //       color: AppColors.error,
+              //       size: 20,
+              //     ),
+              //     label: Text(
+              //       'Delete Account',
+              //       style: TextStyle(
+              //         color: AppColors.error,
+              //         fontSize: 15,
+              //         fontWeight: FontWeight.w600,
+              //       ),
+              //     ),
+              //     style: OutlinedButton.styleFrom(
+              //       side: BorderSide(
+              //         color: AppColors.error.withValues(alpha: 0.5),
+              //         width: 1.5,
+              //       ),
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //       ),
+              //       backgroundColor: AppColors.error.withValues(alpha: 0.1),
+              //     ),
+              //   ),
+              // ),
               const SizedBox(height: 80),
             ],
           ),
@@ -497,13 +502,14 @@ class EditProfileWidget extends GetView<ProfileController> {
       onChanged: onChanged, // Applied here
       inputFormatters: inputFormatters, // Applied here
       style: TextStyle(
+        fontFamily: FontFamily.regular,
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: AppColors.textPrimary,
       ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(fontSize: 14, color: AppColors.lightTextHint),
+        hintStyle: TextStyle(fontFamily: FontFamily.regular, fontSize: 14, color: AppColors.lightTextHint),
         filled: true,
         fillColor: AppColors.bgLight,
         contentPadding: const EdgeInsets.symmetric(
@@ -554,6 +560,7 @@ class EditProfileWidget extends GetView<ProfileController> {
                 child: Text(
                   c,
                   style: TextStyle(
+                    fontFamily: FontFamily.regular,
                     fontSize: 14,
                     color: AppColors.textPrimary,
                   ),
@@ -580,6 +587,7 @@ class EditProfileWidget extends GetView<ProfileController> {
           Text(
             text,
             style: TextStyle(
+              fontFamily: FontFamily.regular,
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -622,6 +630,7 @@ class EditProfileWidget extends GetView<ProfileController> {
               Text(
                 'System Default',
                 style: TextStyle(
+                  fontFamily: FontFamily.regular,
                   fontSize: 14,
                   fontWeight: themeService.themeMode == ThemeMode.system
                       ? FontWeight.bold
@@ -645,6 +654,7 @@ class EditProfileWidget extends GetView<ProfileController> {
               Text(
                 'Light Mode',
                 style: TextStyle(
+                  fontFamily: FontFamily.regular,
                   fontSize: 14,
                   fontWeight: themeService.themeMode == ThemeMode.light
                       ? FontWeight.bold
@@ -668,6 +678,7 @@ class EditProfileWidget extends GetView<ProfileController> {
               Text(
                 'Dark Mode',
                 style: TextStyle(
+                  fontFamily: FontFamily.regular,
                   fontSize: 14,
                   fontWeight: themeService.themeMode == ThemeMode.dark
                       ? FontWeight.bold
@@ -713,6 +724,7 @@ class EditProfileWidget extends GetView<ProfileController> {
                   Text(
                     title,
                     style: TextStyle(
+                      fontFamily: FontFamily.regular,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -722,6 +734,7 @@ class EditProfileWidget extends GetView<ProfileController> {
                   Text(
                     subtitle,
                     style: TextStyle(
+                      fontFamily: FontFamily.regular,
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),

@@ -60,7 +60,7 @@ class AppTextStyles {
 
   /// AppBar title — "Order Assignment" / "Order Now"
   static TextStyle get appBarTitle => TextStyle(
-    fontFamily: FontFamily.semiBold,
+    fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s15,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
@@ -69,7 +69,7 @@ class AppTextStyles {
   // ── Section ──────────────────────────────────────────────────────────────────
   /// Bold gradient heading — "Assignment Details"
   static TextStyle get sectionHeading => TextStyle(
-    fontFamily: FontFamily.bold,
+    fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s18,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
@@ -143,7 +143,7 @@ class AppTextStyles {
   // ── Step Badge ───────────────────────────────────────────────────────────────
   /// Text inside the step pill — "Step 1/2"
   static TextStyle get stepBadge => TextStyle(
-    fontFamily: FontFamily.semiBold,
+    fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s11,
     fontWeight: FontWeight.w600,
     color: const Color(0xFF5B3FD4),
@@ -153,7 +153,7 @@ class AppTextStyles {
   // ── Price Box ────────────────────────────────────────────────────────────────
   /// "Price Details" title
   static TextStyle get priceTitle => TextStyle(
-    fontFamily: FontFamily.bold,
+    fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s11,
     fontWeight: FontWeight.w600,
     color: AppColors.primary,
@@ -170,7 +170,7 @@ class AppTextStyles {
 
   /// Row value — "USD 224.52"
   static TextStyle get priceValue => TextStyle(
-    fontFamily: FontFamily.semiBold,
+    fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s13,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
@@ -259,7 +259,7 @@ class AppTextStyles {
 
   // ── Wallet ─────────────────────────────────────────────────────────────────
   static TextStyle get walletTitle => TextStyle(
-    fontFamily: FontFamily.semiBold,
+    fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s18,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
@@ -273,28 +273,28 @@ class AppTextStyles {
   );
 
   static TextStyle get walletAmount => TextStyle(
-    fontFamily: FontFamily.bold,
+    fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s28,
     fontWeight: FontWeight.w600,
     color: AppColors.primary,
   );
 
   static TextStyle get transactionTitle => TextStyle(
-    fontFamily: FontFamily.semiBold,
+    fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s14,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
   static TextStyle get transactionAmount => TextStyle(
-    fontFamily: FontFamily.bold,
+    fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s14,
     fontWeight: FontWeight.w600,
     color: Colors.green, // You can also move this to AppColors.success
   );
 
   static TextStyle get transactionHistory => TextStyle(
-    fontFamily: FontFamily.semiBold,
+    fontFamily: FontFamily.regular,
     fontSize: AppFontSize.s13,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,

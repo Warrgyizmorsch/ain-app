@@ -181,7 +181,7 @@ class ExpertsView extends GetView<ExpertsController> {
                     itemBuilder: (context, index) {
                       final expert = experts[index];
                       return _ExpertCard(
-                        name: expert.name ?? "Unknown",
+                        name: expert.name ?? "",
                         expertise: expert.subject ?? "N/A",
                         rating: expert.successRate?.toString() ?? "0",
                         orders: expert.finishOrder?.toString() ?? "0",
@@ -241,7 +241,7 @@ class _ExpertCard extends StatelessWidget {
             backgroundColor: AppColors.appBackground,
             backgroundImage: imageUrl.isNotEmpty
                 ? NetworkImage(imageUrl)
-                : null,
+                : null, // Changed from Icons.person to null
             child: imageUrl.isEmpty
                 ? Icon(Icons.person, color: AppColors.lightTextDisabled)
                 : null,

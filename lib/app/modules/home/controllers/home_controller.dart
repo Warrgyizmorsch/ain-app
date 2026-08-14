@@ -6,6 +6,8 @@ import '../../../common/constant/app_imports.dart';
 import '../../../core/models/accdemic_tools/assessment_model.dart';
 import '../../../core/models/login_model/login_response_model.dart';
 import '../../../core/models/notifications_model/get_notifications_model.dart';
+import '../../../core/models/coupon_model/coupon_model.dart';
+import '../../../core/utils/api/coupon_api/coupon_api.dart';
 import '../../../services/storage_services.dart';
 
 
@@ -14,6 +16,11 @@ class HomeController extends GetxController {
   final filters = ['All', 'Unread', 'Important'];
   final selectedFilterIndex = 0.obs;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // --- Coupon State ---
+  final RxList<CouponModel> couponList = <CouponModel>[].obs;
+  final RxBool isCouponLoading = false.obs;
+  final RxString couponError = ''.obs;
 
   // --- Form Controllers ---
   final subjectController = TextEditingController();
@@ -94,13 +101,25 @@ class HomeController extends GetxController {
         backgroundColor: Colors.green.shade100, colorText: Colors.green.shade900);
   }
 
-  void closeDrawer() {
+  void closeDrawer([BuildContext? context]) {
+    if (context != null) {
+      try {
+        Scaffold.of(context).closeDrawer();
+        return;
+      } catch (_) {}
+    }
     if (scaffoldKey.currentState?.isDrawerOpen ?? false) {
       scaffoldKey.currentState?.closeDrawer();
     }
   }
 
-  void openDrawer() {
+  void openDrawer([BuildContext? context]) {
+    if (context != null) {
+      try {
+        Scaffold.of(context).openDrawer();
+        return;
+      } catch (_) {}
+    }
     scaffoldKey.currentState?.openDrawer();
   }
   // ==========================================
@@ -492,6 +511,7 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     getData();
+    fetchCoupons();
 
     assessments.addAll([
       Assessment(id: '1', title: 'Assignment 1', type: 'Homework', score: 88, outOf: 100, weight: 20),
@@ -563,6 +583,24 @@ class HomeController extends GetxController {
     if (userData != null) {
       debugPrint("NAME: ${userData.name}");
       username.value = userData.name ?? '';
+    }
+  }
+
+  Future<void> fetchCoupons() async {
+    try {
+      isCouponLoading.value = true;
+      couponError.value = '';
+      final response = await CouponApi.getCoupons();
+      if (response.success == true && response.data != null) {
+        couponList.value = response.data!;
+      } else {
+        couponError.value = response.message ?? 'Failed to load coupons';
+      }
+    } catch (e) {
+      debugPrint('Error fetching coupons: $e');
+      couponError.value = e.toString();
+    } finally {
+      isCouponLoading.value = false;
     }
   }
 

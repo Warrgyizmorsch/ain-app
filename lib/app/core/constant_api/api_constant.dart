@@ -59,6 +59,9 @@ class ApiConstant {
   static const String addPayment = "app/add-payment";
   static const String profileUpdate = "app/profile-update";
   static const String profile = "app/profile";
+  static const String totalSpent = "app/total-spent";
+  static const String COUPONS = "app/coupons";
+  static const String APPLY_COUPON = "app/apply-coupon";
 
 
 

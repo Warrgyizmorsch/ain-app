@@ -52,7 +52,7 @@ class SavedSamplesView extends GetView<ProfileController> {
                   child: TextField(
                     controller: controller.sampleSearchController,
                     onChanged: controller.updateSampleSearchQuery,
-                    style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
+                    style: TextStyle(fontFamily: FontFamily.regular, color: AppColors.textPrimary, fontSize: 15),
                     decoration: InputDecoration(
                       hintText: 'Search saved samples...',
                       hintStyle: AppTextStyles.hintText.copyWith(
@@ -111,6 +111,7 @@ class SavedSamplesView extends GetView<ProfileController> {
                         const Text(
                           'All Your Saved Work',
                           style: TextStyle(
+                            fontFamily: FontFamily.regular,
                             color: AppColors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -120,6 +121,7 @@ class SavedSamplesView extends GetView<ProfileController> {
                         Text(
                           'Access and manage your saved\nsamples anytime.',
                           style: TextStyle(
+                            fontFamily: FontFamily.regular,
                             color: AppColors.white.withValues(alpha: 0.8),
                             fontSize: 12,
                             height: 1.4,
@@ -129,6 +131,7 @@ class SavedSamplesView extends GetView<ProfileController> {
                         Obx(() => Text(
                           '${controller.sampleList.length}',
                           style: const TextStyle(
+                            fontFamily: FontFamily.regular,
                             color: AppColors.white,
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -137,6 +140,7 @@ class SavedSamplesView extends GetView<ProfileController> {
                         Text(
                           'Total Samples',
                           style: TextStyle(
+                            fontFamily: FontFamily.regular,
                             color: AppColors.white.withValues(alpha: 0.8),
                             fontSize: 12,
                           ),
@@ -331,12 +335,12 @@ class SavedSamplesView extends GetView<ProfileController> {
                       children: [
                         Text(
                           'Save time and stay organized',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                          style: TextStyle(fontFamily: FontFamily.regular, fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Your saved samples are secure and\navailable across all your devices.',
-                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.3),
+                          style: TextStyle(fontFamily: FontFamily.regular, fontSize: 12, color: AppColors.textSecondary, height: 1.3),
                         ),
                       ],
                     ),
@@ -348,7 +352,7 @@ class SavedSamplesView extends GetView<ProfileController> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     ),
-                    child: Text('Explore Tools', style: TextStyle(color: AppColors.primaryPurple, fontSize: 12, fontWeight: FontWeight.bold)),
+                    child: Text('Explore Tools', style: TextStyle(fontFamily: FontFamily.regular, color: AppColors.primaryPurple, fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -460,6 +464,7 @@ class _SampleCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
+                      fontFamily: FontFamily.regular,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -469,6 +474,7 @@ class _SampleCard extends StatelessWidget {
                   Text(
                     formattedDate,
                     style: TextStyle(
+                      fontFamily: FontFamily.regular,
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),
@@ -487,6 +493,7 @@ class _SampleCard extends StatelessWidget {
                           child: Text(
                             'Word Count: $mockWordCount',
                             style: TextStyle(
+                              fontFamily: FontFamily.regular,
                               color: AppColors.secondary,
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
@@ -505,6 +512,7 @@ class _SampleCard extends StatelessWidget {
                         child: Text(
                           'Type: $type',
                           style: TextStyle(
+                            fontFamily: FontFamily.regular,
                             color: iconColor,
                             fontSize: 9,
                             fontWeight: FontWeight.w600,

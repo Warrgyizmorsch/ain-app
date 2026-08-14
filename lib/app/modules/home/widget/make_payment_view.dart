@@ -28,6 +28,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
               onPressed: () {
                 controller.getOrderList();
                 controller.bankList();
+                controller.fetchTotalSpent();
               },
             ),
           ],
@@ -46,9 +47,9 @@ class MakePaymentView extends GetView<AssignmentsController> {
                         _buildTotalSpentCard(),
                         const SizedBox(height: 24),
 
-                        // 2. Quick Actions Row
-                        _buildQuickActionsRow(),
-                        const SizedBox(height: 32),
+                        // // 2. Quick Actions Row
+                        // _buildQuickActionsRow(),
+                        // const SizedBox(height: 32),
 
                         // 3. Pending Payments Header
                         Row(
@@ -61,6 +62,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                                 Text(
                                   'Pending Payments',
                                   style: TextStyle(
+                                    fontFamily: FontFamily.regular,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary,
@@ -77,6 +79,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                               child: Text(
                                 '${pendingAssignments.length} Pending',
                                 style: TextStyle(
+                                  fontFamily: FontFamily.regular,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.error,
@@ -123,6 +126,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                                 Text(
                                   'Bank Transfer Details',
                                   style: TextStyle(
+                                    fontFamily: FontFamily.regular,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary,
@@ -138,7 +142,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                               ),
                               child: Text(
                                 'Official Accounts',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
+                                style: TextStyle(fontFamily: FontFamily.regular, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
                               ),
                             ),
                           ],
@@ -160,7 +164,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                               border: Border.all(color: AppColors.lightDivider),
                             ),
                             child: Center(
-                              child: Text("No bank details found.", style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                              child: Text("No bank details found.", style: TextStyle(fontFamily: FontFamily.regular, fontSize: 13, color: AppColors.textSecondary)),
                             ),
                           )
                         else
@@ -189,6 +193,14 @@ class MakePaymentView extends GetView<AssignmentsController> {
   // ==========================================
 
   Widget _buildTotalSpentCard() {
+    final totalSpentData = controller.totalSpentData;
+    final isSpentLoading = controller.isTotalSpentLoading.value;
+    final totalOrdersAmountStr = controller.formatCurrency(
+      totalSpentData?.totalOrdersAmount,
+      totalSpentData?.currency,
+    );
+    final currencySymbol = controller.getCurrencySymbol(totalSpentData?.currency);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -199,39 +211,50 @@ class MakePaymentView extends GetView<AssignmentsController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Total Spent',
-                style: TextStyle(
-                  color: AppColors.white.withValues(alpha: 0.8),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Total Spent',
+                  style: TextStyle(
+                    color: AppColors.white.withValues(alpha: 0.8),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                '£1,197.00',
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
+                const SizedBox(height: 4),
+                isSpentLoading && totalSpentData == null
+                    ? const SizedBox(
+                        height: 28,
+                        width: 28,
+                        child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2.5),
+                      )
+                    : Text(
+                        totalOrdersAmountStr,
+                        style: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                const SizedBox(height: 4),
+                Text(
+                  totalSpentData != null
+                      ? 'Spent: ${controller.formatCurrency(totalSpentData.totalSpent, totalSpentData.currency)}  •  Due: ${controller.formatCurrency(totalSpentData.totalDueAmount, totalSpentData.currency)}'
+                      : 'Across all transactions',
+                  style: TextStyle(
+                    color: AppColors.white.withValues(alpha: 0.8),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Across all transactions',
-                style: TextStyle(
-                  color: AppColors.white.withValues(alpha: 0.8),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
+          const SizedBox(width: 12),
 
-          // Simulated Wallet Illustration
+          // Wallet Illustration
           Container(
             width: 80,
             height: 70,
@@ -252,7 +275,10 @@ class MakePaymentView extends GetView<AssignmentsController> {
                       color: AppColors.white,
                       shape: BoxShape.circle,
                     ),
-                    child: Text('£', style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 12)),
+                    child: Text(
+                      currencySymbol,
+                      style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 12),
+                    ),
                   ),
                 )
               ],
@@ -302,6 +328,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
+            fontFamily: FontFamily.regular,
             fontSize: 11,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -350,6 +377,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                       Text(
                         'Order #${lead.orderId ?? "0000"}',
                         style: TextStyle(
+                          fontFamily: FontFamily.regular,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -359,6 +387,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                       Text(
                         'Deadline: ${lead.deadline ?? '-'}',
                         style: TextStyle(
+                          fontFamily: FontFamily.regular,
                           fontSize: 12,
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
@@ -393,6 +422,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                   child: Text(
                     'Pending',
                     style: TextStyle(
+                      fontFamily: FontFamily.regular,
                       color: AppColors.error,
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -429,6 +459,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                       Text(
                         lead.service ?? 'Assignment',
                         style: TextStyle(
+                          fontFamily: FontFamily.regular,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -440,6 +471,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                       Text(
                         lead.subject ?? 'General Subject',
                         style: TextStyle(
+                          fontFamily: FontFamily.regular,
                           fontSize: 12,
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
@@ -453,6 +485,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                 Text(
                   '£${lead.price ?? '0.00'}',
                   style: TextStyle(
+                    fontFamily: FontFamily.regular,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryPurple,
@@ -489,6 +522,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                       Text(
                         'View Details',
                         style: TextStyle(
+                          fontFamily: FontFamily.regular,
                           color: AppColors.primaryPurple,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
@@ -507,6 +541,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                   label: const Text(
                     'Make Payment',
                     style: TextStyle(
+                      fontFamily: FontFamily.regular,
                       color: AppColors.white,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -554,6 +589,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                 Text(
                   'Need help with payment?',
                   style: TextStyle(
+                    fontFamily: FontFamily.regular,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -563,6 +599,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
                 Text(
                   'Our support team is available 24/7.',
                   style: TextStyle(
+                    fontFamily: FontFamily.regular,
                     fontSize: 11,
                     color: AppColors.textSecondary,
                   ),
@@ -584,7 +621,7 @@ class MakePaymentView extends GetView<AssignmentsController> {
             ),
             child: const Text(
               'Contact Support',
-              style: TextStyle(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w600),
+              style: TextStyle(fontFamily: FontFamily.regular, color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
         ],

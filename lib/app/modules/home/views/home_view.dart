@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:ain/app/modules/profile/widget/payment_history_view.dart';
 import '../../../common/constant/app_imports.dart';
+import '../../../core/models/coupon_model/coupon_model.dart';
 import '../../../core/models/order_now_model/order_list_model.dart';
 import '../../assignments/controllers/assignments_controller.dart';
 import '../../assignments/widget/order_details_view.dart';
@@ -26,7 +27,6 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
-      key: controller.scaffoldKey,
       backgroundColor: AppColors.appBackground,
       drawer: const AppDrawer(),
       appBar: CustomAppBar(
@@ -35,7 +35,7 @@ class HomeView extends GetView<HomeController> {
         leading: Builder(
           builder: (context) => IconButton(
             icon:  Icon(Icons.menu, color: AppColors.textPrimary),
-            onPressed: () => controller.openDrawer(),
+            onPressed: () => controller.openDrawer(context),
           ),
         ),
         actions: [
@@ -483,10 +483,12 @@ class HomeView extends GetView<HomeController> {
                   ),
                   child: Icon(icon, color: effectiveColor, size: 24),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   title,
                   textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.caption.copyWith(
                     fontSize: AppFontSize.s10,
                     fontWeight: FontWeight.w600,
@@ -815,6 +817,7 @@ class AppDrawer extends StatelessWidget {
                       icon: Icons.assignment_outlined,
                       label: AppStrings.myAssignments,
                       onTap: () {
+                        Get.back();
                         Get.until(
                           (route) =>
                               route.settings.name == Routes.BOTTOM_NAV_BAR,
@@ -868,6 +871,7 @@ class AppDrawer extends StatelessWidget {
                       icon: Icons.person_outline,
                       label: AppStrings.profile,
                       onTap: () {
+                        Get.back();
                         Get.until(
                           (route) =>
                               route.settings.name == Routes.BOTTOM_NAV_BAR,
@@ -879,6 +883,7 @@ class AppDrawer extends StatelessWidget {
                       icon: Icons.settings_outlined,
                       label: AppStrings.settings,
                       onTap: () {
+                        Get.back();
                         Get.until(
                           (route) =>
                               route.settings.name == Routes.BOTTOM_NAV_BAR,
@@ -1027,16 +1032,40 @@ class _PromoBannerSliderState extends State<PromoBannerSlider> {
   Timer? _timer;
   bool _isGoingForward = true;
 
-  @override
-  void initState() {
-    super.initState();
-    _startAutoScroll();
-  }
+  late final List<Gradient> _gradients = [
+    AppColors.primaryGradient,
+    AppColors.discountGradient,
+    const LinearGradient(
+      colors: [Color(0xFF2E7D32), Color(0xFF1B5E20)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+    const LinearGradient(
+      colors: [Color(0xFF6A1B9A), Color(0xFF4A148C)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+    const LinearGradient(
+      colors: [Color(0xFFD84315), Color(0xFFBF360C)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+  ];
 
-  void _startAutoScroll() {
+  final List<IconData> _icons = const [
+    Icons.card_giftcard,
+    Icons.local_offer_rounded,
+    Icons.discount_rounded,
+    Icons.stars_rounded,
+    Icons.redeem_rounded,
+  ];
+
+  void _startAutoScroll(int totalSlides) {
+    _timer?.cancel();
+    if (totalSlides <= 1) return;
     _timer = Timer.periodic(const Duration(seconds: 4), (Timer timer) {
       if (_isGoingForward) {
-        if (_currentPage < 2) {
+        if (_currentPage < totalSlides - 1) {
           _currentPage++;
         } else {
           _isGoingForward = false;
@@ -1069,108 +1098,175 @@ class _PromoBannerSliderState extends State<PromoBannerSlider> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> slides = [
-      _buildBannerCard(
-        title: 'Get Up to ',
-        highlight: '40% OFF\n',
-        subtitle: 'On your first order',
-        code: 'AIN40',
-        icon: Icons.card_giftcard,
-        iconColor: const Color(0xFFFFD54F),
-        gradient: AppColors.primaryGradient,
-      ),
-      _buildBannerCard(
-        title: 'Homework Help ',
-        highlight: 'Flat 10% OFF\n',
-        subtitle: 'Instant expert assistance',
-        code: 'HW10',
-        icon: Icons.menu_book_rounded,
-        iconColor: AppColors.white,
-        gradient: AppColors.discountGradient,
-      ),
-      _buildBannerCard(
-        title: 'Connect & Save ',
-        highlight: 'Extra 10% OFF\n',
-        subtitle: 'Order via WhatsApp',
-        code: 'WA10',
-        icon: Icons.chat_bubble_rounded,
-        iconColor: const Color(0xFFA5D6A7),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2E7D32), Color(0xFF1B5E20)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-    ];
+    final HomeController controller = Get.isRegistered<HomeController>()
+        ? Get.find<HomeController>()
+        : Get.put(HomeController());
 
-    return Column(
-      children: [
-        SizedBox(
+    return Obx(() {
+      if (controller.isCouponLoading.value && controller.couponList.isEmpty) {
+        return Container(
           height: 170,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: slides.length,
-            onPageChanged: (index) {
-              setState(() {
-                _currentPage = index;
-                if (index == 2) _isGoingForward = false;
-                if (index == 0) _isGoingForward = true;
-              });
-            },
-            itemBuilder: (context, index) {
-              return AnimatedBuilder(
-                animation: _pageController,
-                builder: (context, child) {
-                  double value = 0.0;
-                  if (_pageController.position.haveDimensions) {
-                    value = index - _pageController.page!;
-                  } else {
-                    value = (index - _currentPage).toDouble();
-                  }
-                  value = value.clamp(-1.0, 1.0);
-                  final double depth = (1 - value.abs()) * 0.15;
-                  final double scale = 0.85 + depth;
-                  final double rotationY = value * (pi / 4);
-
-                  return Transform(
-                    alignment: FractionalOffset.center,
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, 0.002)
-                      ..rotateY(rotationY)
-                      ..scaleByDouble(scale, scale, scale, 1.0),
-                    child: Opacity(
-                      opacity: (1 - value.abs() * 0.4).clamp(0.4, 1.0),
-                      child: child,
-                    ),
-                  );
-                },
-                child: slides[index],
-              );
-            },
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(20),
           ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            slides.length,
-            (index) => AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutCirc,
-              margin: const EdgeInsets.symmetric(horizontal: 5),
-              height: 6,
-              width: _currentPage == index ? 24 : 8,
-              decoration: BoxDecoration(
-                color: _currentPage == index
-                    ? AppColors.primary
-                    : AppColors.lightDivider,
-                borderRadius: BorderRadius.circular(10),
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      final List<CouponModel> coupons = controller.couponList;
+      List<Widget> slides = [];
+
+      if (coupons.isNotEmpty) {
+        slides = coupons.asMap().entries.map((entry) {
+          final int idx = entry.key;
+          final CouponModel coupon = entry.value;
+
+          String highlight = '';
+          if (coupon.discountType == 'percentage') {
+            highlight = '${coupon.discountValue}% OFF\n';
+          } else if (coupon.discountValue != null) {
+            highlight = 'Flat ${coupon.discountValue} OFF\n';
+          } else {
+            highlight = 'SPECIAL OFF\n';
+          }
+
+          String subtitle = '';
+          if (coupon.description != null && coupon.description!.isNotEmpty) {
+            subtitle = coupon.description!;
+          } else if (coupon.minOrderAmount != null && coupon.minOrderAmount! > 0) {
+            subtitle = 'Min order amount: ${coupon.minOrderAmount}';
+          } else {
+            subtitle = 'On your order';
+          }
+
+          final Gradient gradient = _gradients[idx % _gradients.length];
+          final IconData icon = _icons[idx % _icons.length];
+
+          return _buildBannerCard(
+            title: 'Get Up to ',
+            highlight: highlight,
+            subtitle: subtitle,
+            code: coupon.couponCode ?? '',
+            icon: icon,
+            iconColor: AppColors.white,
+            gradient: gradient,
+          );
+        }).toList();
+      } else {
+        // Fallback default banners
+        slides = [
+          _buildBannerCard(
+            title: 'Get Up to ',
+            highlight: '40% OFF\n',
+            subtitle: 'On your first order',
+            code: 'AIN40',
+            icon: Icons.card_giftcard,
+            iconColor: const Color(0xFFFFD54F),
+            gradient: AppColors.primaryGradient,
+          ),
+          _buildBannerCard(
+            title: 'Homework Help ',
+            highlight: 'Flat 10% OFF\n',
+            subtitle: 'Instant expert assistance',
+            code: 'HW10',
+            icon: Icons.menu_book_rounded,
+            iconColor: AppColors.white,
+            gradient: AppColors.discountGradient,
+          ),
+          _buildBannerCard(
+            title: 'Connect & Save ',
+            highlight: 'Extra 10% OFF\n',
+            subtitle: 'Order via WhatsApp',
+            code: 'WA10',
+            icon: Icons.chat_bubble_rounded,
+            iconColor: const Color(0xFFA5D6A7),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF2E7D32), Color(0xFF1B5E20)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ];
+      }
+
+      if (_currentPage >= slides.length) {
+        _currentPage = 0;
+      }
+      _startAutoScroll(slides.length);
+
+      return Column(
+        children: [
+          SizedBox(
+            height: 170,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: slides.length,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPage = index;
+                  if (index == slides.length - 1) _isGoingForward = false;
+                  if (index == 0) _isGoingForward = true;
+                });
+              },
+              itemBuilder: (context, index) {
+                return AnimatedBuilder(
+                  animation: _pageController,
+                  builder: (context, child) {
+                    double value = 0.0;
+                    if (_pageController.position.haveDimensions) {
+                      value = index - _pageController.page!;
+                    } else {
+                      value = (index - _currentPage).toDouble();
+                    }
+                    value = value.clamp(-1.0, 1.0);
+                    final double depth = (1 - value.abs()) * 0.15;
+                    final double scale = 0.85 + depth;
+                    final double rotationY = value * (pi / 4);
+
+                    return Transform(
+                      alignment: FractionalOffset.center,
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.002)
+                        ..rotateY(rotationY)
+                        ..scaleByDouble(scale, scale, scale, 1.0),
+                      child: Opacity(
+                        opacity: (1 - value.abs() * 0.4).clamp(0.4, 1.0),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: slides[index],
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              slides.length,
+              (index) => AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCirc,
+                margin: const EdgeInsets.symmetric(horizontal: 5),
+                height: 6,
+                width: _currentPage == index ? 24 : 8,
+                decoration: BoxDecoration(
+                  color: _currentPage == index
+                      ? AppColors.primary
+                      : AppColors.lightDivider,
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 
   Widget _buildBannerCard({
@@ -1214,7 +1310,6 @@ class _PromoBannerSliderState extends State<PromoBannerSlider> {
                       TextSpan(text: title),
                       TextSpan(
                         text: highlight,
-                        // CAPPED AT w600
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 18,
@@ -1230,20 +1325,46 @@ class _PromoBannerSliderState extends State<PromoBannerSlider> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Use Code: $code',
-                    style: AppTextStyles.caption.copyWith(
-                      color: gradient.colors.last,
-                      fontWeight: FontWeight.w600, // Capped at w600
+                GestureDetector(
+                  onTap: () {
+                    if (code.isNotEmpty) {
+                      Clipboard.setData(ClipboardData(text: code));
+                      Get.snackbar(
+                        'Coupon Copied!',
+                        'Code $code copied to clipboard',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: AppColors.white,
+                        colorText: AppColors.primary,
+                        duration: const Duration(seconds: 2),
+                      );
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Use Code: $code',
+                          style: AppTextStyles.caption.copyWith(
+                            color: gradient.colors.last,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.copy_rounded,
+                          size: 14,
+                          color: gradient.colors.last,
+                        ),
+                      ],
                     ),
                   ),
                 ),

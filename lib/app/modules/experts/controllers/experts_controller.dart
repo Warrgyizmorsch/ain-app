@@ -91,7 +91,8 @@ class ExpertsController extends GetxController {
         allExperts.assignAll(response.data!);
 
         final List<String> uniqueSubjects = response.data!
-            .map<String>((expert) => expert.subject ?? 'Unknown')
+            .where((expert) => expert.subject != null && expert.subject!.trim().isNotEmpty)
+            .map<String>((expert) => expert.subject!)
             .toSet()
             .toList();
 

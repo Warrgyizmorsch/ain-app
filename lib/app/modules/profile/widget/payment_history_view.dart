@@ -56,6 +56,7 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
             onPressed: () {
               controller.getOrderList();
               _fetchBankDetails();
+              controller.fetchTotalSpent();
             },
           ),
         ],
@@ -72,9 +73,9 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
                 _buildTotalSpentCard(),
                 const SizedBox(height: 24),
 
-                // 2. Quick Actions Row
-                _buildQuickActionsRow(),
-                const SizedBox(height: 32),
+                // // 2. Quick Actions Row
+                // _buildQuickActionsRow(),
+                // const SizedBox(height: 32),
 
                 // 3. Transaction History Header
                 Row(
@@ -83,6 +84,7 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
                     Text(
                       AppStrings.transactionHistory,
                       style: TextStyle(
+                        fontFamily: FontFamily.regular,
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -101,7 +103,7 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
                           const SizedBox(width: 6),
                           Text(
                             'Filter',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                            style: TextStyle(fontFamily: FontFamily.regular, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                           ),
                           const SizedBox(width: 4),
                           Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.textSecondary),
@@ -139,6 +141,7 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
                           Text(
                             'No transaction history found',
                             style: TextStyle(
+                              fontFamily: FontFamily.regular,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
@@ -149,6 +152,7 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
                             'Your completed or confirmed payments will appear here.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
+                              fontFamily: FontFamily.regular,
                               fontSize: 12,
                               color: AppColors.textSecondary,
                             ),
@@ -171,6 +175,7 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
                     Text(
                       'Bank Transfer Details',
                       style: TextStyle(
+                        fontFamily: FontFamily.regular,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -184,7 +189,7 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
                       ),
                       child: Text(
                         'Bank Transfer',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
+                        style: TextStyle(fontFamily: FontFamily.regular, fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
                       ),
                     ),
                   ],
@@ -279,6 +284,15 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
   }
 
   Widget _buildTotalSpentCard() {
+    final controller = Get.find<AssignmentsController>();
+    final totalSpentData = controller.totalSpentData;
+    final isSpentLoading = controller.isTotalSpentLoading.value;
+    final totalOrdersAmountStr = controller.formatCurrency(
+      totalSpentData?.totalOrdersAmount,
+      totalSpentData?.currency,
+    );
+    final currencySymbol = controller.getCurrencySymbol(totalSpentData?.currency);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -289,37 +303,51 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Total Spent',
-                style: TextStyle(
-                  color: AppColors.white.withValues(alpha: 0.8),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Total Spent',
+                  style: TextStyle(
+                    fontFamily: FontFamily.regular,
+                    color: AppColors.white.withValues(alpha: 0.8),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                '£1,197.00',
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
+                const SizedBox(height: 4),
+                isSpentLoading && totalSpentData == null
+                    ? const SizedBox(
+                        height: 28,
+                        width: 28,
+                        child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2.5),
+                      )
+                    : Text(
+                        totalOrdersAmountStr,
+                        style: const TextStyle(
+                          fontFamily: FontFamily.regular,
+                          color: AppColors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                const SizedBox(height: 4),
+                Text(
+                  totalSpentData != null
+                      ? 'Spent: ${controller.formatCurrency(totalSpentData.totalSpent, totalSpentData.currency)}  •  Due: ${controller.formatCurrency(totalSpentData.totalDueAmount, totalSpentData.currency)}'
+                      : 'Across all transactions',
+                  style: TextStyle(
+                    fontFamily: FontFamily.regular,
+                    color: AppColors.white.withValues(alpha: 0.8),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Across all transactions',
-                style: TextStyle(
-                  color: AppColors.white.withValues(alpha: 0.8),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
+          const SizedBox(width: 12),
 
           // Simulated Wallet Illustration
           Container(
@@ -342,7 +370,10 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
                       color: AppColors.white,
                       shape: BoxShape.circle,
                     ),
-                    child: Text('£', style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 12)),
+                    child: Text(
+                      currencySymbol,
+                      style: TextStyle(fontFamily: FontFamily.regular, color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 12),
+                    ),
                   ),
                 )
               ],
@@ -392,6 +423,7 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
+            fontFamily: FontFamily.regular,
             fontSize: 11,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -440,13 +472,13 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
               children: [
                 Text(
                   title,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                  style: TextStyle(fontFamily: FontFamily.regular, fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                   maxLines: 3, overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   date,
-                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontFamily: FontFamily.regular, fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 6),
                 Container(
@@ -457,7 +489,7 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
                   ),
                   child: Text(
                     'Order $orderId',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
+                    style: TextStyle(fontFamily: FontFamily.regular, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primaryPurple),
                   ),
                 ),
               ],
@@ -469,12 +501,12 @@ class _PaymentHistoryViewState extends State<PaymentHistoryView> {
             children: [
               Text(
                 amount,
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                style: TextStyle(fontFamily: FontFamily.regular, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 4),
               Text(
                 status,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: effectiveStatusColor),
+                style: TextStyle(fontFamily: FontFamily.regular, fontSize: 12, fontWeight: FontWeight.w600, color: effectiveStatusColor),
               ),
             ],
           ),
@@ -515,6 +547,7 @@ class _SupportBanner extends StatelessWidget {
                 Text(
                   'Need help with payments?',
                   style: TextStyle(
+                    fontFamily: FontFamily.regular,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -524,6 +557,7 @@ class _SupportBanner extends StatelessWidget {
                 Text(
                   'Our support team is here to assist you.',
                   style: TextStyle(
+                    fontFamily: FontFamily.regular,
                     fontSize: 11,
                     color: AppColors.textSecondary,
                   ),
@@ -545,7 +579,7 @@ class _SupportBanner extends StatelessWidget {
             ),
             child: const Text(
               'Contact Support',
-              style: TextStyle(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w600),
+              style: TextStyle(fontFamily: FontFamily.regular, color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
         ],

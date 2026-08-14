@@ -18,6 +18,8 @@ import '../../../core/utils/api/order_now_api/order_now_dropdown_api.dart';
 import '../../../core/utils/api/payment_api/bank_list_api.dart';
 import '../../../core/models/order_now_model/edit_order_request_model.dart';
 import '../../../core/utils/api/order_now_api/edit_order_api.dart';
+import '../../../core/models/coupon_model/coupon_model.dart';
+import '../../../core/utils/api/coupon_api/coupon_api.dart';
 import '../../assignments/controllers/assignments_controller.dart';
 import '../../bottom_nav_bar/controllers/bottom_nav_bar_controller.dart';
 
@@ -35,6 +37,16 @@ class AddOrderController extends GetxController {
   final walletCurrency = '£'.obs;
   final useWallet = false.obs;
   final isWalletLoading = false.obs;
+
+  // Coupon State
+  final couponCodeController = TextEditingController();
+  final isApplyingCoupon = false.obs;
+  final isCouponApplied = false.obs;
+  final appliedCouponCode = ''.obs;
+  final couponDiscountAmount = 0.0.obs;
+  final couponStatusMessage = ''.obs;
+  final RxList<CouponModel> availableCoupons = <CouponModel>[].obs;
+  final isCouponsLoading = false.obs;
 
   // Text Form Controllers
   final topicController = TextEditingController();
@@ -97,6 +109,7 @@ class AddOrderController extends GetxController {
     _attachCalculationListeners();
     updateWordCountConfig();
     fetchAllMasterData();
+    fetchAvailableCoupons();
   }
 
   void updateWordCountConfig() {
@@ -279,22 +292,232 @@ class AddOrderController extends GetxController {
     return currentBaseCost * serviceMultiplier * typeMultiplier * urgencyMultiplier;
   }
 
+  double get globalDiscountAmount {
+    final double discountRate = globalDiscountPercentage.value / 100.0;
+    return estimatedPrice * discountRate;
+  }
+
+  double get priceAfterGlobalDiscount {
+    final double currentEstimated = estimatedPrice;
+    final double discount = globalDiscountAmount;
+    final double net = currentEstimated - discount;
+    return net < 0 ? 0.0 : net;
+  }
+
+  double get savingsAmount {
+    final double globalDisc = globalDiscountAmount;
+    final double couponDisc = isCouponApplied.value ? couponDiscountAmount.value : 0.0;
+    return globalDisc + couponDisc;
+  }
+
   double get finalPrice {
     final double currentEstimated = estimatedPrice;
     if (currentEstimated == 0.0) return 0.0;
 
-    // Formula rule: round(Estimated Price x (1 - Discount Rate), 2)
-    final double discountRate = globalDiscountPercentage.value / 100.0;
-    final double computedFinal = currentEstimated * (1 - discountRate);
+    final double totalDiscount = savingsAmount;
+    final double computedFinal = currentEstimated - totalDiscount;
+    final double safeFinal = computedFinal < 0 ? 0.0 : computedFinal;
 
-    // Rounding is strictly applied to the final monetary result to two decimal places
-    return double.parse(computedFinal.toStringAsFixed(2));
+    return double.parse(safeFinal.toStringAsFixed(2));
   }
 
-  double get savingsAmount {
-    // Calculates the exact amount saved for the UI
-    final double discountRate = globalDiscountPercentage.value / 100.0;
-    return estimatedPrice * discountRate;
+  List<CouponModel> get sortedAvailableCoupons {
+    final list = List<CouponModel>.from(availableCoupons);
+    final currentPrice = priceAfterGlobalDiscount;
+    final isApplied = isCouponApplied.value;
+    final appliedCode = appliedCouponCode.value;
+
+    list.sort((a, b) {
+      final codeA = a.couponCode ?? '';
+      final codeB = b.couponCode ?? '';
+
+      final bool isSelectedA = isApplied && appliedCode == codeA;
+      final bool isSelectedB = isApplied && appliedCode == codeB;
+
+      if (isSelectedA && !isSelectedB) return -1;
+      if (!isSelectedA && isSelectedB) return 1;
+
+      final bool aNotMet = a.minOrderAmount != null &&
+          a.minOrderAmount! > 0 &&
+          currentPrice < a.minOrderAmount!;
+      final bool bNotMet = b.minOrderAmount != null &&
+          b.minOrderAmount! > 0 &&
+          currentPrice < b.minOrderAmount!;
+
+      if (aNotMet == bNotMet) return 0;
+      return aNotMet ? 1 : -1;
+    });
+
+    return list;
+  }
+
+  // ─── COUPON METHODS ────────────────────────────────────────────────────────
+
+  Future<void> fetchAvailableCoupons() async {
+    try {
+      isCouponsLoading.value = true;
+      final response = await CouponApi.getCoupons();
+      if (response.success == true && response.data != null) {
+        availableCoupons.value = response.data!;
+      }
+    } catch (e) {
+      debugPrint('Error fetching available coupons: $e');
+    } finally {
+      isCouponsLoading.value = false;
+    }
+  }
+
+  Future<void> applyCoupon({String? code}) async {
+    final String targetCode = (code ?? couponCodeController.text).trim();
+    if (targetCode.isEmpty) {
+      Get.snackbar(
+        'Empty Coupon',
+        'Please enter a coupon code.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.amberAccent.withValues(alpha: 0.2),
+        colorText: Colors.black87,
+      );
+      return;
+    }
+
+    couponCodeController.text = targetCode;
+    final double baseForCoupon = priceAfterGlobalDiscount;
+
+    // 1. Local Pre-validation against minOrderAmount if found in availableCoupons list
+    final matchedPre = availableCoupons.firstWhereOrNull(
+      (c) => c.couponCode?.toUpperCase() == targetCode.toUpperCase(),
+    );
+    if (matchedPre != null &&
+        matchedPre.minOrderAmount != null &&
+        matchedPre.minOrderAmount! > 0 &&
+        baseForCoupon < matchedPre.minOrderAmount!) {
+      final double needed = (matchedPre.minOrderAmount!.toDouble() - baseForCoupon);
+      final String neededStr = needed > 0 ? needed.toStringAsFixed(2) : '0.00';
+      Get.snackbar(
+        'Minimum Order Not Met',
+        'Add £$neededStr more to apply \'$targetCode\'. (Min order £${matchedPre.minOrderAmount!.toStringAsFixed(2)})',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.amberAccent.withValues(alpha: 0.2),
+        colorText: Colors.black87,
+      );
+      return;
+    }
+
+    try {
+      isApplyingCoupon.value = true;
+      couponStatusMessage.value = '';
+
+      final num orderAmt = baseForCoupon > 0 ? baseForCoupon : 100;
+
+      final response = await CouponApi.applyCoupon(
+        couponCode: targetCode,
+        orderAmount: orderAmt,
+      );
+
+      if (response.success == true) {
+        // 2. Post-validation: Check min_order_amount from response data or matched coupon
+        final num? minAmt = response.data?.minOrderAmount ?? matchedPre?.minOrderAmount;
+        if (minAmt != null && minAmt > 0 && baseForCoupon < minAmt) {
+          isCouponApplied.value = false;
+          couponDiscountAmount.value = 0.0;
+          couponStatusMessage.value = 'Minimum order amount for coupon $targetCode is £${minAmt.toStringAsFixed(2)}';
+          update();
+
+          final double needed = (minAmt.toDouble() - baseForCoupon);
+          final String neededStr = needed > 0 ? needed.toStringAsFixed(2) : '0.00';
+          Get.snackbar(
+            'Minimum Order Not Met',
+            'Add £$neededStr more to apply \'$targetCode\'. (Min order £${minAmt.toStringAsFixed(2)})',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.amberAccent.withValues(alpha: 0.2),
+            colorText: Colors.black87,
+          );
+          return;
+        }
+
+        isCouponApplied.value = true;
+        appliedCouponCode.value = targetCode;
+
+        double discount = 0.0;
+        if (response.discountAmount != null && response.discountAmount! > 0) {
+          discount = response.discountAmount!.toDouble();
+        } else if (response.data?.discountType == 'percentage' && response.data?.discountValue != null) {
+          discount = (baseForCoupon * (response.data!.discountValue! / 100.0));
+        } else if (response.data?.discountValue != null) {
+          discount = response.data!.discountValue!.toDouble();
+        } else {
+          final matched = availableCoupons.firstWhereOrNull(
+            (c) => c.couponCode?.toUpperCase() == targetCode.toUpperCase(),
+          );
+          if (matched != null) {
+            if (matched.discountType == 'percentage' && matched.discountValue != null) {
+              discount = baseForCoupon * (matched.discountValue! / 100.0);
+            } else if (matched.discountValue != null) {
+              discount = matched.discountValue!.toDouble();
+            }
+          }
+        }
+
+        couponDiscountAmount.value = double.parse(discount.toStringAsFixed(2));
+        couponStatusMessage.value = response.message ?? 'Coupon applied successfully!';
+        update();
+
+        Get.snackbar(
+          'Coupon Applied!',
+          '${response.message ?? "Coupon applied!"} Saved £${couponDiscountAmount.value.toStringAsFixed(2)}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.shade100,
+          colorText: Colors.green.shade900,
+          duration: const Duration(seconds: 3),
+        );
+      } else {
+        isCouponApplied.value = false;
+        couponDiscountAmount.value = 0.0;
+        couponStatusMessage.value = response.message ?? 'Invalid coupon code';
+        update();
+
+        Get.snackbar(
+          'Invalid Coupon',
+          response.message ?? 'Coupon code could not be applied.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade100,
+          colorText: Colors.red.shade900,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error applying coupon: $e');
+      isCouponApplied.value = false;
+      couponDiscountAmount.value = 0.0;
+      couponStatusMessage.value = 'Failed to verify coupon';
+      update();
+
+      Get.snackbar(
+        'Coupon Error',
+        'Could not apply coupon. Please check code or try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+    } finally {
+      isApplyingCoupon.value = false;
+    }
+  }
+
+  void removeCoupon() {
+    isCouponApplied.value = false;
+    appliedCouponCode.value = '';
+    couponDiscountAmount.value = 0.0;
+    couponStatusMessage.value = '';
+    couponCodeController.clear();
+    update();
+
+    Get.snackbar(
+      'Coupon Removed',
+      'Coupon code has been removed.',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.grey.shade200,
+      colorText: Colors.black87,
+    );
   }
 
   // ─── WALLET DEDUCTION CALCULATIONS ────────────────────────────────────────
@@ -795,6 +1018,9 @@ class AddOrderController extends GetxController {
         expertId: selectedExpert.value?.id?.toString(),
         expertName: selectedExpert.value?.name,
         useWallet: useWallet.value,
+        couponCode: isCouponApplied.value ? appliedCouponCode.value : null,
+        orderAmount: estimatedPrice.toStringAsFixed(2),
+        discountAmount: savingsAmount.toStringAsFixed(2),
         finalPrice: finalPrice.toStringAsFixed(2),
       );
 
@@ -814,6 +1040,9 @@ class AddOrderController extends GetxController {
           expertName: selectedExpert.value?.name,
           useWallet: useWallet.value,
           walletAmount: walletDeduction.toStringAsFixed(2),
+          couponCode: isCouponApplied.value ? appliedCouponCode.value : null,
+          orderAmount: estimatedPrice.toStringAsFixed(2),
+          discountAmount: savingsAmount.toStringAsFixed(2),
           finalPrice: netPayablePrice.toStringAsFixed(2),
         );
 
@@ -1008,6 +1237,7 @@ class AddOrderController extends GetxController {
 
   @override
   void onClose() {
+    couponCodeController.dispose();
     topicController.dispose();
     deadlineController.dispose();
     pagesController.dispose();

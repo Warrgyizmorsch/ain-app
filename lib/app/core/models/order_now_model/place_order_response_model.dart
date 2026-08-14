@@ -29,16 +29,22 @@ class PlaceOrderResponse {
 
   factory PlaceOrderResponse.fromJson(Map<String, dynamic> json) {
     return PlaceOrderResponse(
-      success: json['success'],
-      message: json['message'],
-      orderId: json['order_id'],
-      leadId: json['lead_id'],
-      isAppLead: json['is_app_lead'],
-      writerId: json['writer_id'],
+      success: json['success'] as bool?,
+      message: json['message']?.toString(),
+      orderId: json['order_id']?.toString(),
+      leadId: json['lead_id'] != null
+          ? int.tryParse(json['lead_id'].toString())
+          : null,
+      isAppLead: json['is_app_lead'] != null
+          ? int.tryParse(json['is_app_lead'].toString())
+          : null,
+      writerId: json['writer_id'] != null
+          ? int.tryParse(json['writer_id'].toString())
+          : null,
       totalAmount: json['total_amount'],
       receivedAmount: json['received_amount'],
       dueAmount: json['due_amount'],
-      walletUsed: json['wallet_used'],
+      walletUsed: json['wallet_used'] as bool?,
       walletDeducted: json['wallet_deducted'],
       walletBalance: json['wallet_balance'],
     );

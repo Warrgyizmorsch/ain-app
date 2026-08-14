@@ -5,11 +5,13 @@ import '../../../core/models/order_now_model/feedback_request_model.dart';
 import '../../../core/models/order_now_model/order_list_model.dart';
 import '../../../core/models/payment_model/add_payment_sc_request_model.dart';
 import '../../../core/models/payment_model/bank_list_model.dart';
+import '../../../core/models/payment_model/total_spent_model.dart';
 import '../../../core/utils/api/order_now_api/feedback_api.dart';
 import '../../../core/utils/api/order_now_api/order_list_api.dart';
 import '../../../core/utils/api/order_now_api/raise_ticket_api.dart';
 import '../../../core/utils/api/payment_api/add_payment_sc_api.dart';
 import '../../../core/utils/api/payment_api/bank_list_api.dart';
+import '../../../core/utils/api/payment_api/total_spent_api.dart';
 import '../../../core/utils/helper/device_helper.dart';
 
 enum OrderFilter { all, completed, inProgress, pending }
@@ -21,8 +23,12 @@ class AssignmentsController extends GetxController {
   final isLoadingTicket = false.obs;
   final isLoadingFeedback = false.obs;
   final isBankLoading = false.obs;
+  final isTotalSpentLoading = false.obs;
 
   final orderResponse = Rxn<OrderListResponse>();
+  final totalSpentResponse = Rxn<TotalSpentResponseModel>();
+  TotalSpentData? get totalSpentData => totalSpentResponse.value?.data;
+
   final RxList<BankDetail> banksList = <BankDetail>[].obs;
   final selectedFilter = OrderFilter.all.obs;
   final selectedTabIndex = 0.obs;
@@ -88,6 +94,7 @@ class AssignmentsController extends GetxController {
     super.onInit();
     getOrderList();
     bankList();
+    fetchTotalSpent();
   }
 
   void updateFilter(OrderFilter filter) {
@@ -125,6 +132,7 @@ class AssignmentsController extends GetxController {
   Future<void> getOrderList() async {
     try {
       isLoading.value = true;
+      fetchTotalSpent();
       final response = await OrderListApi.getOrderList();
 
       if (response != null) {
@@ -135,6 +143,46 @@ class AssignmentsController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> fetchTotalSpent() async {
+    try {
+      isTotalSpentLoading.value = true;
+      final response = await TotalSpentApi.getTotalSpent();
+      if (response.success == true && response.data != null) {
+        totalSpentResponse.value = response;
+      }
+    } catch (e) {
+      debugPrint('Total Spent Fetch Error: $e');
+    } finally {
+      isTotalSpentLoading.value = false;
+    }
+  }
+
+  String getCurrencySymbol(String? currencyCode) {
+    if (currencyCode == null || currencyCode.trim().isEmpty) return '£';
+    switch (currencyCode.trim().toUpperCase()) {
+      case 'GBP':
+        return '£';
+      case 'USD':
+        return '\$';
+      case 'EUR':
+        return '€';
+      case 'INR':
+        return '₹';
+      case 'AUD':
+        return 'A\$';
+      case 'CAD':
+        return 'C\$';
+      default:
+        return currencyCode.length == 1 ? currencyCode : '$currencyCode ';
+    }
+  }
+
+  String formatCurrency(num? amount, String? currencyCode) {
+    final symbol = getCurrencySymbol(currencyCode);
+    if (amount == null) return '${symbol}0.00';
+    return '$symbol${amount.toStringAsFixed(2)}';
   }
 
   Future<void> bankList() async {

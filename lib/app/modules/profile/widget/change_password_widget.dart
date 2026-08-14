@@ -57,7 +57,7 @@ class ChangePasswordWidget extends GetView<ProfileController> {
                       ? Padding(
                     padding:   EdgeInsets.only(top: 4, left: 5),
                     child: Text(controller.oldPasswordError.value,
-                        style:   TextStyle(fontSize: 12, color: AppColors.error)),
+                        style: AppTextStyles.error),
                   )
                       :   SizedBox.shrink()),
                     SizedBox(height: 12),
@@ -88,7 +88,7 @@ class ChangePasswordWidget extends GetView<ProfileController> {
                       ? Padding(
                     padding:   EdgeInsets.only(top: 4, left: 5),
                     child: Text(controller.newPasswordError.value,
-                        style:   TextStyle(fontSize: 12, color: AppColors.error)),
+                        style: AppTextStyles.error),
                   )
                       :   SizedBox.shrink()),
                     SizedBox(height: 12),
@@ -119,7 +119,7 @@ class ChangePasswordWidget extends GetView<ProfileController> {
                       ? Padding(
                     padding:   EdgeInsets.only(top: 4, left: 5),
                     child: Text(controller.confirmPasswordError.value,
-                        style:   TextStyle(fontSize: 12, color: AppColors.error)),
+                        style: AppTextStyles.error),
                   )
                       :   SizedBox.shrink()),
                     SizedBox(height: 30),

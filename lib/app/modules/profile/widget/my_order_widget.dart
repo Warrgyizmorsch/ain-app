@@ -56,7 +56,7 @@ class MyOrdersWidget extends StatelessWidget {
                               padding: const EdgeInsets.all(32.0),
                               child: Text(
                                 'No recent orders found.',
-                                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                                style: TextStyle(fontFamily: FontFamily.regular, color: AppColors.textSecondary, fontSize: 16),
                               ),
                             ),
                           );
@@ -199,6 +199,7 @@ class _TabItem extends StatelessWidget {
         child: Text(
           title,
           style: TextStyle(
+            fontFamily: FontFamily.regular,
             fontSize: 12,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             color: isActive ? AppColors.primaryPurple : AppColors.textSecondary,
@@ -303,6 +304,7 @@ class _OrderTile extends StatelessWidget {
                       Text(
                         'Order $orderId',
                         style: TextStyle(
+                          fontFamily: FontFamily.regular,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -312,6 +314,7 @@ class _OrderTile extends StatelessWidget {
                       Text(
                         date,
                         style: TextStyle(
+                          fontFamily: FontFamily.regular,
                           fontSize: 12,
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
@@ -329,6 +332,7 @@ class _OrderTile extends StatelessWidget {
                   child: Text(
                     statusText,
                     style: TextStyle(
+                      fontFamily: FontFamily.regular,
                       color: statusColor,
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -362,6 +366,7 @@ class _OrderTile extends StatelessWidget {
                       Text(
                         serviceName,
                         style: TextStyle(
+                          fontFamily: FontFamily.regular,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -373,6 +378,7 @@ class _OrderTile extends StatelessWidget {
                       Text(
                         '1 Year Subscription',
                         style: TextStyle(
+                          fontFamily: FontFamily.regular,
                           fontSize: 12,
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
@@ -384,6 +390,7 @@ class _OrderTile extends StatelessWidget {
                 Text(
                   price,
                   style: TextStyle(
+                    fontFamily: FontFamily.regular,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -407,6 +414,7 @@ class _OrderTile extends StatelessWidget {
                     Text(
                       'Total Amount',
                       style: TextStyle(
+                        fontFamily: FontFamily.regular,
                         fontSize: 11,
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
@@ -416,6 +424,7 @@ class _OrderTile extends StatelessWidget {
                     Text(
                       price,
                       style: TextStyle(
+                        fontFamily: FontFamily.regular,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primaryPurple,
@@ -437,6 +446,7 @@ class _OrderTile extends StatelessWidget {
                       Text(
                         'View Details',
                         style: TextStyle(
+                          fontFamily: FontFamily.regular,
                           color: AppColors.primaryPurple,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
@@ -485,6 +495,7 @@ class _SupportBanner extends StatelessWidget {
                 Text(
                   'Need help with your order?',
                   style: TextStyle(
+                    fontFamily: FontFamily.regular,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -494,6 +505,7 @@ class _SupportBanner extends StatelessWidget {
                 Text(
                   'Our support team is here to help you.',
                   style: TextStyle(
+                    fontFamily: FontFamily.regular,
                     fontSize: 12,
                     color: AppColors.textSecondary,
                   ),
@@ -515,7 +527,7 @@ class _SupportBanner extends StatelessWidget {
             ),
             child: Text(
               'Contact Support',
-              style: TextStyle(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w600),
+              style: TextStyle(fontFamily: FontFamily.regular, color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
         ],

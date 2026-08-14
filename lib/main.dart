@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'app/common/constant/font_family.dart';
 import 'app/common/widget/no_internet/no_internet_widget.dart';
 import 'app/core/utils/bindlings/app_bindling.dart';
 import 'app/routes/app_pages.dart';
@@ -33,14 +34,16 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
 
         initialBinding: AppBinding(),
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData(
+          fontFamily: FontFamily.regular,
+          brightness: Brightness.light,
           scaffoldBackgroundColor: const Color(0xFFF6F5F5),
           cardColor: const Color(0xFFFAFAFA),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
             fillColor: const Color(0xFFFAFAFA),
-            hintStyle: const TextStyle(color: Color(0xFFBDC3C7)),
-            labelStyle: const TextStyle(color: Color(0xFF8892A4)),
+            hintStyle: const TextStyle(color: Color(0xFFBDC3C7), fontFamily: FontFamily.regular),
+            labelStyle: const TextStyle(color: Color(0xFF8892A4), fontFamily: FontFamily.regular),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: Color(0xFFE2E6F0)),
@@ -55,14 +58,16 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        darkTheme: ThemeData.dark().copyWith(
+        darkTheme: ThemeData(
+          fontFamily: FontFamily.regular,
+          brightness: Brightness.dark,
           scaffoldBackgroundColor: const Color(0xFF1A1A24),
           cardColor: const Color(0xFF1E1E1E),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
             fillColor: const Color(0xFF1E1E1E),
-            hintStyle: const TextStyle(color: Color(0xFF5B626A)),
-            labelStyle: const TextStyle(color: Color(0xFFAAB4C3)),
+            hintStyle: const TextStyle(color: Color(0xFF5B626A), fontFamily: FontFamily.regular),
+            labelStyle: const TextStyle(color: Color(0xFFAAB4C3), fontFamily: FontFamily.regular),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: Color(0xFF2D3243)),

@@ -27,7 +27,7 @@ class ImageConstant {
   static const String onboarding3 =
       '${onboardingPath}onboarding3.png';
   static const String loginOnboarding3 =
-      '${onboardingPath}login_onboarding.webp';
+      '${onboardingPath}login_onboarding.png';
   static const String loginBackground = '${imagesPath}login_background.png';
   static const String signupBackground = '${imagesPath}signup_background.png';
   static const String facebookIcon = '${iconPath}facebook_icon.png';

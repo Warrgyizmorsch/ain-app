@@ -83,7 +83,9 @@ class LoginView extends GetView<LoginController> {
                               Future.delayed(
                                 const Duration(milliseconds: 200),
                                 () {
-                                  controller.showDropdown.value = false;
+                                  if (Get.isRegistered<LoginController>()) {
+                                    Get.find<LoginController>().showDropdown.value = false;
+                                  }
                                 },
                               );
                             }

@@ -1,10 +1,6 @@
 import '../../../common/constant/app_imports.dart';
-import '../../home/widget/apa_generator_view.dart';
-import '../../home/widget/dissertation_planner_view.dart';
 import '../../home/widget/grade_calculator_view.dart';
 import '../../home/widget/notifications_view.dart';
-import '../../home/widget/plagiarism_checker_view.dart';
-import '../../home/widget/reference_generator_view.dart';
 import '../../home/widget/word_counter_view.dart';
 
 class ResourcesView extends StatelessWidget {
@@ -58,7 +54,7 @@ class ResourcesView extends StatelessWidget {
 
               // --- Quick Tools Header ---
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
                     'Quick Tools',
@@ -68,22 +64,7 @@ class ResourcesView extends StatelessWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      'See All',
-                      style: TextStyle(
-                        color: AppColors.primaryPurple,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
+
                 ],
               ),
 
@@ -105,20 +86,20 @@ class ResourcesView extends StatelessWidget {
                     iconBgColor: AppColors.primaryPurple.withValues(alpha: 0.15),
                     onTap: () => Get.to(() => const GradeCalculatorView()),
                   ),
-                  _ToolCard(
-                    icon: Icons.assignment_outlined,
-                    label: 'APA\nGenerator',
-                    iconColor: AppColors.primaryPurple,
-                    iconBgColor: AppColors.primaryPurple.withValues(alpha: 0.15),
-                    onTap: () => Get.to(() => const ApaGeneratorView()),
-                  ),
-                  _ToolCard(
-                    icon: Icons.plagiarism_outlined,
-                    label: 'Plagiarism\nChecker',
-                    iconColor: AppColors.statusGreen,
-                    iconBgColor: AppColors.statusGreen.withValues(alpha: 0.15),
-                    onTap: () => Get.to(() => const PlagiarismCheckerView()),
-                  ),
+                  // _ToolCard(
+                  //   icon: Icons.assignment_outlined,
+                  //   label: 'APA\nGenerator',
+                  //   iconColor: AppColors.primaryPurple,
+                  //   iconBgColor: AppColors.primaryPurple.withValues(alpha: 0.15),
+                  //   onTap: () => Get.to(() => const ApaGeneratorView()),
+                  // ),
+                  // _ToolCard(
+                  //   icon: Icons.plagiarism_outlined,
+                  //   label: 'Plagiarism\nChecker',
+                  //   iconColor: AppColors.statusGreen,
+                  //   iconBgColor: AppColors.statusGreen.withValues(alpha: 0.15),
+                  //   onTap: () => Get.to(() => const PlagiarismCheckerView()),
+                  // ),
                   _ToolCard(
                     icon: Icons.text_snippet_outlined,
                     label: 'Word\nCounter',
@@ -126,20 +107,20 @@ class ResourcesView extends StatelessWidget {
                     iconBgColor: AppColors.primaryPurple.withValues(alpha: 0.15),
                     onTap: () => Get.to(() => const WordCounterView()),
                   ),
-                  _ToolCard(
-                    icon: Icons.format_quote_outlined,
-                    label: 'Reference\nGenerator',
-                    iconColor: AppColors.secondary,
-                    iconBgColor: AppColors.secondary.withValues(alpha: 0.15),
-                    onTap: () => Get.to(() => const ReferenceGeneratorView()),
-                  ),
-                  _ToolCard(
-                    icon: Icons.event_note_outlined,
-                    label: 'Dissertation\nPlanner',
-                    iconColor: AppColors.statusGreen,
-                    iconBgColor: AppColors.statusGreen.withValues(alpha: 0.15),
-                    onTap: () => Get.to(() => const DissertationPlannerView()),
-                  ),
+                  // _ToolCard(
+                  //   icon: Icons.format_quote_outlined,
+                  //   label: 'Reference\nGenerator',
+                  //   iconColor: AppColors.secondary,
+                  //   iconBgColor: AppColors.secondary.withValues(alpha: 0.15),
+                  //   onTap: () => Get.to(() => const ReferenceGeneratorView()),
+                  // ),
+                  // _ToolCard(
+                  //   icon: Icons.event_note_outlined,
+                  //   label: 'Dissertation\nPlanner',
+                  //   iconColor: AppColors.statusGreen,
+                  //   iconBgColor: AppColors.statusGreen.withValues(alpha: 0.15),
+                  //   onTap: () => Get.to(() => const DissertationPlannerView()),
+                  // ),
                 ],
               ),
 

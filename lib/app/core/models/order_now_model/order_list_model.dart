@@ -38,7 +38,8 @@ class OrderData {
           .map((i) => Lead.fromJson(i))
           .toList()
           : [],
-      summary: json['summary'] != null ? Summary.fromJson(json['summary']) : null,
+      summary:
+      json['summary'] != null ? Summary.fromJson(json['summary']) : null,
     );
   }
 
@@ -67,6 +68,8 @@ class ConfirmedOrder {
   final String? amount;
   final String? receivedAmount;
   final dynamic dueAmount;
+  final int? timesPaidCount;
+  final List<PaymentHistory>? paymentHistory;
   final String? createdAt;
   final int? writerId;
   final Writer? writer;
@@ -89,6 +92,8 @@ class ConfirmedOrder {
     this.amount,
     this.receivedAmount,
     this.dueAmount,
+    this.timesPaidCount,
+    this.paymentHistory,
     this.createdAt,
     this.writerId,
     this.writer,
@@ -113,6 +118,12 @@ class ConfirmedOrder {
       amount: json['amount']?.toString(),
       receivedAmount: json['received_amount']?.toString(),
       dueAmount: json['due_amount'],
+      timesPaidCount: json['times_paid_count'],
+      paymentHistory: json['payment_history'] != null
+          ? (json['payment_history'] as List)
+          .map((e) => PaymentHistory.fromJson(e))
+          .toList()
+          : [],
       createdAt: json['created_at'],
       writerId: json['writer_id'],
       writer: json['writer'] != null ? Writer.fromJson(json['writer']) : null,
@@ -141,6 +152,8 @@ class ConfirmedOrder {
     'amount': amount,
     'received_amount': receivedAmount,
     'due_amount': dueAmount,
+    'times_paid_count': timesPaidCount,
+    'payment_history': paymentHistory?.map((e) => e.toJson()).toList(),
     'created_at': createdAt,
     'writer_id': writerId,
     'writer': writer?.toJson(),
@@ -168,6 +181,7 @@ class Lead {
   final int? isAppLead;
   final int? isConverted;
   final dynamic convertedAt;
+  final List<PaymentHistory>? paymentHistory;
   final String? createdAt;
   final String? subject;
   final int? writerId;
@@ -194,6 +208,7 @@ class Lead {
     this.isAppLead,
     this.isConverted,
     this.convertedAt,
+    this.paymentHistory,
     this.createdAt,
     this.subject,
     this.writerId,
@@ -222,6 +237,11 @@ class Lead {
       isAppLead: json['is_app_lead'],
       isConverted: json['is_converted'],
       convertedAt: json['converted_at'],
+      paymentHistory: json['payment_history'] != null
+          ? (json['payment_history'] as List)
+          .map((e) => PaymentHistory.fromJson(e))
+          .toList()
+          : [],
       createdAt: json['created_at'],
       subject: json['subject'],
       writerId: json['writer_id'],
@@ -255,12 +275,58 @@ class Lead {
       'is_app_lead': isAppLead,
       'is_converted': isConverted,
       'converted_at': convertedAt,
+      'payment_history': paymentHistory?.map((e) => e.toJson()).toList(),
       'created_at': createdAt,
       'subject': subject,
       'writer_id': writerId,
       'writer': writer?.toJson(),
       'images': images,
       'files': files,
+    };
+  }
+}
+
+// ---- NEW CLASS ADDED ----
+class PaymentHistory {
+  final int? paymentId;
+  final dynamic paidAmount;
+  final String? paymentDate;
+  final String? paymentMethod;
+  final String? payeeName;
+  final String? accountStatus;
+  final String? createdAt;
+
+  PaymentHistory({
+    this.paymentId,
+    this.paidAmount,
+    this.paymentDate,
+    this.paymentMethod,
+    this.payeeName,
+    this.accountStatus,
+    this.createdAt,
+  });
+
+  factory PaymentHistory.fromJson(Map<String, dynamic> json) {
+    return PaymentHistory(
+      paymentId: json['payment_id'],
+      paidAmount: json['paid_amount'],
+      paymentDate: json['payment_date'],
+      paymentMethod: json['payment_method'],
+      payeeName: json['payee_name'],
+      accountStatus: json['account_status'],
+      createdAt: json['created_at'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'payment_id': paymentId,
+      'paid_amount': paidAmount,
+      'payment_date': paymentDate,
+      'payment_method': paymentMethod,
+      'payee_name': payeeName,
+      'account_status': accountStatus,
+      'created_at': createdAt,
     };
   }
 }

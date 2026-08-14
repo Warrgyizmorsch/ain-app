@@ -3,13 +3,10 @@ import 'package:get/get.dart';
 
 import '../../services/theme_service.dart';
 
-// Make sure to import your ThemeService here
-// import 'path/to/your/theme_service.dart';
 
 class AppColors {
   AppColors._();
 
-  // ── Theme Checker ──────────────────────────────────────────────────────────
   static bool get _isDarkMode {
     if (Get.isRegistered<ThemeService>()) {
       return ThemeService.to.isDarkMode;
@@ -17,7 +14,6 @@ class AppColors {
     return false;
   }
 
-  // ── Absolute Colors (Never change based on theme) ──────────────────────────
   static const Color transparent = Colors.transparent;
   static const Color white       = Color(0xFFFFFFFF);
   static const Color white70     = Colors.white70;
@@ -93,11 +89,10 @@ class AppColors {
   static Color get priceDivider => _isDarkMode ? const Color(0xFF2C3E50) : const Color(0xFFD6E6F7);
 
   // ── Gradients ──────────────────────────────────────────────────────────────
-  // Because the primary/secondary colors are getters, these gradients MUST also be getters
   static LinearGradient get primaryGradient => LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
-    colors: [primary, secondary], // Automatically updates based on theme
+    colors: [primary, secondary],
   );
 
   static LinearGradient get discountGradient => LinearGradient(

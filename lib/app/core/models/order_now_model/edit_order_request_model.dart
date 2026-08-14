@@ -13,6 +13,9 @@ class EditOrderRequest {
   String? expertName;
   bool? useWallet;
   String? walletAmount;
+  String? couponCode;
+  String? orderAmount;
+  String? discountAmount;
 
   EditOrderRequest({
     required this.orderId,
@@ -29,6 +32,9 @@ class EditOrderRequest {
     this.expertName,
     this.useWallet,
     this.walletAmount,
+    this.couponCode,
+    this.orderAmount,
+    this.discountAmount,
   });
 
   Map<String, String> toFields() {
@@ -55,6 +61,15 @@ class EditOrderRequest {
     if (useWallet == true) {
       fields['use_wallet'] = '1';
       fields['wallet_amount'] = walletAmount ?? '0';
+    }
+    if (couponCode != null && couponCode!.isNotEmpty) {
+      fields['coupon_code'] = couponCode!;
+    }
+    if (orderAmount != null && orderAmount!.isNotEmpty) {
+      fields['order_amount'] = orderAmount!;
+    }
+    if (discountAmount != null && discountAmount!.isNotEmpty) {
+      fields['discount_amount'] = discountAmount!;
     }
     return fields;
   }

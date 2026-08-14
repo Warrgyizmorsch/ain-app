@@ -16,7 +16,7 @@ class StorageService extends GetxService {
   static const String _keyRememberMe = 'remember_me';
   static const String _themeKey = 'theme_mode';
   static const String _keyAccountsMap = 'saved_accounts_map';
-
+  static const String _chatSessionKey = 'ain_chat_session';
   /// Initializes the SharedPreferences instance
   Future<StorageService> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -122,6 +122,17 @@ class StorageService extends GetxService {
 
   Future<void> saveUser(UserData user) async {
     await _prefs.setString(_userKey, jsonEncode(user));
+  }
+  String? getChatSession() {
+    return _prefs.getString(_chatSessionKey);
+  }
+
+  Future<void> saveChatSession(String sessionId) async {
+    await _prefs.setString(_chatSessionKey, sessionId);
+  }
+
+  Future<void> clearChatSession() async {
+    await _prefs.remove(_chatSessionKey);
   }
 
   /// Clears active user tokens and metadata fields during manual session logs out

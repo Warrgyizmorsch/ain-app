@@ -28,7 +28,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
     String price = "0.00";
     String dueAmount = "0.00";
 
-    Writer? assignedWriter; // <--- ADDED FULL WRITER OBJECT
+    Writer? assignedWriter;
 
     List<String> attachments = [];
 
@@ -49,8 +49,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       workType = orderData.workType ?? "N/A";
       wordCount = orderData.wordCount ?? "N/A";
       price = orderData.price ?? "0.00";
-
-      assignedWriter = orderData.writer; // <--- EXTRACT FROM LEAD
+      assignedWriter = orderData.writer;
 
       dueAmount = price;
 
@@ -65,11 +64,11 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       statusColor = status == "In Progress" ? AppColors.secondary : AppColors.success;
       progress = 1.0;
       progressText = "100%";
-
+      wordCount = orderData.wordCount??"N/A";
       workType = orderData.type ?? "N/A";
       price = orderData.amount ?? "0.00";
 
-      assignedWriter = orderData.writer; // <--- EXTRACT FROM CONFIRMED ORDER
+      assignedWriter = orderData.writer;
 
       final String s = (orderData.status ?? '').toLowerCase().trim();
       final String cs = (orderData.confirmedStatus ?? '').toLowerCase().trim();
@@ -95,9 +94,19 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       attachments.addAll(orderData.images ?? []);
     }
 
-    // Payment is pending ONLY IF order is NOT completed AND dueAmount > 0
+    List<PaymentHistory> paymentHistoryList = [];
+    int timesPaidCount = 0;
+    if (orderData is ConfirmedOrder) {
+      timesPaidCount = orderData.timesPaidCount ?? 0;
+      paymentHistoryList = orderData.paymentHistory ?? [];
+    } else if (orderData is Lead) {
+      timesPaidCount = 0;
+      paymentHistoryList = orderData.paymentHistory ?? [];
+    }
+
+    // Payment is pending IF order is NOT completed AND (dueAmount > 0 OR timesPaidCount == 0)
     double parsedDue = double.tryParse(dueAmount) ?? 0.0;
-    bool isPaymentPending = !isCompletedOrder && (parsedDue > 0);
+    bool isPaymentPending = !isCompletedOrder && (parsedDue > 0 || timesPaidCount == 0);
 
     // --- AUTO-OPEN PAYMENT DETAILS IF PENDING ---
     if (isPaymentPending) {
@@ -203,6 +212,14 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                   _buildIconDetailRow(Icons.format_list_numbered, AppStrings.pages, wordCount),
                   Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
                   _buildIconDetailRow(Icons.monetization_on_outlined, AppStrings.total, "£$price", valueColor: AppColors.textPrimary, isValueBold: true),
+                  Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1, color: AppColors.lightDivider)),
+                  _buildIconDetailRow(
+                    Icons.history,
+                    "Times Paid",
+                    timesPaidCount == 0 ? "No Payment (0)" : "$timesPaidCount Time(s)",
+                    valueColor: timesPaidCount == 0 ? AppColors.error : AppColors.success,
+                    isValueBold: true,
+                  ),
 
                   // --- DUE AMOUNT ROW ---
                   if (isPaymentPending) ...[
@@ -289,8 +306,25 @@ class OrderDetailsView extends GetView<AssignmentsController> {
 
                 const SizedBox(height: 12),
 
-                // Pass dueAmount to PaymentStatusBox instead of full price
-                _buildPaymentStatusBox(context, isPaymentPending, dueAmount, orderId),
+                // Pass dueAmount & timesPaidCount to PaymentStatusBox
+                _buildPaymentStatusBox(context, isPaymentPending, dueAmount, orderId, timesPaidCount),
+                const SizedBox(height: 12),
+
+                // --- PAYMENT HISTORY SECTION ---
+                _buildSectionTitle("Payment History"),
+                if (paymentHistoryList.isNotEmpty)
+                  ...paymentHistoryList.map((ph) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: _buildOrderPaymentHistoryCard(ph),
+                  ))
+                else
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
+                    child: Text(
+                      "No payment history records found.",
+                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                    ),
+                  ),
                 const SizedBox(height: 12),
 
                 _buildSectionTitle("Help & Feedback"),
@@ -744,10 +778,18 @@ class OrderDetailsView extends GetView<AssignmentsController> {
     );
   }
 
-  Widget _buildPaymentStatusBox(BuildContext context, bool isPending, String amount, String orderId) {
-    Color bgColor = isPending ? AppColors.error.withValues(alpha:0.05) : AppColors.success.withValues(alpha:0.05);
-    Color borderColor = isPending ? AppColors.error.withValues(alpha:0.2) : AppColors.success.withValues(alpha:0.2);
-    Color textColor = isPending ? AppColors.error : AppColors.success;
+  Widget _buildPaymentStatusBox(BuildContext context, bool isPending, String amount, String orderId, int timesPaidCount) {
+    bool noPayment = isPending || timesPaidCount == 0;
+    Color bgColor = noPayment ? AppColors.error.withValues(alpha:0.05) : AppColors.success.withValues(alpha:0.05);
+    Color borderColor = noPayment ? AppColors.error.withValues(alpha:0.2) : AppColors.success.withValues(alpha:0.2);
+    Color textColor = noPayment ? AppColors.error : AppColors.success;
+
+    String statusLabel = "PAID";
+    if (timesPaidCount == 0) {
+      statusLabel = "NO PAYMENT";
+    } else if (isPending) {
+      statusLabel = "PENDING";
+    }
 
     return Column(
       children: [
@@ -763,23 +805,32 @@ class OrderDetailsView extends GetView<AssignmentsController> {
             children: [
               Row(
                 children: [
-                  Icon(isPending ? Icons.pending_actions : Icons.verified, color: textColor, size: 18),
+                  Icon(noPayment ? Icons.pending_actions : Icons.verified, color: textColor, size: 18),
                   const SizedBox(width: 8),
-                  Text("Payment Status", style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.bold, fontSize: AppFontSize.s13)),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Payment Status", style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.bold, fontSize: AppFontSize.s13)),
+                      Text(
+                        timesPaidCount == 0 ? "No payments made yet" : "$timesPaidCount payment(s) completed",
+                        style: AppTextStyles.caption.copyWith(fontSize: 11, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(color: AppColors.white.withValues(alpha:0.8), borderRadius: BorderRadius.circular(6)),
                 child: Text(
-                  isPending ? "PENDING" : "PAID",
+                  statusLabel,
                   style: AppTextStyles.stepBadge.copyWith(color: textColor, letterSpacing: 0.3, fontSize: AppFontSize.s11),
                 ),
               ),
             ],
           ),
         ),
-        if (isPending) ...[
+        if (noPayment) ...[
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
@@ -790,6 +841,152 @@ class OrderDetailsView extends GetView<AssignmentsController> {
           )
         ]
       ],
+    );
+  }
+
+  Widget _buildOrderPaymentHistoryCard(PaymentHistory item) {
+    String status = item.accountStatus ?? "Pending";
+    Color statusColor = AppColors.warning;
+    Color statusBgColor = AppColors.warning.withValues(alpha: 0.12);
+
+    final sLower = status.toLowerCase();
+    if (sLower.contains('approved') || sLower.contains('complete') || sLower.contains('success')) {
+      statusColor = AppColors.success;
+      statusBgColor = AppColors.success.withValues(alpha: 0.12);
+    } else if (sLower.contains('reject') || sLower.contains('fail') || sLower.contains('cancel')) {
+      statusColor = AppColors.error;
+      statusBgColor = AppColors.error.withValues(alpha: 0.12);
+    }
+
+    String amountStr = "0.00";
+    if (item.paidAmount != null) {
+      amountStr = item.paidAmount.toString();
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.bgLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.lightDivider),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.lightShadow,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.receipt_long, color: AppColors.primaryPurple, size: 18),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    item.paymentId != null ? "Payment #${item.paymentId}" : "Payment Record",
+                    style: AppTextStyles.subtitle.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: AppFontSize.s13,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusBgColor,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  status.toUpperCase(),
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "£$amountStr",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryPurple,
+                ),
+              ),
+              if (item.paymentMethod != null && item.paymentMethod!.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.tagBg,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    item.paymentMethod!,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          if ((item.paymentDate != null && item.paymentDate!.isNotEmpty) ||
+              (item.payeeName != null && item.payeeName!.isNotEmpty)) ...[
+            const SizedBox(height: 8),
+            Divider(height: 1, color: AppColors.lightDivider),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (item.paymentDate != null && item.paymentDate!.isNotEmpty)
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        item.paymentDate!,
+                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                if (item.payeeName != null && item.payeeName!.isNotEmpty)
+                  Row(
+                    children: [
+                      Icon(Icons.person_outline, size: 12, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        item.payeeName!,
+                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
     );
   }
 
