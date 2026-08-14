@@ -40,8 +40,8 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       deadline = orderData.deadline ?? "N/A";
       status = "Pending";
       statusColor = AppColors.warning;
-      progress = 0.3;
-      progressText = "30%";
+      progress = orderData.progressPercentage != null ? (orderData.progressPercentage! / 100.0) : 0.0;
+      progressText = "${orderData.progressPercentage?.toString()}%" ;
       instructions = orderData.requirements ?? instructions;
 
       customerMobile = "${orderData.countrycode ?? ''} ${orderData.mobile ?? ''}".trim();
@@ -49,6 +49,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       workType = orderData.workType ?? "N/A";
       wordCount = orderData.wordCount ?? "N/A";
       price = orderData.price ?? "0.00";
+
       assignedWriter = orderData.writer;
 
       dueAmount = price;
@@ -62,9 +63,10 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       deadline = orderData.deliveryDate ?? "N/A";
       status = orderData.status ?? "Completed";
       statusColor = status == "In Progress" ? AppColors.secondary : AppColors.success;
-      progress = 1.0;
-      progressText = "100%";
-      wordCount = orderData.wordCount??"N/A";
+
+      progress = orderData.progress != null ? (orderData.progress! / 100.0) : 0.0;
+      progressText = "${orderData.progress?.toString()}%" ;
+
       workType = orderData.type ?? "N/A";
       price = orderData.amount ?? "0.00";
 
@@ -105,10 +107,10 @@ class OrderDetailsView extends GetView<AssignmentsController> {
     }
 
     // Payment is pending IF order is NOT completed AND (dueAmount > 0 OR timesPaidCount == 0)
+
     double parsedDue = double.tryParse(dueAmount) ?? 0.0;
     bool isPaymentPending = !isCompletedOrder && (parsedDue > 0 || timesPaidCount == 0);
 
-    // --- AUTO-OPEN PAYMENT DETAILS IF PENDING ---
     if (isPaymentPending) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showPaymentDetailsSheet(context, dueAmount, orderId);

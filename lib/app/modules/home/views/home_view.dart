@@ -26,6 +26,10 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
+    final assignController = Get.isRegistered<AssignmentsController>()
+        ? Get.find<AssignmentsController>()
+        : Get.put(AssignmentsController());
+
     return Obx(() => Scaffold(
       backgroundColor: AppColors.appBackground,
       drawer: const AppDrawer(),
@@ -199,98 +203,111 @@ class HomeView extends GetView<HomeController> {
               ),
               const SizedBox(height: 32),
 
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      spreadRadius: 2,
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppStrings.overallProgress,
-                          style: AppTextStyles.subtitle.copyWith(
-                            color: AppColors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          AppStrings.allAssignments,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.white70,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.white,
-                            foregroundColor: AppColors.primary,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 10,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            AppStrings.viewDetails,
-                            style: AppTextStyles.button.copyWith(
-                              color: AppColors.primary,
-                              fontSize: AppFontSize.s13,
-                              fontWeight: FontWeight.w600, // Capped at w600
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      width: 80,
-                      height: 80,
-                      child: Stack(
-                        fit: StackFit.expand,
+              Obx(() {
+                final progressPercentage = assignController.orderResponse.value?.overallProgressPercentage ??
+                    assignController.orderResponse.value?.data?.overallProgressPercentage ??
+                    0;
+                final double progressValue = (progressPercentage / 100.0).clamp(0.0, 1.0);
+
+                return Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        spreadRadius: 2,
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircularProgressIndicator(
-                            value: 0.78,
-                            strokeWidth: 8,
-                            backgroundColor: AppColors.white.withValues(
-                              alpha: 0.2,
+                          Text(
+                            AppStrings.overallProgress,
+                            style: AppTextStyles.subtitle.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w600,
                             ),
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                              AppColors.warning,
-                            ),
-                            strokeCap: StrokeCap.round,
                           ),
-                          Center(
+                          const SizedBox(height: 4),
+                          Text(
+                            AppStrings.allAssignments,
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.white70,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () {
+                              Get.until(
+                                (route) =>
+                                    route.settings.name == Routes.BOTTOM_NAV_BAR,
+                              );
+                              Get.find<BottomNavController>().changeTab(2);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.white,
+                              foregroundColor: AppColors.primary,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                             child: Text(
-                              '78%',
-                              style: AppTextStyles.titleLarge.copyWith(
-                                color: AppColors.white,
+                              AppStrings.viewDetails,
+                              style: AppTextStyles.button.copyWith(
+                                color: AppColors.primary,
+                                fontSize: AppFontSize.s13,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                      SizedBox(
+                        width: 80,
+                        height: 80,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            CircularProgressIndicator(
+                              value: progressValue,
+                              strokeWidth: 8,
+                              backgroundColor: AppColors.white.withValues(
+                                alpha: 0.2,
+                              ),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                AppColors.warning,
+                              ),
+                              strokeCap: StrokeCap.round,
+                            ),
+                            Center(
+                              child: Text(
+                                '$progressPercentage%',
+                                style: AppTextStyles.titleLarge.copyWith(
+                                  color: AppColors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
 
               const SizedBox(height: 32),
 
@@ -793,12 +810,21 @@ class AppDrawer extends StatelessWidget {
                       onPressed: () => Get.back(),
                     ),
                   ),
-                  Image.asset(
-                    ImageConstant.appLogo,
-                    width: Get.width * 0.55,
-                    height: 80,
-                    fit: BoxFit
-                        .contain, // Ensures the logo scales nicely without getting cropped
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Image.asset(
+                      ImageConstant.appLogo,
+                      width: Get.width * 0.45,
+                      height: 54,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ],
               ),
@@ -903,7 +929,18 @@ class AppDrawer extends StatelessWidget {
                     _DrawerItem(
                       icon: Icons.help_outline,
                       label: AppStrings.supportCenter,
-                      onTap: () => Get.back(),
+                      onTap: () {
+                        Get.back();
+                        Get.find<HomeController>().openLiveChat();
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Icons.headset_mic_outlined,
+                      label: AppStrings.contactUs,
+                      onTap: () {
+                        Get.back();
+                        Get.find<HomeController>().openLiveChat();
+                      },
                     ),
                   ],
                 ),
@@ -941,7 +978,10 @@ class AppDrawer extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           ElevatedButton(
-                            onPressed: () => Get.back(),
+                            onPressed: () {
+                              Get.back();
+                              Get.find<HomeController>().openLiveChat();
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.warning,
                               elevation: 0,

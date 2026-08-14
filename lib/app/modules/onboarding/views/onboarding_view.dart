@@ -455,26 +455,28 @@ class _BottomControls extends GetView<OnboardingController> {
             ),
           )),
           const SizedBox(height: 20),
-          Row(
+          Obx(() => Row(
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: controller.skipOnboarding,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: BorderSide(
-                        color: AppColors.lightDivider, width: 1.5),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+              if (controller.currentIndex.value > 0) ...[
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: controller.skipOnboarding,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(
+                          color: AppColors.lightDivider, width: 1.5),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: Text('Skip',
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary)),
                   ),
-                  child: Text('Skip',
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary)),
                 ),
-              ),
-              const SizedBox(width: 16),
+                const SizedBox(width: 16),
+              ],
               Expanded(
                 child: AppButton(
                   title: 'Next',
@@ -482,7 +484,7 @@ class _BottomControls extends GetView<OnboardingController> {
                 ),
               ),
             ],
-          ),
+          )),
         ],
       ),
     );

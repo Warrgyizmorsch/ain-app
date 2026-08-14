@@ -31,24 +31,6 @@ class ResourcesView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- Search Bar ---
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.bgLight,
-                  borderRadius: BorderRadius.circular(30), // Pill-shaped
-                  border: Border.all(color: AppColors.lightDivider),
-                ),
-                child: TextField(
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
-                  decoration: InputDecoration(
-                    hintText: 'Search resources or tools...',
-                    hintStyle: TextStyle(color: AppColors.lightTextHint, fontSize: 15),
-                    prefixIcon: Icon(Icons.search, color: AppColors.lightTextHint),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                  ),
-                ),
-              ),
 
               const SizedBox(height: 24),
 
@@ -86,20 +68,7 @@ class ResourcesView extends StatelessWidget {
                     iconBgColor: AppColors.primaryPurple.withValues(alpha: 0.15),
                     onTap: () => Get.to(() => const GradeCalculatorView()),
                   ),
-                  // _ToolCard(
-                  //   icon: Icons.assignment_outlined,
-                  //   label: 'APA\nGenerator',
-                  //   iconColor: AppColors.primaryPurple,
-                  //   iconBgColor: AppColors.primaryPurple.withValues(alpha: 0.15),
-                  //   onTap: () => Get.to(() => const ApaGeneratorView()),
-                  // ),
-                  // _ToolCard(
-                  //   icon: Icons.plagiarism_outlined,
-                  //   label: 'Plagiarism\nChecker',
-                  //   iconColor: AppColors.statusGreen,
-                  //   iconBgColor: AppColors.statusGreen.withValues(alpha: 0.15),
-                  //   onTap: () => Get.to(() => const PlagiarismCheckerView()),
-                  // ),
+
                   _ToolCard(
                     icon: Icons.text_snippet_outlined,
                     label: 'Word\nCounter',
@@ -107,95 +76,13 @@ class ResourcesView extends StatelessWidget {
                     iconBgColor: AppColors.primaryPurple.withValues(alpha: 0.15),
                     onTap: () => Get.to(() => const WordCounterView()),
                   ),
-                  // _ToolCard(
-                  //   icon: Icons.format_quote_outlined,
-                  //   label: 'Reference\nGenerator',
-                  //   iconColor: AppColors.secondary,
-                  //   iconBgColor: AppColors.secondary.withValues(alpha: 0.15),
-                  //   onTap: () => Get.to(() => const ReferenceGeneratorView()),
-                  // ),
-                  // _ToolCard(
-                  //   icon: Icons.event_note_outlined,
-                  //   label: 'Dissertation\nPlanner',
-                  //   iconColor: AppColors.statusGreen,
-                  //   iconBgColor: AppColors.statusGreen.withValues(alpha: 0.15),
-                  //   onTap: () => Get.to(() => const DissertationPlannerView()),
-                  // ),
+
                 ],
               ),
 
               const SizedBox(height: 24),
 
-              // --- Bottom Upgrade Banner ---
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 6,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Upgrade Your Academic\nPerformance',
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 16,
-                              height: 1.3,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Explore our expert tools',
-                            style: TextStyle(
-                              color: AppColors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.white,
-                              foregroundColor: AppColors.primaryPurple,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              'Explore Now',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primaryPurple,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 4,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Icon(
-                          Icons.rocket_launch,
-                          color: AppColors.secondary,
-                          size: 80,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+
 
               const SizedBox(height: 80),
             ],
