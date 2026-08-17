@@ -50,9 +50,8 @@ class AssignmentsController extends GetxController {
     final allConfirmed = orderResponse.value?.data?.confirmedOrders ?? [];
 
     return allConfirmed.where((order) {
-      final isConfirmed = order.confirmedStatus?.toLowerCase() == 'confirmed';
-      final isDelivered = order.deliveryDate != null && order.deliveryDate!.toString().trim().isNotEmpty;
-      return isConfirmed && isDelivered;
+      final s = (order.status ?? '').toLowerCase().trim();
+      return s == 'completed' || s == 'delivered';
     }).toList();
   }
 
@@ -60,9 +59,8 @@ class AssignmentsController extends GetxController {
     final allConfirmed = orderResponse.value?.data?.confirmedOrders ?? [];
 
     final activeConfirmed = allConfirmed.where((order) {
-      final isConfirmed = order.confirmedStatus?.toLowerCase() == 'confirmed';
-      final isNotDelivered = order.deliveryDate == null || order.deliveryDate!.toString().trim().isEmpty;
-      return isConfirmed && isNotDelivered;
+      final s = (order.status ?? '').toLowerCase().trim();
+      return s != 'completed' && s != 'delivered' && s != 'cancelled';
     }).toList();
 
     return [...nonConfirmedLeads, ...activeConfirmed];
@@ -73,16 +71,30 @@ class AssignmentsController extends GetxController {
 
     switch (selectedFilter.value) {
       case OrderFilter.completed:
-        return all.where((item) =>
-        item is ConfirmedOrder &&
-            item.deliveryDate != null &&
-            item.deliveryDate!.trim().isNotEmpty).toList();
+        return all.where((item) {
+          if (item is ConfirmedOrder) {
+            final s = (item.status ?? '').toLowerCase().trim();
+            return s == 'completed' || s == 'delivered';
+          }
+          return false;
+        }).toList();
       case OrderFilter.inProgress:
-        return all.where((item) =>
-        item is ConfirmedOrder &&
-            (item.deliveryDate == null || item.deliveryDate!.trim().isEmpty)).toList();
+        return all.where((item) {
+          if (item is ConfirmedOrder) {
+            final s = (item.status ?? '').toLowerCase().trim();
+            return s != 'completed' && s != 'delivered' && s != 'cancelled';
+          }
+          return true;
+        }).toList();
       case OrderFilter.pending:
-        return all.whereType<Lead>().toList();
+        return all.where((item) {
+          if (item is Lead) return true;
+          if (item is ConfirmedOrder) {
+            final s = (item.status ?? '').toLowerCase().trim();
+            return s == 'pending' || s == 'cancelled';
+          }
+          return false;
+        }).toList();
       case OrderFilter.all:
         return all;
     }

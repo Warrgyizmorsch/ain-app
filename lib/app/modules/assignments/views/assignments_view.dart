@@ -197,6 +197,9 @@ class AssignmentsView extends StatelessWidget {
         date: lead.deadline ?? "-",
         price: "£${lead.price ?? "-"}",
         status: currentStatus,
+        rawStatus: lead.confirmedStatus ?? statusText,
+        deliveryDate: lead.deadline,
+        progressPercentage: lead.progressPercentage ?? lead.progress ?? 0,
         writerName: lead.writer?.writerName,
         onTap: () {
           Get.to(() => const OrderDetailsView(), arguments: lead);
@@ -209,21 +212,31 @@ class AssignmentsView extends StatelessWidget {
   }
 
   Widget _buildConfirmedOrderItem(BuildContext context, ConfirmedOrder order, int index) {
-    final bool isDelivered = order.deliveryDate != null && order.deliveryDate!.toString().trim().isNotEmpty;
+    final String s = (order.status ?? '').toLowerCase().trim();
+    final bool isCompleted = s == 'completed' || s == 'delivered';
+    final bool isCancelled = s == 'cancelled';
 
-    OrderStatus currentStatus = isDelivered
-        ? OrderStatus.completed
-        : OrderStatus.inProgress;
+    OrderStatus currentStatus;
+    if (isCancelled) {
+      currentStatus = OrderStatus.cancelled;
+    } else if (isCompleted) {
+      currentStatus = OrderStatus.completed;
+    } else {
+      currentStatus = OrderStatus.inProgress;
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: _OrderTile(
         orderId: order.orderId?.toString() ?? "-",
         serviceName: order.title ?? order.subject ?? "-",
-        subtitle: order.moduleCode ?? (isDelivered ? "Module Complete" : "Expert Working"),
+        subtitle: order.moduleCode ?? (isCompleted ? "Module Complete" : "Expert Working"),
         date: order.deliveryDate ?? order.createdAt ?? "-",
         price: "£${order.amount ?? "-"}",
         status: currentStatus,
+        rawStatus: order.status ?? "in_progress",
+        deliveryDate: order.deliveryDate,
+        progressPercentage: order.progressPercentage ?? order.progress ?? 0,
         writerName: order.writer?.writerName,
         onTap: () {
           Get.to(() => const OrderDetailsView(), arguments: order);
@@ -547,6 +560,9 @@ class _OrderTile extends StatelessWidget {
   final String date;
   final String price;
   final OrderStatus status;
+  final String? rawStatus;
+  final String? deliveryDate;
+  final int? progressPercentage;
   final String? writerName; // <--- Added optional parameter
   final VoidCallback onTap;
   final VoidCallback? onHistoryTap;
@@ -558,6 +574,9 @@ class _OrderTile extends StatelessWidget {
     required this.date,
     required this.price,
     required this.status,
+    this.rawStatus,
+    this.deliveryDate,
+    this.progressPercentage,
     this.writerName, // <--- Added to constructor
     required this.onTap,
     this.onHistoryTap,
@@ -565,8 +584,6 @@ class _OrderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color statusColor;
-    Color statusBgColor;
     Color iconColor;
     Color iconBgColor;
     String statusText;
@@ -574,25 +591,19 @@ class _OrderTile extends StatelessWidget {
 
     switch (status) {
       case OrderStatus.completed:
-        statusColor = AppColors.statusGreen;
-        statusBgColor = AppColors.statusGreen.withValues(alpha: 0.15);
         iconColor = AppColors.statusGreen;
         iconBgColor = AppColors.statusGreen.withValues(alpha: 0.15);
         statusText = 'Completed';
         leadingIcon = Icons.assignment_turned_in_outlined;
         break;
       case OrderStatus.inProgress:
-        statusColor = AppColors.primaryPurple;
-        statusBgColor = AppColors.primaryPurple.withValues(alpha: 0.15);
         iconColor = AppColors.primaryPurple;
         iconBgColor = AppColors.primaryPurple.withValues(alpha: 0.15);
-        statusText = 'Not Completed';
+        statusText = 'In Progress';
         leadingIcon = Icons.assignment_outlined;
         break;
       case OrderStatus.cancelled:
       case OrderStatus.pending:
-        statusColor = AppColors.error;
-        statusBgColor = AppColors.error.withValues(alpha: 0.15);
         iconColor = AppColors.error;
         iconBgColor = AppColors.error.withValues(alpha: 0.15);
         statusText = status == OrderStatus.pending ? 'Pending' : 'Cancelled';
@@ -655,20 +666,8 @@ class _OrderTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusBgColor,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    statusText,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                OrderStatusBadgeWidget(
+                  status: rawStatus ?? statusText,
                 ),
               ],
             ),
@@ -676,7 +675,7 @@ class _OrderTile extends StatelessWidget {
 
           const CustomDashedDivider(),
 
-          // --- ITEM DETAILS SECTION ---
+          // --- ITEM DETAILS & PROGRESS SECTION ---
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
@@ -715,6 +714,23 @@ class _OrderTile extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      if (deliveryDate != null && deliveryDate!.trim().isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.event_outlined, size: 12, color: AppColors.textSecondary),
+                            const SizedBox(width: 4),
+                            Text(
+                              "Delivery: $deliveryDate",
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       // --- CONDITIONAL WRITER DISPLAY ---
                       if (writerName != null && writerName!.isNotEmpty) ...[
                         const SizedBox(height: 6),
@@ -740,13 +756,12 @@ class _OrderTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                Text(
-                  price,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+                const SizedBox(width: 8),
+                OrderProgressStatusWidget(
+                  status: rawStatus ?? statusText,
+                  deliveryDate: deliveryDate ?? date,
+                  progressPercentage: progressPercentage,
+                  size: 44,
                 ),
               ],
             ),

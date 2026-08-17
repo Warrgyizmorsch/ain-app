@@ -34,14 +34,17 @@ class OrderDetailsView extends GetView<AssignmentsController> {
 
     bool isCompletedOrder = false;
 
+    int? progressPercentage;
+
     if (orderData is Lead) {
       title = orderData.service ?? AppStrings.assignmentDetails;
       orderId = orderData.orderId?.toString() ?? "#0000";
       deadline = orderData.deadline ?? "N/A";
       status = "Pending";
       statusColor = AppColors.warning;
-      progress = orderData.progressPercentage != null ? (orderData.progressPercentage! / 100.0) : 0.0;
-      progressText = "${orderData.progressPercentage?.toString()}%" ;
+      progressPercentage = orderData.progressPercentage ?? orderData.progress;
+      progress = progressPercentage != null ? (progressPercentage / 100.0) : 0.0;
+      progressText = "${progressPercentage ?? 0}%" ;
       instructions = orderData.requirements ?? instructions;
 
       customerMobile = "${orderData.countrycode ?? ''} ${orderData.mobile ?? ''}".trim();
@@ -61,26 +64,32 @@ class OrderDetailsView extends GetView<AssignmentsController> {
       title = orderData.title ?? AppStrings.assignmentDetails;
       orderId = orderData.orderId?.toString() ?? "#0000";
       deadline = orderData.deliveryDate ?? "N/A";
-      status = orderData.status ?? "Completed";
-      statusColor = status == "In Progress" ? AppColors.secondary : AppColors.success;
 
-      progress = orderData.progress != null ? (orderData.progress! / 100.0) : 0.0;
-      progressText = "${orderData.progress?.toString()}%" ;
+      final String s = (orderData.status ?? '').toLowerCase().trim();
+      final String cs = (orderData.confirmedStatus ?? '').toLowerCase().trim();
+
+      if (s == 'completed' || s == 'delivered' || s == 'done' || s == 'finish' || s == 'finished' ||
+          cs == 'delivered') {
+        isCompletedOrder = true;
+      }
+
+      status = orderData.status ?? (isCompletedOrder ? "Completed" : "In Progress");
+      if (isCompletedOrder) {
+        statusColor = AppColors.success;
+      } else if (s == 'cancelled') {
+        statusColor = AppColors.error;
+      } else {
+        statusColor = AppColors.secondary;
+      }
+
+      progressPercentage = orderData.progressPercentage ?? orderData.progress;
+      progress = progressPercentage != null ? (progressPercentage / 100.0) : 0.0;
+      progressText = "${progressPercentage ?? 0}%" ;
 
       workType = orderData.type ?? "N/A";
       price = orderData.amount ?? "0.00";
 
       assignedWriter = orderData.writer;
-
-      final String s = (orderData.status ?? '').toLowerCase().trim();
-      final String cs = (orderData.confirmedStatus ?? '').toLowerCase().trim();
-      final String dd = (orderData.deliveryDate ?? '').toLowerCase().trim();
-
-      if (s == 'completed' || s == 'delivered' || s == 'done' || s == 'finish' || s == 'finished' ||
-          cs == 'completed' || cs == 'delivered' ||
-          (dd.isNotEmpty && dd != 'n/a')) {
-        isCompletedOrder = true;
-      }
 
       if (isCompletedOrder) {
         dueAmount = "0.00";
@@ -197,7 +206,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTopCard(title, orderId, deadline, status, statusColor, progress, progressText),
+                _buildTopCard(title, orderId, deadline, status, statusColor, progress, progressText, progressPercentage),
                 const SizedBox(height: 12),
 
                 // --- NEW: FULL EXPERT DETAILS SECTION ---
@@ -1024,7 +1033,11 @@ class OrderDetailsView extends GetView<AssignmentsController> {
     );
   }
 
-  Widget _buildTopCard(String title, String orderId, String deadline, String status, Color statusColor, double progress, String progressText) {
+  Widget _buildTopCard(String title, String orderId, String deadline, String status, Color statusColor, double progress, String progressText, int? progressPercentage) {
+    final bool overdue = isOrderOverdue(deadline, status);
+    final String effectiveStatus = overdue ? "Overdue" : status;
+    final Color effectiveStatusColor = overdue ? AppColors.error : statusColor;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.bgLight,
@@ -1057,21 +1070,17 @@ class OrderDetailsView extends GetView<AssignmentsController> {
                             const SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(color: statusColor.withValues(alpha:0.1), borderRadius: BorderRadius.circular(6)),
-                              child: Text(status, style: AppTextStyles.stepBadge.copyWith(color: statusColor, fontSize: AppFontSize.s10)),
+                              decoration: BoxDecoration(color: effectiveStatusColor.withValues(alpha:0.1), borderRadius: BorderRadius.circular(6)),
+                              child: Text(effectiveStatus, style: AppTextStyles.stepBadge.copyWith(color: effectiveStatusColor, fontSize: AppFontSize.s10)),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(
-                        height: 54, width: 54,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(height: 54, width: 54, child: CircularProgressIndicator(value: progress, strokeWidth: 5, backgroundColor: AppColors.lightDivider, color: AppColors.primary, strokeCap: StrokeCap.round)),
-                            Text(progressText, style: AppTextStyles.h1.copyWith(fontSize: AppFontSize.s12)),
-                          ],
-                        ),
+                      OrderProgressStatusWidget(
+                        status: status,
+                        deliveryDate: deadline,
+                        progressPercentage: progressPercentage,
+                        size: 54,
                       ),
                     ],
                   ),
@@ -1088,7 +1097,7 @@ class OrderDetailsView extends GetView<AssignmentsController> {
               children: [
                 Icon(Icons.info_outline, size: 14, color: AppColors.textSecondary),
                 const SizedBox(width: 6),
-                Text("Estimated completion: Tomorrow", style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: AppFontSize.s11)),
+                Text(overdue ? "Deadline has passed" : "Estimated completion: $deadline", style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: AppFontSize.s11)),
               ],
             ),
           ),

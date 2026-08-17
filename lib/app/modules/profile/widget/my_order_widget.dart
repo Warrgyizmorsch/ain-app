@@ -133,22 +133,37 @@ class MyOrdersWidget extends StatelessWidget {
     String date = '';
     String price = '0.00';
     OrderStatus status = OrderStatus.pending;
+    String? rawStatus;
+    String? deliveryDate;
+    int? progressPercentage;
 
     // Item mapping logic
     if (item is ConfirmedOrder) {
       orderId = item.orderId ?? 'Unknown';
       serviceName = item.title ?? item.subject ?? 'No Title';
       price = item.amount ?? '0.00';
+      rawStatus = item.status ?? 'in_progress';
+      deliveryDate = item.deliveryDate;
+      progressPercentage = item.progressPercentage ?? item.progress ?? 0;
 
-      final isDelivered = item.deliveryDate != null && item.deliveryDate!.trim().isNotEmpty;
-      status = isDelivered ? OrderStatus.completed : OrderStatus.inProgress;
-      date = isDelivered ? (item.deliveryDate ?? '') : (item.orderDate ?? '');
+      final String s = (item.status ?? '').toLowerCase().trim();
+      if (s == 'completed' || s == 'delivered') {
+        status = OrderStatus.completed;
+      } else if (s == 'cancelled') {
+        status = OrderStatus.cancelled;
+      } else {
+        status = OrderStatus.inProgress;
+      }
+      date = item.deliveryDate ?? item.orderDate ?? item.createdAt ?? '';
     } else if (item is Lead) {
       orderId = item.orderId ?? 'Unknown';
       serviceName = item.service ?? item.subject ?? 'No Service';
       date = item.createdAt ?? '';
       price = item.price ?? '0.00';
       status = OrderStatus.pending;
+      rawStatus = item.confirmedStatus ?? "pending";
+      deliveryDate = item.deadline;
+      progressPercentage = item.progressPercentage ?? item.progress;
     }
 
     // Default formatting if date is empty, adapt to your API's format
@@ -160,6 +175,9 @@ class MyOrdersWidget extends StatelessWidget {
       date: displayDate,
       price: price.startsWith('£') ? price : '£$price',
       status: status,
+      rawStatus: rawStatus,
+      deliveryDate: deliveryDate,
+      progressPercentage: progressPercentage,
       onTap: () {
         Get.to(() => const OrderDetailsView(), arguments: item);
       },
@@ -218,6 +236,9 @@ class _OrderTile extends StatelessWidget {
   final String date;
   final String price;
   final OrderStatus status;
+  final String? rawStatus;
+  final String? deliveryDate;
+  final int? progressPercentage;
   final VoidCallback onTap;
 
   const _OrderTile({
@@ -226,13 +247,14 @@ class _OrderTile extends StatelessWidget {
     required this.date,
     required this.price,
     required this.status,
+    this.rawStatus,
+    this.deliveryDate,
+    this.progressPercentage,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    Color statusColor;
-    Color statusBgColor;
     Color iconColor;
     Color iconBgColor;
     String statusText;
@@ -240,16 +262,12 @@ class _OrderTile extends StatelessWidget {
 
     switch (status) {
       case OrderStatus.completed:
-        statusColor = AppColors.statusGreen;
-        statusBgColor = AppColors.statusGreen.withValues(alpha: 0.15);
         iconColor = AppColors.statusGreen;
         iconBgColor = AppColors.statusGreen.withValues(alpha: 0.15);
         statusText = 'Completed';
         leadingIcon = Icons.assignment_turned_in_outlined;
         break;
       case OrderStatus.inProgress:
-        statusColor = AppColors.primaryPurple;
-        statusBgColor = AppColors.primaryPurple.withValues(alpha: 0.15);
         iconColor = AppColors.primaryPurple;
         iconBgColor = AppColors.primaryPurple.withValues(alpha: 0.15);
         statusText = 'Processing';
@@ -257,8 +275,6 @@ class _OrderTile extends StatelessWidget {
         break;
       case OrderStatus.cancelled:
       case OrderStatus.pending:
-        statusColor = AppColors.error;
-        statusBgColor = AppColors.error.withValues(alpha: 0.15);
         iconColor = AppColors.error;
         iconBgColor = AppColors.error.withValues(alpha: 0.15);
         statusText = status == OrderStatus.pending ? 'Pending' : 'Cancelled';
@@ -323,21 +339,8 @@ class _OrderTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusBgColor,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    statusText,
-                    style: TextStyle(
-                      fontFamily: FontFamily.regular,
-                      color: statusColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                OrderStatusBadgeWidget(
+                  status: rawStatus ?? statusText,
                 ),
               ],
             ),
@@ -376,7 +379,9 @@ class _OrderTile extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '1 Year Subscription',
+                        deliveryDate != null && deliveryDate!.isNotEmpty
+                            ? 'Delivery: $deliveryDate'
+                            : 'Delivery: TBD',
                         style: TextStyle(
                           fontFamily: FontFamily.regular,
                           fontSize: 12,
@@ -387,14 +392,12 @@ class _OrderTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                Text(
-                  price,
-                  style: TextStyle(
-                    fontFamily: FontFamily.regular,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+                const SizedBox(width: 8),
+                OrderProgressStatusWidget(
+                  status: rawStatus ?? statusText,
+                  deliveryDate: deliveryDate ?? date,
+                  progressPercentage: progressPercentage,
+                  size: 44,
                 ),
               ],
             ),

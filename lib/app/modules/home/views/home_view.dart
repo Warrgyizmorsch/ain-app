@@ -411,13 +411,13 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildLeadCard(Lead lead) {
     return _AssignmentCard(
+      orderId: lead.orderId?.toString(),
       title: lead.service ?? AppStrings.orderAssignment,
       subject: lead.subject ?? "General",
       dueDate: lead.deadline ?? "-",
-      iconColor: AppColors.warning,
-      iconBgColor: AppColors.warning.withValues(alpha: 0.1),
-      statusType: AssignmentStatus.pending,
-      daysLeft: AppStrings.actionRequired,
+      status: lead.confirmedStatus ?? "Pending",
+      progressPercentage: lead.progressPercentage ?? lead.progress ?? 0,
+      price: lead.price,
       onTap: () {
         Get.to(() => const OrderDetailsView(), arguments: lead);
       },
@@ -425,25 +425,17 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget _buildConfirmedCard(ConfirmedOrder order) {
-    final bool isDelivered =
-        order.deliveryDate != null &&
-        order.deliveryDate!.toString().trim().isNotEmpty;
+    final String s = (order.status ?? '').toLowerCase().trim();
+    final bool isCompleted = s == 'completed' || s == 'delivered';
 
     return _AssignmentCard(
+      orderId: order.orderId?.toString(),
       title: order.title ?? order.subject ?? AppStrings.orderAssignment,
-      subject:
-          order.moduleCode ??
-          (isDelivered ? AppStrings.moduleComplete : AppStrings.expertWorking),
+      subject: order.moduleCode ?? (isCompleted ? AppStrings.moduleComplete : AppStrings.expertWorking),
       dueDate: order.deliveryDate ?? order.createdAt ?? "-",
-      iconColor: isDelivered ? AppColors.success : AppColors.primaryPurple,
-      iconBgColor: isDelivered
-          ? AppColors.success.withValues(alpha: 0.1)
-          : AppColors.tagBg,
-      statusType: isDelivered
-          ? AssignmentStatus.completed
-          : AssignmentStatus.inProgress,
-      progress: isDelivered ? null : 0.85,
-      daysLeft: isDelivered ? null : AppStrings.inProgress,
+      status: order.status ?? "in_progress",
+      progressPercentage: order.progressPercentage ?? order.progress ?? 0,
+      price: order.amount,
       onTap: () {
         Get.to(() => const OrderDetailsView(), arguments: order);
       },
@@ -585,121 +577,178 @@ class HomeView extends GetView<HomeController> {
   }
 }
 
-enum AssignmentStatus { inProgress, completed, expertAssigned, pending }
-
 class _AssignmentCard extends StatelessWidget {
+  final String? orderId;
   final String title;
   final String subject;
   final String dueDate;
-  final Color iconColor;
-  final Color iconBgColor;
-  final AssignmentStatus statusType;
-  final double? progress;
-  final String? daysLeft;
+  final String? status;
+  final int? progressPercentage;
+  final String? price;
   final VoidCallback? onTap;
 
   const _AssignmentCard({
+    this.orderId,
     required this.title,
     required this.subject,
     required this.dueDate,
-    required this.iconColor,
-    required this.iconBgColor,
-    required this.statusType,
-    this.progress,
-    this.daysLeft,
+    this.status,
+    this.progressPercentage,
+    this.price,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final bool isDark = Get.isRegistered<ThemeService>() && ThemeService.to.isDarkMode;
-    final Color effectiveIconColor = isDark
-        ? Color.lerp(iconColor, Colors.white, 0.20)!.withValues(alpha: 0.85)
-        : iconColor;
-    final Color effectiveBgColor = isDark
-        ? iconColor.withValues(alpha: 0.15)
-        : iconBgColor;
 
     return Container(
       decoration: BoxDecoration(
         color: AppColors.bgLight,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: isDark ? Border.all(color: AppColors.lightDivider, width: 0.8) : null,
-        boxShadow:  [
+        boxShadow: [
           BoxShadow(
             color: AppColors.lightShadow,
-            spreadRadius: 2,
-            blurRadius: 15,
-            offset: const Offset(0, 4),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // --- HEADER: Order ID + Status Badge ---
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: effectiveBgColor,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        Icons.assignment_outlined,
-                        color: effectiveIconColor,
-                        size: 24,
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryPurple.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.assignment_outlined,
+                            color: AppColors.primaryPurple,
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          orderId != null && orderId!.isNotEmpty ? 'Order $orderId' : title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 16),
+                    OrderStatusBadgeWidget(
+                      status: status,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Divider(height: 1, color: AppColors.lightDivider),
+                const SizedBox(height: 10),
+
+                // --- MIDDLE: Subject/Title + Delivery Date on Left, Circular Progress on Right ---
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             title,
-                            style: AppTextStyles.subtitle.copyWith(
+                            style: TextStyle(
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 2),
                           Text(
                             subject,
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Due: $dueDate',
-                            style: AppTextStyles.caption.copyWith(
+                            style: TextStyle(
+                              fontSize: 12,
                               color: AppColors.textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(Icons.event_outlined, size: 12, color: AppColors.textSecondary),
+                              const SizedBox(width: 4),
+                              Text(
+                                dueDate.isNotEmpty && dueDate != '-' ? 'Delivery: $dueDate' : 'Delivery: TBD',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: AppColors.lightTextHint,
-                      size: 20,
+                    const SizedBox(width: 10),
+                    OrderProgressStatusWidget(
+                      status: status,
+                      deliveryDate: dueDate,
+                      progressPercentage: progressPercentage,
+                      size: 44,
                     ),
                   ],
                 ),
-                if (statusType != AssignmentStatus.pending) ...[
-                  const SizedBox(height: 12),
-                  _buildStatusIndicator(),
+
+                // --- FOOTER: Price Details (if available) ---
+                if (price != null && price!.isNotEmpty && price != "0" && price != "0.00") ...[
+                  const SizedBox(height: 8),
+                  Divider(height: 1, color: AppColors.lightDivider),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total Amount',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        price!.startsWith('£') ? price! : '£$price',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryPurple,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ],
             ),
@@ -707,74 +756,6 @@ class _AssignmentCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildStatusIndicator() {
-    switch (statusType) {
-      case AssignmentStatus.inProgress:
-        return Row(
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: progress ?? 0.0,
-                  minHeight: 6,
-                  backgroundColor: AppColors.lightDivider,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    AppColors.warning,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              '${((progress ?? 0) * 100).toInt()}%',
-              style: AppTextStyles.caption.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Text(
-              daysLeft ?? '',
-              style: AppTextStyles.caption.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.warning,
-              ),
-            ),
-          ],
-        );
-
-      case AssignmentStatus.completed:
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              AppStrings.completed,
-              style: AppTextStyles.caption.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.success,
-              ),
-            ),
-            const Icon(Icons.check, color: AppColors.success, size: 18),
-          ],
-        );
-
-      case AssignmentStatus.expertAssigned:
-        return Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            AppStrings.expertAssigned,
-            style: AppTextStyles.caption.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppColors.primary,
-            ),
-          ),
-        );
-
-      default:
-        return const SizedBox.shrink();
-    }
   }
 }
 

@@ -589,6 +589,67 @@ class ProfileUtils {
     } catch (e) {
       return sqlDate; 
     }
-    return sqlDate;
+    return sqlDate; 
   }
+}
+
+/// Checks if an order is overdue based on its delivery date and status.
+///
+/// Rules:
+/// 1. If dateString is null or empty, returns false.
+/// 2. If status is "completed", "delivered", or "cancelled", returns false.
+/// 3. Sets deadline to the end of the day (23:59:59.999) to avoid false flags.
+/// 4. Checks if deadline < current date/time.
+bool isOrderOverdue(String? dateString, String? status) {
+  if (dateString == null || dateString.trim().isEmpty) return false;
+
+  final String s = (status ?? '').toLowerCase().trim();
+
+  // If the order is already finished or cancelled, it cannot be overdue
+  if (s == 'completed' || s == 'delivered' || s == 'cancelled') return false;
+
+  DateTime? deliveryDate = DateTime.tryParse(dateString.trim());
+
+  if (deliveryDate == null) {
+    try {
+      final clean = dateString.trim();
+      if (clean.contains('/')) {
+        final parts = clean.split('/');
+        if (parts.length == 3) {
+          if (parts[0].length == 4) {
+            deliveryDate = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+          } else {
+            deliveryDate = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+          }
+        }
+      } else if (clean.contains('-')) {
+        final parts = clean.split('-');
+        if (parts.length == 3) {
+          if (parts[0].length == 4) {
+            deliveryDate = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+          } else {
+            deliveryDate = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+          }
+        }
+      }
+    } catch (_) {
+      return false;
+    }
+  }
+
+  if (deliveryDate == null) return false;
+
+  // Set the delivery date time to the end of the day to avoid false flags
+  final DateTime endOfDayDeadline = DateTime(
+    deliveryDate.year,
+    deliveryDate.month,
+    deliveryDate.day,
+    23,
+    59,
+    59,
+    999,
+  );
+
+  // Check if that deadline has passed compared to the current date/time
+  return endOfDayDeadline.isBefore(DateTime.now());
 }

@@ -21,4 +21,5 @@ export '../../common/widget/dialog/theme_selection_dialog.dart';
 export '../../services/theme_service.dart';
 export '../../common/widget/bank_details/bank_transfer_details_widget.dart';
 export '../../common/widget/global_chat/global_chat_widget.dart';
+export '../../common/widget/order/order_progress_status_widget.dart';
 

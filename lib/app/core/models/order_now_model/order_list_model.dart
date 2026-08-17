@@ -13,12 +13,12 @@ class OrderListResponse {
 
   factory OrderListResponse.fromJson(Map<String, dynamic> json) {
     return OrderListResponse(
-      success: json['success'],
-      overallProgress: json['overall_progress'],
-      overallProgressPercentage: json['overall_progress_percentage'],
-      data: json['data'] != null
-          ? OrderData.fromJson(json['data'])
-          : null,
+      success: json['success'] is bool
+          ? json['success']
+          : json['success']?.toString().toLowerCase() == 'true',
+      overallProgress: _parseInt(json['overall_progress']),
+      overallProgressPercentage: _parseInt(json['overall_progress_percentage']),
+      data: json['data'] != null ? OrderData.fromJson(json['data']) : null,
     );
   }
 
@@ -49,23 +49,19 @@ class OrderData {
 
   factory OrderData.fromJson(Map<String, dynamic> json) {
     return OrderData(
-      overallProgress: json['overall_progress'],
-      overallProgressPercentage: json['overall_progress_percentage'],
-
-      confirmedOrders: json['confirmed_orders'] != null
+      overallProgress: _parseInt(json['overall_progress']),
+      overallProgressPercentage: _parseInt(json['overall_progress_percentage']),
+      confirmedOrders: json['confirmed_orders'] != null && json['confirmed_orders'] is List
           ? (json['confirmed_orders'] as List)
-          .map((e) => ConfirmedOrder.fromJson(e))
-          .toList()
+              .map((e) => ConfirmedOrder.fromJson(e as Map<String, dynamic>))
+              .toList()
           : [],
-
-      nonConfirmedLeads: json['non_confirmed_leads'] != null
+      nonConfirmedLeads: json['non_confirmed_leads'] != null && json['non_confirmed_leads'] is List
           ? (json['non_confirmed_leads'] as List)
-          .map((e) => Lead.fromJson(e))
-          .toList()
+              .map((e) => Lead.fromJson(e as Map<String, dynamic>))
+              .toList()
           : [],
-
-
-      summary: json['summary'] != null
+      summary: json['summary'] != null && json['summary'] is Map<String, dynamic>
           ? Summary.fromJson(json['summary'])
           : null,
     );
@@ -75,10 +71,8 @@ class OrderData {
     return {
       'overall_progress': overallProgress,
       'overall_progress_percentage': overallProgressPercentage,
-      'confirmed_orders':
-      confirmedOrders?.map((e) => e.toJson()).toList(),
-      'non_confirmed_leads':
-      nonConfirmedLeads?.map((e) => e.toJson()).toList(),
+      'confirmed_orders': confirmedOrders?.map((e) => e.toJson()).toList(),
+      'non_confirmed_leads': nonConfirmedLeads?.map((e) => e.toJson()).toList(),
       'summary': summary?.toJson(),
     };
   }
@@ -104,7 +98,6 @@ class ConfirmedOrder {
   final String? amount;
   final String? receivedAmount;
   final dynamic dueAmount;
-
 
   final int? timesPaidCount;
   final List<PaymentHistory>? paymentHistory;
@@ -140,7 +133,6 @@ class ConfirmedOrder {
     this.dueAmount,
     this.timesPaidCount,
     this.paymentHistory,
-
     this.isAppLead,
     this.source,
     this.pageUrl,
@@ -153,66 +145,45 @@ class ConfirmedOrder {
 
   factory ConfirmedOrder.fromJson(Map<String, dynamic> json) {
     return ConfirmedOrder(
-      type: json['type'],
-      confirmedStatus: json['confirmed_status'],
-      orderDbId: json['order_db_id'],
-      leadId: json['lead_id'],
-      orderId: json['order_id'],
+      type: json['type']?.toString(),
+      confirmedStatus: json['confirmed_status']?.toString(),
+      orderDbId: _parseInt(json['order_db_id']),
+      leadId: _parseInt(json['lead_id']),
+      orderId: json['order_id']?.toString(),
       orderDate: json['order_date']?.toString(),
       deliveryDate: json['delivery_date']?.toString(),
-      title: json['title'],
+      title: json['title']?.toString(),
       moduleCode: json['module_code']?.toString(),
       subject: json['subject']?.toString(),
       status: json['status']?.toString(),
-
-      progress: json['progress'],
-      progressPercentage: json['progress_percentage'],
-
+      progress: _parseInt(json['progress']),
+      progressPercentage: _parseInt(json['progress_percentage']),
       wordCount: json['word_count']?.toString(),
       amount: json['amount']?.toString(),
       receivedAmount: json['received_amount']?.toString(),
       dueAmount: json['due_amount'],
-
-      timesPaidCount: json['times_paid_count'],
-
-      paymentHistory: json['payment_history'] != null
+      timesPaidCount: _parseInt(json['times_paid_count']),
+      paymentHistory: json['payment_history'] != null && json['payment_history'] is List
           ? (json['payment_history'] as List)
-          .map((e) => PaymentHistory.fromJson(e))
-          .toList()
-
+              .map((e) => PaymentHistory.fromJson(e as Map<String, dynamic>))
+              .toList()
           : [],
-      createdAt: json['created_at'],
-      writerId: json['writer_id'],
-      writer: json['writer'] != null ? Writer.fromJson(json['writer']) : null,
-      images: json['images'] != null
-          ? List<String>.from(json['images'].map((x) => x.toString()))
-
-          : [],
-
-      isAppLead: json['is_app_lead'],
-      source: json['source'],
-      pageUrl: json['page_url'],
+      isAppLead: _parseInt(json['is_app_lead']),
+      source: json['source']?.toString(),
+      pageUrl: json['page_url']?.toString(),
       createdAt: json['created_at']?.toString(),
-
-      writerId: json['writer_id'],
-      writer: json['writer'] != null
+      writerId: _parseInt(json['writer_id']),
+      writer: json['writer'] != null && json['writer'] is Map<String, dynamic>
           ? Writer.fromJson(json['writer'])
           : null,
-
-      images: json['images'] != null
-          ? List<String>.from(
-        (json['images'] as List).map((x) => x.toString()),
-      )
+      images: json['images'] != null && json['images'] is List
+          ? List<String>.from((json['images'] as List).map((x) => x.toString()))
           : [],
-
-      files: json['files'] != null
-          ? List<String>.from(
-        (json['files'] as List).map((x) => x.toString()),
-      )
+      files: json['files'] != null && json['files'] is List
+          ? List<String>.from((json['files'] as List).map((x) => x.toString()))
           : [],
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -234,8 +205,7 @@ class ConfirmedOrder {
       'received_amount': receivedAmount,
       'due_amount': dueAmount,
       'times_paid_count': timesPaidCount,
-      'payment_history':
-      paymentHistory?.map((e) => e.toJson()).toList(),
+      'payment_history': paymentHistory?.map((e) => e.toJson()).toList(),
       'is_app_lead': isAppLead,
       'source': source,
       'page_url': pageUrl,
@@ -280,7 +250,6 @@ class Lead {
 
   final int? isConverted;
   final dynamic convertedAt;
-  final List<PaymentHistory>? paymentHistory;
   final String? createdAt;
 
   final String? subject;
@@ -316,7 +285,6 @@ class Lead {
     this.pageUrl,
     this.isConverted,
     this.convertedAt,
-    this.paymentHistory,
     this.createdAt,
     this.subject,
     this.writerId,
@@ -327,68 +295,45 @@ class Lead {
 
   factory Lead.fromJson(Map<String, dynamic> json) {
     return Lead(
-      type: json['type'],
-      confirmedStatus: json['confirmed_status'],
-      leadId: json['lead_id'],
-      orderId: json['order_id'],
-
-      name: json['name'],
-      email: json['email'],
-      mobile: json['mobile'],
-      countrycode: json['countrycode'],
-
-      service: json['service'],
-      workType: json['work_type'],
+      type: json['type']?.toString(),
+      confirmedStatus: json['confirmed_status']?.toString(),
+      leadId: _parseInt(json['lead_id']),
+      orderId: json['order_id']?.toString(),
+      name: json['name']?.toString(),
+      email: json['email']?.toString(),
+      mobile: json['mobile']?.toString(),
+      countrycode: json['countrycode']?.toString(),
+      service: json['service']?.toString(),
+      workType: json['work_type']?.toString(),
       wordCount: json['word_count']?.toString(),
       price: json['price']?.toString(),
       deadline: json['deadline']?.toString(),
       deliveryTime: json['delivery_time'],
-
-      progress: json['progress'],
-      progressPercentage: json['progress_percentage'],
-
-      requirements: json['requirements'],
-
-      timesPaidCount: json['times_paid_count'],
-
-      paymentHistory: json['payment_history'] != null
+      progress: _parseInt(json['progress']),
+      progressPercentage: _parseInt(json['progress_percentage']),
+      requirements: json['requirements']?.toString(),
+      timesPaidCount: _parseInt(json['times_paid_count']),
+      paymentHistory: json['payment_history'] != null && json['payment_history'] is List
           ? (json['payment_history'] as List)
-          .map((e) => PaymentHistory.fromJson(e))
-          .toList()
+              .map((e) => PaymentHistory.fromJson(e as Map<String, dynamic>))
+              .toList()
           : [],
-
-      isAppLead: json['is_app_lead'],
-      source: json['source'],
+      isAppLead: _parseInt(json['is_app_lead']),
+      source: json['source']?.toString(),
       pageUrl: json['page_url']?.toString(),
-
-      isConverted: json['is_converted'],
+      isConverted: _parseInt(json['is_converted']),
       convertedAt: json['converted_at'],
-      paymentHistory: json['payment_history'] != null
-          ? (json['payment_history'] as List)
-          .map((e) => PaymentHistory.fromJson(e))
-          .toList()
-          : [],
-      createdAt: json['created_at'],
-      subject: json['subject'],
       createdAt: json['created_at']?.toString(),
-
       subject: json['subject']?.toString(),
-
-      writerId: json['writer_id'],
-      writer: json['writer'] != null
+      writerId: _parseInt(json['writer_id']),
+      writer: json['writer'] != null && json['writer'] is Map<String, dynamic>
           ? Writer.fromJson(json['writer'])
           : null,
-
-      images: json['images'] != null
-          ? List<String>.from(
-        (json['images'] as List).map((x) => x.toString()),
-      )
+      images: json['images'] != null && json['images'] is List
+          ? List<String>.from((json['images'] as List).map((x) => x.toString()))
           : [],
-
-      files: json['files'] != null
-          ? List<String>.from(
-        (json['files'] as List).map((x) => x.toString()),
-      )
+      files: json['files'] != null && json['files'] is List
+          ? List<String>.from((json['files'] as List).map((x) => x.toString()))
           : [],
     );
   }
@@ -413,14 +358,12 @@ class Lead {
       'progress_percentage': progressPercentage,
       'requirements': requirements,
       'times_paid_count': timesPaidCount,
-      'payment_history':
-      paymentHistory?.map((e) => e.toJson()).toList(),
+      'payment_history': paymentHistory?.map((e) => e.toJson()).toList(),
       'is_app_lead': isAppLead,
       'source': source,
       'page_url': pageUrl,
       'is_converted': isConverted,
       'converted_at': convertedAt,
-      'payment_history': paymentHistory?.map((e) => e.toJson()).toList(),
       'created_at': createdAt,
       'subject': subject,
       'writer_id': writerId,
@@ -430,7 +373,6 @@ class Lead {
     };
   }
 }
-
 
 class PaymentHistory {
   final int? paymentId;
@@ -453,9 +395,8 @@ class PaymentHistory {
 
   factory PaymentHistory.fromJson(Map<String, dynamic> json) {
     return PaymentHistory(
-      paymentId: json['payment_id'],
+      paymentId: _parseInt(json['payment_id']),
       paidAmount: json['paid_amount'],
-
       paymentDate: json['payment_date']?.toString(),
       paymentMethod: json['payment_method']?.toString(),
       payeeName: json['payee_name']?.toString(),
@@ -496,12 +437,12 @@ class Writer {
 
   factory Writer.fromJson(Map<String, dynamic> json) {
     return Writer(
-      id: json['id'],
-      writerName: json['writer_name'],
-      image: json['image'],
-      subject: json['subject'],
-      service: json['service'],
-      slug: json['slug'],
+      id: _parseInt(json['id']),
+      writerName: json['writer_name']?.toString(),
+      image: json['image']?.toString(),
+      subject: json['subject']?.toString(),
+      service: json['service']?.toString(),
+      slug: json['slug']?.toString(),
     );
   }
 
@@ -532,10 +473,10 @@ class Summary {
 
   factory Summary.fromJson(Map<String, dynamic> json) {
     return Summary(
-      confirmedCount: json['confirmed_count'],
-      nonConfirmedCount: json['non_confirmed_count'],
-      overallProgress: json['overall_progress'],
-      overallProgressPercentage: json['overall_progress_percentage'],
+      confirmedCount: _parseInt(json['confirmed_count']),
+      nonConfirmedCount: _parseInt(json['non_confirmed_count']),
+      overallProgress: _parseInt(json['overall_progress']),
+      overallProgressPercentage: _parseInt(json['overall_progress_percentage']),
     );
   }
 
@@ -547,4 +488,11 @@ class Summary {
       'overall_progress_percentage': overallProgressPercentage,
     };
   }
+}
+
+int? _parseInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value.toString());
 }

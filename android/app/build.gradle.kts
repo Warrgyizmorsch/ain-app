@@ -50,10 +50,17 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
+            // Enable shrinking and obfuscation for Android code
+            isMinifyEnabled = true
+            isShrinkResources = true
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
-            isShrinkResources = false
         }
     }
 }
